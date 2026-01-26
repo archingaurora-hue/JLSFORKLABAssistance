@@ -15,7 +15,7 @@
      <div id = "dashboardname" class="row border border-white">
                 <center><h1><b>LABAssistance</b></h1>
                 <label>Laundry Management System</label>
-                </center>
+                <h3><b>Log in</b></h3></center>
             </div>
 <div class="main">
     <!-- MAIN -->
