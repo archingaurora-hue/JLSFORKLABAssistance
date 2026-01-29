@@ -33,7 +33,7 @@
                     </div>
 
                     <div class="mb-3 text-end">
-                        <button type="button" class="btn btn-link text-dark p-0 text-decoration-none" onclick="Swal.fire('Please contact your administrator to reset your password.')">Forgot Password?</button>
+                        <button type="button" class="btn btn-link text-dark p-0 text-decoration-none">Forgot Password?</button>
                     </div>
 
                     <div class="d-grid gap-2">
