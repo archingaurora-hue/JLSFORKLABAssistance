@@ -70,7 +70,7 @@
                 </div>
             </div>
 
-            <form action="backend/final_reset.php" method="POST" id="step3" style="display: none;">
+            <form action="backend/pass_reset.php" method="POST" id="step3" style="display: none;">
                 <input type="hidden" name="email" id="final_email">
 
                 <div class="mb-3">
@@ -152,7 +152,7 @@
                 return;
             }
 
-            // Professional Toast notification
+
             const Toast = Swal.mixin({
                 toast: true,
                 position: 'top-end',
@@ -175,7 +175,6 @@
         // Transition from OTP to New Password
         function goToStep3() {
             const otp = document.getElementById('otp_code').value;
-            // Since it's local, we just check if it's 4 digits long
             if (otp.length === 4) {
                 document.getElementById('step2').style.display = 'none';
                 document.getElementById('step3').style.display = 'block';
@@ -185,7 +184,6 @@
             }
         }
 
-        // Add this to your existing script section
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
