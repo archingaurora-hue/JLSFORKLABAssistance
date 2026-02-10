@@ -34,10 +34,10 @@ if (isset($_POST['signin'])) {
             header("Location: ../dashboard.php");
             exit();
         } else {
-            // ERROR: Go up one level to root to find login.php
+            // ERROR: Go up one level to root to find customer_login.php
             echo "<script>
                     alert('Invalid Password!'); 
-                    window.location.href='../login.php';
+                    window.location.href='../customer_login.php';
                   </script>";
         }
     } else {

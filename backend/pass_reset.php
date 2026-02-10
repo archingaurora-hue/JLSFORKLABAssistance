@@ -8,7 +8,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($new_pwd !== $confirm_pwd) {
         // Redirect with an error flag
-        header("Location: ../login.php?status=mismatch");
+        header("Location: ../customer_login.php?status=mismatch");
         exit();
     }
 
@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     if ($stmt->execute()) {
         // Redirect with a success flag
-        header("Location: ../login.php?status=resetsuccess");
+        header("Location: ../customer_login.php?status=resetsuccess");
     } else {
         header("Location: ../login.php?status=error");
     }

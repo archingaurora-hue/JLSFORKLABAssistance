@@ -39,7 +39,7 @@ if (isset($_POST['register'])) {
         $stmt->bind_param("ssss", $email, $hashed_password, $role, $full_name);
 
         if ($stmt->execute()) {
-            // Success: Redirect back up to login.php
+            // Success: Redirect back up to customer_login.php
             echo "<script>
                     alert('Registration Successful! Please login.');
                     window.location.href='../login.php';

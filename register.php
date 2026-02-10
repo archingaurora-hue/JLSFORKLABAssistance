@@ -55,7 +55,7 @@
                     </div>
 
                     <div class="text-center mt-3">
-                        <a href="login.php" class="btn btn-link text-dark text-decoration-none">Already have an account? Login</a>
+                        <a href="customer_login.php" class="btn btn-link text-dark text-decoration-none">Already have an account? Login</a>
                     </div>
                 </div>
             </form>
