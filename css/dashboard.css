@@ -150,3 +150,31 @@
   border-radius: 8px;
   background-color: rgb(252, 227, 127);
 }
+
+#dashboardname{
+    padding-top: 60px;
+}
+
+/* New Order Card Styles */
+.card {
+    transition: transform 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.modal-content {
+    border-radius: 15px;
+    border: none;
+}
+
+.list-group-item {
+    border: none;
+    border-bottom: 1px solid #f0f0f0;
+    padding: 15px;
+}
+
+.list-group-item:last-child {
+    border-bottom: none;
+}

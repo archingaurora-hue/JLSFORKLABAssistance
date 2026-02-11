@@ -9,13 +9,16 @@ CREATE TABLE IF NOT EXISTS `User` (
   UNIQUE KEY `email` (`email`)
 );
 
--- 1. Main Order Table
+-- 1. Main Order Table (Header Info)
 CREATE TABLE IF NOT EXISTS `Order` (
-  `order_id` VARCHAR(20) NOT NULL, -- Format: MMDDYYYYXXX
+  `order_id` VARCHAR(20) NOT NULL,
   `customer_id` INT(11) NOT NULL,
   `customer_name` VARCHAR(255) NOT NULL,
   `tracking_code` INT(4) NOT NULL,
-  `status` ENUM('Pending Dropoff', 'In Queue', 'Processing', 'Ready', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending Dropoff',
+  
+  -- This status now represents the OVERALL progress. 
+  -- Example: If one bag is "Washing" and another is "Drying", this might just say "In Progress" or match the earliest status.
+  `status` ENUM('Pending Dropoff', 'Processing', 'Ready for Pickup', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending Dropoff',
   
   -- Inputs
   `services_requested` TEXT NOT NULL, 
@@ -34,23 +37,44 @@ CREATE TABLE IF NOT EXISTS `Order` (
   FOREIGN KEY (`customer_id`) REFERENCES `User`(`user_id`) ON DELETE CASCADE
 );
 
--- 2. Process_Load Table (The Physical Bags)
+-- 2. Process_Load Table (The Real Status Tracker)
+-- This is where the specific status for "Colored #1" vs "White #1" lives.
 CREATE TABLE IF NOT EXISTS `Process_Load` (
   `load_id` INT(11) NOT NULL AUTO_INCREMENT,
   `order_id` VARCHAR(20) NOT NULL,
   
-  -- Describes the bag (e.g., "Colored", "White")
+  -- Describes the bag
   `load_category` ENUM('Colored', 'White', 'Fold Only', 'Other') NOT NULL,
+  `bag_label` VARCHAR(50) NOT NULL, -- e.g. "Colored #1"
   
-  -- Display Label (e.g., "Colored #1", "White #1")
-  `bag_label` VARCHAR(50) NOT NULL,
-  
-  -- Current Status of this specific bag
-  `status` ENUM('Pending', 'In Queue', 'Washing', 'Wash Complete', 'Drying', 'Drying Complete', 'Folding', 'Folding Complete', 'Completed') NOT NULL DEFAULT 'Pending',
+  -- THE GRANULAR STATUS
+  `status` ENUM(
+      'Pending Dropoff', 
+      'In Queue', 
+      'Washing', 
+      'Wash Complete', 
+      'Drying', 
+      'Drying Complete', 
+      'Folding', 
+      'Folding Complete', 
+      'Awaiting Pickup', 
+      'Completed'
+  ) NOT NULL DEFAULT 'Pending Dropoff',
   
   `start_time` DATETIME DEFAULT NULL,
   `end_time` DATETIME DEFAULT NULL,
   
   PRIMARY KEY (`load_id`),
   FOREIGN KEY (`order_id`) REFERENCES `Order`(`order_id`) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS `System_Log` (
+  `log_id` INT(11) NOT NULL AUTO_INCREMENT,
+  `load_id` INT(11) NOT NULL, 
+  `status_event` VARCHAR(50) NOT NULL, -- The status that was set (e.g., 'Washing')
+  `employee_name` VARCHAR(255) NOT NULL, -- Who performed the action
+  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  
+  PRIMARY KEY (`log_id`),
+  FOREIGN KEY (`load_id`) REFERENCES `Process_Load`(`load_id`) ON DELETE CASCADE
 );

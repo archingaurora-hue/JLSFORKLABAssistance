@@ -1,19 +1,7 @@
 <?php
 session_start();
+require 'db_conn.php'; // Uses central connection
 
-// 1. Database Connection
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "laundry_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// 2. Auth Check
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../customer_login.php");
     exit();
@@ -44,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $qtyWhite = isset($_POST['qtyWhite']) ? intval($_POST['qtyWhite']) : 0;
     $qtyFold = isset($_POST['qtyFold']) ? intval($_POST['qtyFold']) : 0;
 
-    // --- B. SERVER-SIDE CALCULATION ---
+    // --- B. CALCULATIONS ---
     $isWash = in_array("Wash", $services);
     $isDry = in_array("Dry", $services);
     $isFold = in_array("Fold", $services);
@@ -71,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $final_price = $estimated_price;
     $bag_counts = $isFoldOnly ? "Fold Only: $qtyFold" : "Colored: $qtyColored, White: $qtyWhite";
 
-    // --- C. GENERATE ORDER ID (MMDDYYYYXXX) ---
+    // --- C. GENERATE ORDER ID ---
     $datePart = date("mdY");
     $query = "SELECT COUNT(*) as count FROM `Order` WHERE order_id LIKE '$datePart%'";
     $result = $conn->query($query);
@@ -91,6 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $tracking_code = intval($prefix . $suffix);
 
     // --- E. INSERT MAIN ORDER ---
+    // Note: Main Order status acts as a summary. It starts at 'Pending Dropoff'
     $stmt = $conn->prepare("INSERT INTO `Order` 
         (order_id, customer_id, customer_name, tracking_code, services_requested, supplies_requested, bag_counts, customer_note, estimated_price, final_price, status) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Dropoff')");
@@ -101,12 +90,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $stmt->close();
 
         // --- F. INSERT INDIVIDUAL LOADS (PROCESS_LOAD) ---
-        // This splits the order into physical bag rows
-
-        $loadInsert = $conn->prepare("INSERT INTO `Process_Load` (order_id, load_category, bag_label, status) VALUES (?, ?, ?, 'Pending')");
+        // Each bag gets the specific granular status 'Pending Dropoff'
+        $loadInsert = $conn->prepare("INSERT INTO `Process_Load` (order_id, load_category, bag_label, status) VALUES (?, ?, ?, 'Pending Dropoff')");
 
         if ($isFoldOnly) {
-            // Loop for Fold Only Bags
             for ($i = 1; $i <= $qtyFold; $i++) {
                 $category = "Fold Only";
                 $label = "Fold Only #$i";
@@ -114,15 +101,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 $loadInsert->execute();
             }
         } else {
-            // Loop for Colored Bags
             for ($i = 1; $i <= $qtyColored; $i++) {
                 $category = "Colored";
                 $label = "Colored #$i";
                 $loadInsert->bind_param("sss", $order_id, $category, $label);
                 $loadInsert->execute();
             }
-
-            // Loop for White Bags
             for ($i = 1; $i <= $qtyWhite; $i++) {
                 $category = "White";
                 $label = "White #$i";
@@ -132,7 +116,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $loadInsert->close();
 
-        // Success Redirect
         echo "<script>
                 alert('Order Placed! ID: $order_id. Tracking: $tracking_code'); 
                 window.location.href='../dashboard.php';
