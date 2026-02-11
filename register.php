@@ -22,10 +22,9 @@
 
                 <div class="app-card p-4">
                     <form action="backend/register_process.php" method="POST">
-
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Full Name</label>
-                            <input type="text" class="form-control" name="full_name" placeholder="Juan Dela Cruz" required>
+                            <input type="text" class="form-control" name="full_name" placeholder="Full Name" required>
                         </div>
 
                         <div class="mb-3">
@@ -36,20 +35,22 @@
                         <div class="row">
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Password</label>
-                                <input type="password" class="form-control" name="password" placeholder="••••••••" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="password" id="reg_pwd" placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('reg_pwd', 'eyeReg')">
+                                        <i class="bi bi-eye" id="eyeReg"></i>
+                                    </button>
+                                </div>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Confirm</label>
-                                <input type="password" class="form-control" name="confirm_password" placeholder="••••••••" required>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="confirm_password" id="reg_conf_pwd" placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('reg_conf_pwd', 'eyeConf')">
+                                        <i class="bi bi-eye" id="eyeConf"></i>
+                                    </button>
+                                </div>
                             </div>
-                        </div>
-
-                        <div class="mb-4">
-                            <label class="smooth-checkbox">
-                                <input type="checkbox" name="terms" required>
-                                <span class="checkmark"></span>
-                                <span class="text-muted small">I agree to the Terms & Conditions</span>
-                            </label>
                         </div>
 
                         <button type="submit" name="register" class="btn-primary-app">Register Account</button>

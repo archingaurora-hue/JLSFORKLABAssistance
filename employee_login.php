@@ -26,9 +26,15 @@
                             <label class="form-label text-muted small fw-bold text-uppercase">Staff Email</label>
                             <input type="email" class="form-control" name="email" placeholder="staff@lab.com" required>
                         </div>
+
                         <div class="mb-4">
                             <label class="form-label text-muted small fw-bold text-uppercase">Password</label>
-                            <input type="password" class="form-control" name="password" placeholder="••••••••" required>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="password" id="staff_pwd" placeholder="••••••••" required>
+                                <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('staff_pwd', 'eyeStaff')">
+                                    <i class="bi bi-eye" id="eyeStaff"></i>
+                                </button>
+                            </div>
                         </div>
 
                         <button type="submit" name="login" class="btn-primary-app">Access Workspace</button>
