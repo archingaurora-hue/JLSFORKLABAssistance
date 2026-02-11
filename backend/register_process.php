@@ -42,7 +42,7 @@ if (isset($_POST['register'])) {
             // Success: Redirect back up to customer_login.php
             echo "<script>
                     alert('Registration Successful! Please login.');
-                    window.location.href='../login.php';
+                    window.location.href='../customer_login.php';
                   </script>";
         } else {
             echo "Error: " . $stmt->error;
