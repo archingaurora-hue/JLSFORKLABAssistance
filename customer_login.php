@@ -50,6 +50,11 @@
                             <button type="submit" name="signin" class="btn-primary-app">Sign In</button>
                         </form>
                     </div>
+
+                    <div class="text-center mt-4">
+                        <span class="text-muted">Don't have an account?</span>
+                        <a href="register.php" class="text-dark fw-bold text-decoration-none">Register</a>
+                    </div>
                 </div>
 
                 <div id="passRecovery" style="display: none;">
@@ -174,7 +179,6 @@
             }
         }
 
-        // Handle URL Parameters for feedback
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
