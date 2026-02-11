@@ -6,38 +6,40 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Staff Login - LABAssistance</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./css/design.css">
+    <link rel="stylesheet" href="./css/main.css">
 </head>
 
-<body class="bg-dark">
+<body class="bg-dark d-flex align-items-center justify-content-center min-h-100dvh">
 
-    <div class="d-flex justify-content-center align-items-center" style="min-height: 100vh;">
-        <div class="card p-4 shadow-lg rounded-3" style="width: 100%; max-width: 400px;">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-6 col-lg-4">
 
-            <div class="text-center mb-4">
-                <h2 class="fw-bold">LABAssistance</h2>
-                <p class="text-muted">Laundry Management System</p>
-                <h3 class="mt-2">Staff Log In</h3>
+                <div class="text-center mb-4 text-white">
+                    <h1 class="fw-bold">LAB<span class="text-primary">Assistance</span></h1>
+                    <p class="text-white-50">Staff Login</p>
+                </div>
+
+                <div class="app-card p-4">
+                    <form action="backend/employee_login_process.php" method="POST">
+                        <div class="mb-3">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Staff Email</label>
+                            <input type="email" class="form-control" name="email" placeholder="staff@lab.com" required>
+                        </div>
+                        <div class="mb-4">
+                            <label class="form-label text-muted small fw-bold text-uppercase">Password</label>
+                            <input type="password" class="form-control" name="password" placeholder="••••••••" required>
+                        </div>
+
+                        <button type="submit" name="login" class="btn-primary-app">Access Workspace</button>
+                    </form>
+                </div>
+
+                <div class="text-center mt-4">
+                    <a href="customer_login.php" class="text-white-50 text-decoration-none small">Switch to Customer Login</a>
+                </div>
+
             </div>
-
-            <form action="backend/employee_login_process.php" method="POST">
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" name="email" placeholder="Email" required>
-                </div>
-                <div class="mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-control" name="password" placeholder="Password" required>
-                </div>
-
-                <div class="d-grid gap-2 mb-3">
-                    <input type="submit" class="btn btn-dark" name="login" value="Sign In">
-                </div>
-
-                <div class="text-center">
-                    <a href="#" class="text-muted text-decoration-none small">Forgot password?</a>
-                </div>
-            </form>
         </div>
     </div>
 

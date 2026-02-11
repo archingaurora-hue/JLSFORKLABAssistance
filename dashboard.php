@@ -2,7 +2,7 @@
 session_start();
 require 'backend/db_conn.php';
 
-// Auth Check
+// --- 1. AUTH CHECK (Retained) ---
 if (!isset($_SESSION['user_id'])) {
     header("Location: customer_login.php");
     exit();
@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// Fetch User's Orders (Newest First)
+// --- 2. FETCH ORDERS (Retained) ---
 $orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";
 $stmt = $conn->prepare($orderQuery);
 $stmt->bind_param("i", $user_id);
@@ -27,73 +27,75 @@ $ordersResult = $stmt->get_result();
     <title>Dashboard - LABAssistance</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
-    <link rel="stylesheet" href="./css/design.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="./css/main.css">
 </head>
 
 <body class="bg-light">
 
-    <div class="container d-flex flex-column" style="min-height: 100dvh;">
+    <nav class="navbar navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <span class="navbar-brand fw-bold">LAB<span class="text-primary">Assistance</span></span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <a href="customer_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
+        </div>
+    </nav>
 
-        <div class="row pt-3 flex-shrink-0">
-            <div class="col-12 d-flex justify-content-between align-items-center">
-                <div class="fw-bold fs-5">Hello, <?php echo htmlspecialchars($_SESSION['full_name']); ?>!</div>
-                <a href="customer_login.php" class="btn btn-outline-dark btn-sm rounded-pill px-3">Log Out</a>
+    <div class="container page-container">
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-8 col-lg-6">
+                <div class="app-card p-4 text-center bg-dark text-white">
+                    <h4 class="fw-bold mb-1">Need Laundry Service?</h4>
+                    <p class="text-white-50 small mb-3">We pick up, wash, and deliver.</p>
+                    <a href="order.php" class="btn btn-light text-dark fw-bold w-100 rounded-pill py-3">
+                        <i class="bi bi-plus-lg me-2"></i>Place New Order
+                    </a>
+                </div>
             </div>
         </div>
 
-        <div class="flex-grow-1 d-flex flex-column justify-content-start align-items-center pt-4">
-
-            <div class="text-center mb-4">
-                <h1 class="fw-bold display-5">LABAssistance</h1>
-                <p class="text-muted fs-6">Laundry Management System</p>
-            </div>
-
-            <div class="w-100 text-center px-4 mb-5">
-                <a href="order.php" class="btn btn-dark btn-lg w-100 py-3 rounded-3 shadow-sm" style="max-width: 400px;">
-                    Place New Order
-                </a>
-            </div>
-
-            <div class="w-100 px-3" style="max-width: 600px;">
-                <h4 class="fw-bold mb-3 border-bottom pb-2">Your Orders</h4>
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-6">
+                <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-2">Recent Orders</h6>
 
                 <?php if ($ordersResult->num_rows > 0): ?>
                     <?php while ($order = $ordersResult->fetch_assoc()): ?>
 
-                        <div class="card mb-3 shadow-sm border-0 rounded-3">
-                            <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start mb-2">
-                                    <div>
-                                        <h5 class="fw-bold mb-0">Order #<?php echo $order['order_id']; ?></h5>
-                                        <small class="text-muted">Tracking: <span class="fw-bold text-dark"><?php echo $order['tracking_code']; ?></span></small>
+                        <div class="app-card mb-3 p-3" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="d-flex align-items-center gap-2 mb-2">
+                                        <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
+                                        <span class="small text-muted">Tracking: <strong><?php echo $order['tracking_code']; ?></strong></span>
                                     </div>
-                                    <span class="badge bg-primary rounded-pill"><?php echo $order['status']; ?></span>
-                                </div>
-
-                                <div class="mb-3">
-                                    <p class="mb-1 small text-muted"><i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?></p>
-                                    <p class="mb-0 small text-muted"><i class="bi bi-tag-fill me-1"></i> <?php echo $order['services_requested']; ?></p>
-                                </div>
-
-                                <div class="d-flex justify-content-between align-items-center mt-3 pt-2 border-top">
                                     <h5 class="fw-bold mb-0">₱<?php echo number_format($order['final_price'], 2); ?></h5>
-
-                                    <button class="btn btn-sm btn-outline-dark rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
-                                        View More
-                                    </button>
+                                    <p class="text-muted small mb-0 mt-1">
+                                        <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags •
+                                        <?php echo $order['services_requested']; ?>
+                                    </p>
+                                </div>
+                                <div class="text-end">
+                                    <span class="badge bg-primary rounded-pill mb-1"><?php echo $order['status']; ?></span>
+                                    <div class="small text-muted" style="font-size: 0.7rem;">Tap for details</div>
                                 </div>
                             </div>
                         </div>
 
                         <div class="modal fade" id="modal<?php echo $order['order_id']; ?>" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content">
-                                    <div class="modal-header">
-                                        <h5 class="modal-title fw-bold">Order Details (#<?php echo $order['order_id']; ?>)</h5>
+                                <div class="modal-content border-0">
+                                    <div class="modal-header border-0 pb-0">
+                                        <div>
+                                            <h5 class="modal-title fw-bold">Order #<?php echo $order['order_id']; ?></h5>
+                                            <p class="small text-muted mb-0">Tracking: <?php echo $order['tracking_code']; ?></p>
+                                        </div>
                                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <div class="modal-body">
+                                    <div class="modal-body pt-4">
 
                                         <h6 class="fw-bold text-uppercase small text-muted mb-3">Bag Status</h6>
                                         <?php
@@ -101,64 +103,76 @@ $ordersResult = $stmt->get_result();
                                         $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
                                         $loads = $conn->query($loadQuery);
                                         ?>
-                                        <ul class="list-group mb-4">
-                                            <?php while ($load = $loads->fetch_assoc()): ?>
-                                                <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                    <div>
-                                                        <strong><?php echo $load['bag_label']; ?></strong>
-                                                        <div class="small text-muted"><?php echo $load['load_category']; ?></div>
-                                                    </div>
-                                                    <span class="badge bg-secondary"><?php echo $load['status']; ?></span>
-                                                </li>
-                                            <?php endwhile; ?>
+                                        <ul class="list-group list-group-flush mb-4 rounded-3 border">
+                                            <?php if ($loads->num_rows > 0): ?>
+                                                <?php while ($load = $loads->fetch_assoc()): ?>
+                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                                        <div>
+                                                            <strong><?php echo $load['bag_label']; ?></strong>
+                                                            <div class="small text-muted"><?php echo $load['load_category']; ?></div>
+                                                        </div>
+                                                        <span class="badge bg-secondary"><?php echo $load['status']; ?></span>
+                                                    </li>
+                                                <?php endwhile; ?>
+                                            <?php else: ?>
+                                                <li class="list-group-item text-muted small text-center">No bags assigned yet.</li>
+                                            <?php endif; ?>
                                         </ul>
 
-                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Logs</h6>
-                                        <div class="bg-light p-3 rounded-3" style="max-height: 200px; overflow-y: auto;">
+                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Timeline</h6>
+                                        <div class="bg-light p-3 rounded-3" style="max-height: 250px; overflow-y: auto;">
                                             <?php
                                             // Fetch Logs for this order via JOIN
                                             $logQuery = "SELECT sl.*, pl.bag_label 
-                                                             FROM `System_Log` sl
-                                                             JOIN `Process_Load` pl ON sl.load_id = pl.load_id
-                                                             WHERE pl.order_id = '" . $order['order_id'] . "'
-                                                             ORDER BY sl.timestamp DESC";
+                                                         FROM `System_Log` sl
+                                                         JOIN `Process_Load` pl ON sl.load_id = pl.load_id
+                                                         WHERE pl.order_id = '" . $order['order_id'] . "'
+                                                         ORDER BY sl.timestamp DESC";
                                             $logs = $conn->query($logQuery);
                                             ?>
 
                                             <?php if ($logs->num_rows > 0): ?>
                                                 <?php while ($log = $logs->fetch_assoc()): ?>
-                                                    <div class="mb-2 pb-2 border-bottom border-light">
+                                                    <div class="mb-3 pb-2 border-bottom border-light last-no-border">
                                                         <div class="d-flex justify-content-between">
-                                                            <strong class="small"><?php echo $log['status_event']; ?></strong>
+                                                            <strong class="small text-dark"><?php echo $log['status_event']; ?></strong>
                                                             <small class="text-muted" style="font-size: 0.7rem;"><?php echo date("M d, h:i A", strtotime($log['timestamp'])); ?></small>
                                                         </div>
-                                                        <div class="small text-muted fst-italic">
-                                                            <?php echo $log['bag_label']; ?> - updated by <?php echo $log['employee_name']; ?>
+                                                        <div class="small text-muted fst-italic mt-1">
+                                                            <i class="bi bi-box-seam me-1"></i><?php echo $log['bag_label']; ?>
+                                                            <span class="mx-1">•</span>
+                                                            updated by <?php echo $log['employee_name']; ?>
                                                         </div>
                                                     </div>
                                                 <?php endwhile; ?>
                                             <?php else: ?>
-                                                <div class="text-center text-muted small">No logs available yet.</div>
+                                                <div class="text-center text-muted small py-3">
+                                                    <i class="bi bi-clock-history d-block mb-1 fs-4"></i>
+                                                    No logs available yet.
+                                                </div>
                                             <?php endif; ?>
                                         </div>
 
                                     </div>
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    <div class="modal-footer border-0">
+                                        <button type="button" class="btn btn-light w-100 fw-bold" data-bs-dismiss="modal">Close Details</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     <?php endwhile; ?>
                 <?php else: ?>
                     <div class="text-center py-5 text-muted">
-                        <i class="bi bi-inbox fs-1 d-block mb-2"></i>
-                        No active orders found.
+                        <div class="mb-3">
+                            <i class="bi bi-basket display-1 text-light bg-secondary p-4 rounded-circle bg-opacity-10"></i>
+                        </div>
+                        <h5 class="fw-bold">No orders yet</h5>
+                        <p class="text-muted small">Your active and past orders will appear here.</p>
                     </div>
                 <?php endif; ?>
 
             </div>
-
         </div>
     </div>
 

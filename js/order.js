@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkFold = document.getElementById('checkFold');
 
     // Supplies
+    const suppliesSection = document.getElementById('suppliesSection'); 
     const supplyDetergent = document.getElementById('supplyDetergent');
     const supplySoftener = document.getElementById('supplySoftener');
     const suppliesHeader = document.getElementById('suppliesHeader');
@@ -22,7 +23,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const btnPlaceOrder = document.getElementById('btnPlaceOrder');
     const totalPriceDisplay = document.getElementById('totalPrice');
 
-    // Add Event Listeners to everything
     const elements = [checkWash, checkDry, checkFold, supplyDetergent, supplySoftener, qtyColored, qtyWhite, qtyFold];
     elements.forEach(el => {
         if(el) {
@@ -40,15 +40,33 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isWash) {
             supplyDetergent.disabled = false;
             supplySoftener.disabled = false;
-            suppliesHeader.classList.remove('text-muted');
-            suppliesHeader.classList.add('text-dark');
+            
+            // Explicitly enable the container to allow clicks
+            if (suppliesSection) {
+                suppliesSection.style.pointerEvents = 'auto';
+                suppliesSection.classList.remove('opacity-50');
+            }
+
+            if (suppliesHeader) {
+                suppliesHeader.classList.remove('text-muted');
+                suppliesHeader.classList.add('text-dark');
+            }
         } else {
             supplyDetergent.disabled = true;
             supplySoftener.disabled = true;
             supplyDetergent.checked = false;
             supplySoftener.checked = false;
-            suppliesHeader.classList.add('text-muted');
-            suppliesHeader.classList.remove('text-dark');
+
+            // Lock the container again
+            if (suppliesSection) {
+                suppliesSection.style.pointerEvents = 'none';
+                suppliesSection.classList.add('opacity-50');
+            }
+
+            if (suppliesHeader) {
+                suppliesHeader.classList.add('text-muted');
+                suppliesHeader.classList.remove('text-dark');
+            }
         }
 
         // 2. Logic: "Wet clothes cannot be folded" (Wash + Fold, No Dry)
@@ -61,7 +79,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         // 3. Logic: Input switching (Fold Only vs Standard)
-        // Fold Only = Fold is Checked AND Wash is Unchecked AND Dry is Unchecked
         const isFoldOnly = isFold && !isWash && !isDry;
 
         if (isFoldOnly) {
@@ -76,10 +93,8 @@ document.addEventListener('DOMContentLoaded', function() {
         let totalLoadCount = 0;
         
         if (isFoldOnly) {
-            // If fold only, use the single input
             totalLoadCount = parseInt(qtyFold.value) || 0;
         } else {
-            // Otherwise use colored + white
             totalLoadCount = (parseInt(qtyColored.value) || 0) + (parseInt(qtyWhite.value) || 0);
         }
 
@@ -88,17 +103,15 @@ document.addEventListener('DOMContentLoaded', function() {
         if (isDry) costPerLoad += 60;
         if (isFold) costPerLoad += 35;
         
-        // Supplies cost (only valid if wash is checked due to logic #1)
-        if (supplyDetergent.checked) costPerLoad += 20;
-        if (supplySoftener.checked) costPerLoad += 10;
+        if (isWash) {
+            if (supplyDetergent.checked) costPerLoad += 20;
+            if (supplySoftener.checked) costPerLoad += 10;
+        }
 
         const grandTotal = totalLoadCount * costPerLoad;
-
-        // Update Display
-        totalPriceDisplay.innerText = "₱" + grandTotal.toFixed(2) + "*";
+        totalPriceDisplay.innerText = "₱" + grandTotal.toFixed(2);
 
         // 5. Button State
-        // Disable if invalid OR total is 0 OR no service selected
         if (isInvalid || grandTotal === 0 || (!isWash && !isDry && !isFold)) {
             btnPlaceOrder.disabled = true;
         } else {
@@ -106,6 +119,5 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Initialize state on load
     updateOrderState();
 });

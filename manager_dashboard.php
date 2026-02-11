@@ -10,35 +10,56 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Manager Dashboard - LABAssistance</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./css/design.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/main.css">
 </head>
 
 <body class="bg-light">
 
-    <div class="container d-flex flex-column align-items-center py-5" style="min-height: 100vh;">
-
-        <div class="text-center mb-5">
-            <h1 class="fw-bold">LABAssistance</h1>
-            <p class="text-muted">Laundry Management System</p>
-            <h2 class="mt-3">Manager Dashboard</h2>
+    <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+        <div class="container">
+            <span class="navbar-brand fw-bold fs-5">Manager Panel</span>
+            <a href="employee_login.php" class="btn btn-sm btn-danger rounded-pill px-3">Exit</a>
         </div>
+    </nav>
 
-        <div class="text-center mb-5">
-            <h3 class="fw-bold">SHOP STATUS</h3>
-            <h1 class="fw-bold text-success display-3">OPEN</h1>
-        </div>
+    <div class="container page-container py-5">
+        <div class="row justify-content-center">
+            <div class="col-12 col-md-8 col-lg-5">
 
-        <div class="d-grid gap-3 w-100" style="max-width: 400px;">
-            <button class="btn btn-dark py-3 fw-bold text-uppercase">Open/Close Shop</button>
-            <button class="btn btn-dark py-3 fw-bold text-uppercase">View Orders</button>
-            <a href="manager_employee_table.php" class="btn btn-dark py-3 fw-bold text-uppercase">View Employee Table</a>
-        </div>
+                <div class="text-center mb-5">
+                    <h1 class="fw-bold">LABAssistance</h1>
+                    <p class="text-muted mb-1">Laundry Management System</p>
+                    <h3 class="fw-bold text-uppercase small text-muted ls-1">Manager Dashboard</h3>
+                </div>
 
-        <div class="mt-5">
-            <a href="employee_login.php" class="btn btn-outline-danger">Log Out</a>
+                <div class="app-card p-4 text-center mb-4">
+                    <h6 class="text-muted fw-bold text-uppercase small mb-2">Current Shop Status</h6>
+                    <h1 class="fw-bold text-success display-3 mb-0">OPEN</h1>
+                </div>
+
+                <div class="d-grid gap-3">
+                    <button class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
+                        <i class="bi bi-power me-2"></i>Open/Close Shop
+                    </button>
+
+                    <button class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
+                        <i class="bi bi-receipt me-2"></i>View Orders
+                    </button>
+
+                    <a href="manager_employee_table.php" class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
+                        <i class="bi bi-people-fill me-2"></i>View Employee Table
+                    </a>
+                </div>
+
+                <div class="text-center mt-5">
+                    <p class="text-muted small">Logged in as: <strong>Manager</strong></p>
+                </div>
+
+            </div>
         </div>
     </div>
 

@@ -6,110 +6,125 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Place Order - LABAssistance</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="./css/design.css">
-    <link rel="stylesheet" href="./css/dashboard.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="./css/main.css">
+    <style>
+        .service-select-card {
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .service-select-card:active {
+            transform: scale(0.98);
+        }
+
+        input:checked+div,
+        input:checked+div+span,
+        label:has(input:checked) {
+            border-color: var(--accent-color) !important;
+            background-color: #f0f7ff;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
 
-    <div class="container py-4">
+    <nav class="navbar navbar-light bg-white shadow-sm sticky-top">
+        <div class="container">
+            <a href="dashboard.php" class="btn btn-sm btn-light rounded-circle"><i class="bi bi-arrow-left"></i></a>
+            <span class="navbar-brand mb-0 h1 fw-bold fs-5 mx-auto">New Order</span>
+            <div style="width: 32px;"></div>
+        </div>
+    </nav>
+
+    <div class="container page-container">
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
 
-                <div class="card shadow-sm border-0 rounded-3">
-                    <div class="card-body p-4">
+                <form action="backend/process_order.php" method="POST" id="orderForm">
 
-                        <div class="text-center mb-4">
-                            <h2 class="fw-bold">Place an Order</h2>
-                            <span class="badge bg-warning text-dark fw-normal px-3 py-2 rounded-pill">1 Load = Min 3kg, Max 8kg</span>
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-1">Select Services</h6>
+
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
+                            <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="50" style="transform: scale(1.3);">
+                            <div class="flex-grow-1 fw-bold">Wash</div>
+                            <span class="fw-bold text-dark">₱50<small class="text-muted fw-normal">/load</small></span>
+                        </label>
+
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
+                            <input class="form-check-input me-3" type="checkbox" id="checkDry" name="checkDry" value="60" style="transform: scale(1.3);">
+                            <div class="flex-grow-1 fw-bold">Dry</div>
+                            <span class="fw-bold text-dark">₱60<small class="text-muted fw-normal">/load</small></span>
+                        </label>
+
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
+                            <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="35" style="transform: scale(1.3);">
+                            <div class="flex-grow-1 fw-bold">Fold</div>
+                            <span class="fw-bold text-dark">₱35<small class="text-muted fw-normal">/load</small></span>
+                        </label>
+
+                        <div id="errorWetClothes" class="alert alert-danger mt-2 d-none small">
+                            <i class="bi bi-exclamation-circle-fill me-1"></i> Wet clothes cannot be folded!
                         </div>
-
-                        <form action="backend/process_order.php" method="POST" id="orderForm">
-
-                            <h5 class="fw-bold mb-3 small text-uppercase text-muted ls-1">Service Type</h5>
-                            <div class="mb-4">
-                                <label class="service-card p-3 border rounded mb-2 d-flex align-items-center bg-white cursor-pointer">
-                                    <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="50">
-                                    <div class="flex-grow-1">
-                                        <div class="fw-bold">Wash</div>
-                                    </div>
-                                    <span class="fw-bold text-dark">₱50<span class="text-muted small fw-normal">/load</span></span>
-                                </label>
-
-                                <label class="service-card p-3 border rounded mb-2 d-flex align-items-center bg-white cursor-pointer">
-                                    <input class="form-check-input me-3" type="checkbox" id="checkDry" name="checkDry" value="60">
-                                    <div class="flex-grow-1">
-                                        <div class="fw-bold">Dry</div>
-                                    </div>
-                                    <span class="fw-bold text-dark">₱60<span class="text-muted small fw-normal">/load</span></span>
-                                </label>
-
-                                <label class="service-card p-3 border rounded mb-2 d-flex align-items-center bg-white cursor-pointer">
-                                    <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="35">
-                                    <div class="flex-grow-1">
-                                        <div class="fw-bold">Fold</div>
-                                    </div>
-                                    <span class="fw-bold text-dark">₱35<span class="text-muted small fw-normal">/load</span></span>
-                                </label>
-                            </div>
-
-                            <div id="errorWetClothes" class="alert alert-danger d-none animate-fade" role="alert">
-                                <i class="bi bi-exclamation-triangle-fill"></i> Wet clothes cannot be folded!
-                            </div>
-
-                            <div id="suppliesSection" class="mb-4">
-                                <h5 class="fw-bold mb-3 small text-uppercase text-muted ls-1" id="suppliesHeader">Laundry Supplies (For Wash)</h5>
-
-                                <label class="service-card p-3 border rounded mb-2 d-flex align-items-center bg-white cursor-pointer">
-                                    <input class="form-check-input me-3" type="checkbox" id="supplyDetergent" name="supplyDetergent" value="20" disabled>
-                                    <div class="flex-grow-1">Detergent</div>
-                                    <span class="text-muted small">₱20/load</span>
-                                </label>
-
-                                <label class="service-card p-3 border rounded mb-2 d-flex align-items-center bg-white cursor-pointer">
-                                    <input class="form-check-input me-3" type="checkbox" id="supplySoftener" name="supplySoftener" value="10" disabled>
-                                    <div class="flex-grow-1">Fabric Softener</div>
-                                    <span class="text-muted small">₱10/load</span>
-                                </label>
-                            </div>
-
-                            <h5 class="fw-bold mb-2 mt-4 small text-uppercase text-muted ls-1">Load Quantity</h5>
-                            <p class="text-muted small mb-3" style="font-size: 0.8rem;">Enter bags per category. 1 bag = 1 load.</p>
-
-                            <div id="standardInputs" class="row g-3 mb-3">
-                                <div class="col-6">
-                                    <label class="fw-bold small mb-1">Colored</label>
-                                    <input type="number" id="qtyColored" name="qtyColored" class="form-control text-center py-3 fs-5 fw-bold" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
-                                </div>
-                                <div class="col-6">
-                                    <label class="fw-bold small mb-1">White</label>
-                                    <input type="number" id="qtyWhite" name="qtyWhite" class="form-control text-center py-3 fs-5 fw-bold" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
-                                </div>
-                            </div>
-
-                            <div id="foldOnlyInput" class="mb-3 d-none">
-                                <label class="fw-bold small mb-1">Load For Folding</label>
-                                <input type="number" id="qtyFold" name="qtyFold" class="form-control text-center py-3 fs-5 fw-bold" value="0" min="0" inputmode="numeric" pattern="[0-9]*">
-                            </div>
-
-                            <h5 class="fw-bold mb-2 mt-4 small text-uppercase text-muted ls-1">Note to Employee</h5>
-                            <textarea class="form-control mb-4" name="note" rows="3" placeholder="Ex: Keep uniforms inside net"></textarea>
-
-                            <div class="border-top pt-4 mt-4">
-                                <h4 class="fw-bold">Total Payment</h4>
-                                <h1 class="fw-bold display-4 mb-1 text-dark" id="totalPrice">₱0.00*</h1>
-                                <p class="text-muted small fst-italic mb-4">Payment made in-shop.</p>
-                            </div>
-
-                            <div class="d-grid gap-3 pt-2">
-                                <button type="submit" id="btnPlaceOrder" class="btn btn-dark py-3 fw-bold fs-5 shadow-sm" disabled>Place Order</button>
-                                <a href="dashboard.php" class="btn btn-outline-secondary py-2 border-0">Cancel</a>
-                            </div>
-
-                        </form>
                     </div>
-                </div>
 
+                    <div id="suppliesSection" class="mb-4 opacity-50" style="pointer-events: none;">
+                        <h6 id="suppliesHeader" class="text-muted fw-bold text-uppercase small mb-3 ps-1">Add-ons (Wash only)</h6>
+
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
+                            <input class="form-check-input me-3" type="checkbox" id="supplyDetergent" name="supplyDetergent" value="20" disabled>
+                            <div class="flex-grow-1">Detergent</div>
+                            <span class="text-muted small">+₱20</span>
+                        </label>
+
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
+                            <input class="form-check-input me-3" type="checkbox" id="supplySoftener" name="supplySoftener" value="10" disabled>
+                            <div class="flex-grow-1">Softener</div>
+                            <span class="text-muted small">+₱10</span>
+                        </label>
+                    </div>
+
+                    <div class="mb-4">
+                        <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-1">Number of Bags</h6>
+                        <div class="app-card p-4">
+                            <div class="row g-3" id="standardInputs">
+                                <div class="col-6 text-center border-end">
+                                    <label class="small text-muted fw-bold mb-2">COLORED</label>
+                                    <input type="number" id="qtyColored" name="qtyColored" class="form-control text-center fs-4 fw-bold border-0 bg-light" value="0" min="0">
+                                </div>
+                                <div class="col-6 text-center">
+                                    <label class="small text-muted fw-bold mb-2">WHITE</label>
+                                    <input type="number" id="qtyWhite" name="qtyWhite" class="form-control text-center fs-4 fw-bold border-0 bg-light" value="0" min="0">
+                                </div>
+                            </div>
+                            <div id="foldOnlyInput" class="mt-3 border-top pt-3 d-none">
+                                <label class="small text-muted fw-bold mb-2 d-block text-center">FOLD ONLY BAGS</label>
+                                <input type="number" id="qtyFold" name="qtyFold" class="form-control text-center fs-4 fw-bold border-0 bg-light" value="0" min="0">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-5">
+                        <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-1">Instructions</h6>
+                        <textarea class="form-control" name="note" rows="3" placeholder="e.g. Separate delicate items..."></textarea>
+                    </div>
+
+                    <div class="fixed-bottom bg-white border-top shadow-lg p-3">
+                        <div class="container" style="max-width: 600px;">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-muted small">Total Estimate</span>
+                                <span class="fs-4 fw-bold text-dark" id="totalPrice">₱0.00</span>
+                            </div>
+                            <button type="submit" id="btnPlaceOrder" class="btn btn-primary-app py-3 fw-bold" disabled>
+                                Confirm Order
+                            </button>
+                        </div>
+                    </div>
+
+                    <div style="height: 100px;"></div>
+
+                </form>
             </div>
         </div>
     </div>

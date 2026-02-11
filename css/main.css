@@ -1,0 +1,116 @@
+/* css/main.css */
+:root {
+    --primary-color: #212529; /* Bootstrap Dark */
+    --accent-color: #2196F3;  /* Blue */
+    --bg-color: #f8f9fa;      /* Light Gray */
+    --card-radius: 12px;
+}
+
+body {
+    background-color: var(--bg-color);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    /* Prevent iOS text zoom on focus */
+    -webkit-text-size-adjust: 100%; 
+}
+
+/* --- UTILITIES --- */
+.min-h-100dvh {
+    /* dvh handles mobile browser address bars better than vh */
+    min-height: 100dvh; 
+}
+
+.page-container {
+    padding-top: 20px;
+    padding-bottom: 80px; /* Space for scrolling */
+}
+
+/* --- COMPONENTS: CARDS --- */
+.app-card {
+    border: none;
+    border-radius: var(--card-radius);
+    background: white;
+    box-shadow: 0 2px 15px rgba(0, 0, 0, 0.05);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    overflow: hidden;
+}
+
+.app-card:active {
+    transform: scale(0.98); /* Tactile feedback on mobile tap */
+}
+
+/* --- COMPONENTS: INPUTS (Touch Friendly) --- */
+.form-control {
+    padding: 12px 15px; /* Larger touch target */
+    border-radius: 8px;
+    border: 2px solid #e0e0e0;
+    font-size: 16px; /* Prevents auto-zoom on iPhone */
+}
+
+.form-control:focus {
+    border-color: var(--primary-color);
+    box-shadow: none;
+}
+
+/* --- COMPONENTS: BUTTONS --- */
+.btn-primary-app {
+    background-color: var(--primary-color);
+    color: white;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    width: 100%;
+    border: none;
+}
+
+.btn-primary-app:active {
+    transform: scale(0.98);
+}
+
+/* --- COMPONENTS: SMOOTH CHECKBOX (Kept from your original) --- */
+.smooth-checkbox {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    padding: 10px 0;
+}
+
+.smooth-checkbox input {
+    position: absolute;
+    opacity: 0;
+    height: 0;
+    width: 0;
+}
+
+.checkmark {
+    height: 24px; /* Slightly larger for mobile */
+    width: 24px;
+    background-color: #fff;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    margin-right: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.smooth-checkbox input:checked ~ .checkmark {
+    background-color: var(--accent-color);
+    border-color: var(--accent-color);
+}
+
+.checkmark:after {
+    content: "";
+    display: none;
+    width: 6px;
+    height: 12px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    margin-bottom: 2px;
+}
+
+.smooth-checkbox input:checked ~ .checkmark:after {
+    display: block;
+}
