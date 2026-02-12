@@ -1,24 +1,24 @@
 document.addEventListener('DOMContentLoaded', function() {
     
-    // Checkboxes
+    // Form elements
     const checkWash = document.getElementById('checkWash');
     const checkDry = document.getElementById('checkDry');
     const checkFold = document.getElementById('checkFold');
 
-    // Supplies
+    // Add-ons
     const suppliesSection = document.getElementById('suppliesSection'); 
     const supplyDetergent = document.getElementById('supplyDetergent');
     const supplySoftener = document.getElementById('supplySoftener');
     const suppliesHeader = document.getElementById('suppliesHeader');
 
-    // Inputs
+    // Quantity inputs
     const standardInputs = document.getElementById('standardInputs');
     const foldOnlyInput = document.getElementById('foldOnlyInput');
     const qtyColored = document.getElementById('qtyColored');
     const qtyWhite = document.getElementById('qtyWhite');
     const qtyFold = document.getElementById('qtyFold');
 
-    // UI Elements
+    // UI controls
     const errorWetClothes = document.getElementById('errorWetClothes');
     const btnPlaceOrder = document.getElementById('btnPlaceOrder');
     const totalPriceDisplay = document.getElementById('totalPrice');
@@ -36,12 +36,12 @@ document.addEventListener('DOMContentLoaded', function() {
         const isDry = checkDry.checked;
         const isFold = checkFold.checked;
 
-        // 1. Logic: Supplies only active if Wash is checked
+        // Toggle supplies
         if (isWash) {
             supplyDetergent.disabled = false;
             supplySoftener.disabled = false;
             
-            // Explicitly enable the container to allow clicks
+            // Enable clicks
             if (suppliesSection) {
                 suppliesSection.style.pointerEvents = 'auto';
                 suppliesSection.classList.remove('opacity-50');
@@ -57,7 +57,7 @@ document.addEventListener('DOMContentLoaded', function() {
             supplyDetergent.checked = false;
             supplySoftener.checked = false;
 
-            // Lock the container again
+            // Disable clicks
             if (suppliesSection) {
                 suppliesSection.style.pointerEvents = 'none';
                 suppliesSection.classList.add('opacity-50');
@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
 
-        // 2. Logic: "Wet clothes cannot be folded" (Wash + Fold, No Dry)
+        // Validate wash/fold
         let isInvalid = false;
         if (isWash && isFold && !isDry) {
             errorWetClothes.classList.remove('d-none');
@@ -78,7 +78,7 @@ document.addEventListener('DOMContentLoaded', function() {
             errorWetClothes.classList.add('d-none');
         }
 
-        // 3. Logic: Input switching (Fold Only vs Standard)
+        // Toggle input modes
         const isFoldOnly = isFold && !isWash && !isDry;
 
         if (isFoldOnly) {
@@ -89,7 +89,7 @@ document.addEventListener('DOMContentLoaded', function() {
             foldOnlyInput.classList.add('d-none');
         }
 
-        // 4. Calculate Total
+        // Calc total
         let totalLoadCount = 0;
         
         if (isFoldOnly) {
@@ -111,7 +111,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const grandTotal = totalLoadCount * costPerLoad;
         totalPriceDisplay.innerText = "₱" + grandTotal.toFixed(2);
 
-        // 5. Button State
+        // Update button
         if (isInvalid || grandTotal === 0 || (!isWash && !isDry && !isFold)) {
             btnPlaceOrder.disabled = true;
         } else {

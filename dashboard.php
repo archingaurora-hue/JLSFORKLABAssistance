@@ -2,7 +2,7 @@
 session_start();
 require 'backend/db_conn.php';
 
-// --- 1. AUTH CHECK (Retained) ---
+// Check auth
 if (!isset($_SESSION['user_id'])) {
     header("Location: customer_login.php");
     exit();
@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
-// --- 2. FETCH ORDERS (Retained) ---
+// Fetch user orders
 $orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";
 $stmt = $conn->prepare($orderQuery);
 $stmt->bind_param("i", $user_id);
@@ -99,7 +99,7 @@ $ordersResult = $stmt->get_result();
 
                                         <h6 class="fw-bold text-uppercase small text-muted mb-3">Bag Status</h6>
                                         <?php
-                                        // Fetch Bags for this order
+                                        // Get bag details
                                         $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
                                         $loads = $conn->query($loadQuery);
                                         ?>
@@ -122,7 +122,7 @@ $ordersResult = $stmt->get_result();
                                         <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Timeline</h6>
                                         <div class="bg-light p-3 rounded-3" style="max-height: 250px; overflow-y: auto;">
                                             <?php
-                                            // Fetch Logs for this order via JOIN
+                                            // Get order logs
                                             $logQuery = "SELECT sl.*, pl.bag_label 
                                                          FROM `System_Log` sl
                                                          JOIN `Process_Load` pl ON sl.load_id = pl.load_id

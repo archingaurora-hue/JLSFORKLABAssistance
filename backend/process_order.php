@@ -1,6 +1,6 @@
 <?php
 session_start();
-require 'db_conn.php'; // Uses central connection
+require 'db_conn.php';
 
 if (!isset($_SESSION['user_id'])) {
     header("Location: ../customer_login.php");
@@ -9,30 +9,30 @@ if (!isset($_SESSION['user_id'])) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
-    // --- A. RETRIEVE INPUTS ---
+    // Get form data
     $customer_id = $_SESSION['user_id'];
     $customer_name = $_SESSION['full_name'];
     $note = isset($_POST['note']) ? trim($_POST['note']) : "";
 
-    // Services
+    // Service types
     $services = [];
     if (isset($_POST['checkWash'])) $services[] = "Wash";
     if (isset($_POST['checkDry'])) $services[] = "Dry";
     if (isset($_POST['checkFold'])) $services[] = "Fold";
     $services_str = implode(", ", $services);
 
-    // Supplies
+    // Add-ons
     $supplies = [];
     if (isset($_POST['supplyDetergent'])) $supplies[] = "Detergent";
     if (isset($_POST['supplySoftener'])) $supplies[] = "Fabric Softener";
     $supplies_str = implode(", ", $supplies);
 
-    // Quantities
+    // Load counts
     $qtyColored = isset($_POST['qtyColored']) ? intval($_POST['qtyColored']) : 0;
     $qtyWhite = isset($_POST['qtyWhite']) ? intval($_POST['qtyWhite']) : 0;
     $qtyFold = isset($_POST['qtyFold']) ? intval($_POST['qtyFold']) : 0;
 
-    // --- B. CALCULATIONS ---
+    // Calculate costs
     $isWash = in_array("Wash", $services);
     $isDry = in_array("Dry", $services);
     $isFold = in_array("Fold", $services);
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         exit();
     }
 
-    // Cost Calculation
+    // Pricing logic
     $costPerLoad = 0;
     if ($isWash) $costPerLoad += 50;
     if ($isDry) $costPerLoad += 60;
@@ -59,7 +59,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $final_price = $estimated_price;
     $bag_counts = $isFoldOnly ? "Fold Only: $qtyFold" : "Colored: $qtyColored, White: $qtyWhite";
 
-    // --- C. GENERATE ORDER ID ---
+    // Create Order ID
     $datePart = date("mdY");
     $query = "SELECT COUNT(*) as count FROM `Order` WHERE order_id LIKE '$datePart%'";
     $result = $conn->query($query);
@@ -68,7 +68,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $sequencePart = str_pad($count, 3, "0", STR_PAD_LEFT);
     $order_id = $datePart . $sequencePart;
 
-    // --- D. GENERATE TRACKING CODE ---
+    // Create tracking code
     $prefix = 5;
     if ($isWash && $isDry && $isFold) $prefix = 1;
     elseif ($isWash && $isDry && !$isFold) $prefix = 2;
@@ -78,8 +78,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $suffix = rand(100, 999);
     $tracking_code = intval($prefix . $suffix);
 
-    // --- E. INSERT MAIN ORDER ---
-    // Note: Main Order status acts as a summary. It starts at 'Pending Dropoff'
+    // Save order
+    // Set initial status
     $stmt = $conn->prepare("INSERT INTO `Order` 
         (order_id, customer_id, customer_name, tracking_code, services_requested, supplies_requested, bag_counts, customer_note, estimated_price, final_price, status) 
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Dropoff')");
@@ -89,8 +89,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     if ($stmt->execute()) {
         $stmt->close();
 
-        // --- F. INSERT INDIVIDUAL LOADS (PROCESS_LOAD) ---
-        // Each bag gets the specific granular status 'Pending Dropoff'
+        // Save bag details
+        // Init bag status
         $loadInsert = $conn->prepare("INSERT INTO `Process_Load` (order_id, load_category, bag_label, status) VALUES (?, ?, ?, 'Pending Dropoff')");
 
         if ($isFoldOnly) {

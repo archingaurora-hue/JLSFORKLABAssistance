@@ -2,13 +2,13 @@
 session_start();
 require 'backend/db_conn.php';
 
-// Auth Check
+// Check permissions
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION['role'] !== 'Manager')) {
     header("Location: employee_login.php");
     exit();
 }
 
-// Fetch Active Loads joined with Order details
+// Get active tasks
 $query = "SELECT pl.*, o.customer_name, o.services_requested 
           FROM `Process_Load` pl
           JOIN `Order` o ON pl.order_id = o.order_id
@@ -16,7 +16,7 @@ $query = "SELECT pl.*, o.customer_name, o.services_requested
           ORDER BY pl.order_id DESC, pl.bag_label ASC";
 $result = $conn->query($query);
 
-// --- NEW: Grouping Logic ---
+// Group by order
 $groupedOrders = [];
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {

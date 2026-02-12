@@ -1,4 +1,4 @@
--- 1. Users Table (Managers, Employees, Customers)
+-- Users table
 CREATE TABLE IF NOT EXISTS `User` (
   `user_id` INT(11) NOT NULL AUTO_INCREMENT,
   `email` VARCHAR(255) NOT NULL,
@@ -10,24 +10,24 @@ CREATE TABLE IF NOT EXISTS `User` (
   UNIQUE KEY `email` (`email`)
 );
 
--- 2. Main Order Table (General Order Info)
+-- Orders table
 CREATE TABLE IF NOT EXISTS `Order` (
   `order_id` VARCHAR(20) NOT NULL,
   `customer_id` INT(11) NOT NULL,
   `customer_name` VARCHAR(255) NOT NULL,
   `tracking_code` INT(4) NOT NULL,
   
-  -- Overall Order Status
+  -- Order status
   `status` ENUM('Pending Dropoff', 'Processing', 'Ready for Pickup', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending Dropoff',
   
-  -- Service Details
+  -- Service info
   `services_requested` TEXT NOT NULL, 
   `supplies_requested` TEXT,          
   `bag_counts` TEXT NOT NULL,         
   `customer_note` TEXT,
   `estimated_price` DECIMAL(10,2) NOT NULL,
   
-  -- Payment & Totals
+  -- Payment details
   `additional_fees` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `final_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
   `payment_status` ENUM('Unpaid', 'Paid') NOT NULL DEFAULT 'Unpaid',
@@ -37,16 +37,16 @@ CREATE TABLE IF NOT EXISTS `Order` (
   FOREIGN KEY (`customer_id`) REFERENCES `User`(`user_id`) ON DELETE CASCADE
 );
 
--- 3. Process_Load Table (Individual Bag Tracking)
+-- Bag tracking
 CREATE TABLE IF NOT EXISTS `Process_Load` (
   `load_id` INT(11) NOT NULL AUTO_INCREMENT,
   `order_id` VARCHAR(20) NOT NULL,
   
-  -- Bag Type & Label
+  -- Bag details
   `load_category` ENUM('Colored', 'White', 'Fold Only', 'Other') NOT NULL,
   `bag_label` VARCHAR(50) NOT NULL, -- e.g. "Colored #1"
   
-  -- Detailed Status List
+  -- Status options
   `status` ENUM(
       'Pending Dropoff', 
       'In Queue', 
@@ -68,14 +68,14 @@ CREATE TABLE IF NOT EXISTS `Process_Load` (
   FOREIGN KEY (`order_id`) REFERENCES `Order`(`order_id`) ON DELETE CASCADE
 );
 
--- 4. System_Log Table (Audit History)
+-- Audit logs
 CREATE TABLE IF NOT EXISTS `System_Log` (
   `log_id` INT(11) NOT NULL AUTO_INCREMENT,
   `load_id` INT(11) NOT NULL, 
-  `status_event` VARCHAR(50) NOT NULL, -- Records the status change
-  `employee_name` VARCHAR(255) NOT NULL, -- Who did it
+  `status_event` VARCHAR(50) NOT NULL, -- Change event
+  `employee_name` VARCHAR(255) NOT NULL, -- Employee
   `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   
   PRIMARY KEY (`log_id`),
   FOREIGN KEY (`load_id`) REFERENCES `Process_Load`(`load_id`) ON DELETE CASCADE
-);
+);  

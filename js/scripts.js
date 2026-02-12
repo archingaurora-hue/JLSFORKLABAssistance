@@ -1,4 +1,4 @@
-//login.php
+// Login View
 var register = document.getElementById("register");
 var login = document.getElementById("login");
 var passRecovery = document.getElementById("passRecovery");
@@ -19,7 +19,7 @@ function showPassRecovery() {
     if(passRecovery) passRecovery.style.display = 'block';
 }
 
-//dashboard.php
+// Dashboard View
 var newOrder = document.getElementById("newOrder");
 
 function showNewOrder(){
@@ -29,19 +29,19 @@ function hideNewOrder(){
     if(newOrder) newOrder.style.display = 'none';
 }
 
-// COST CALCULATION LOGIC
+// Cost Calculator
 function calculateTotal() {
-    // Rates from UI
+    // Service Rates
     const RATE_WASH = 50;
     const RATE_DRY = 60;
     const RATE_FOLD = 35;
     const RATE_DETERGENT = 20;
 
-    // Get Quantities (Default to 0 if empty)
+    // Parse quantities
     var qtyColored = document.getElementById('qtyColored');
     var qtyWhite = document.getElementById('qtyWhite');
     
-    // Safety check if elements exist
+    // Validate elements
     if (!qtyColored || !qtyWhite) return;
 
     var valColored = parseInt(qtyColored.value) || 0;
@@ -50,7 +50,7 @@ function calculateTotal() {
 
     var costPerLoad = 0;
 
-    // Check selected services
+    // Check services
     var serviceWash = document.getElementById('serviceWash');
     var serviceDry = document.getElementById('serviceDry');
     var serviceFold = document.getElementById('serviceFold');
@@ -61,10 +61,10 @@ function calculateTotal() {
     if (serviceFold && serviceFold.checked) costPerLoad += RATE_FOLD;
     if (supplyDetergent && supplyDetergent.checked) costPerLoad += RATE_DETERGENT;
 
-    // Calculate Total
+    // Total cost
     var totalPayment = totalLoads * costPerLoad;
 
-    // Update Display
+    // Show price
     var priceDisplay = document.getElementById('price');
     if (priceDisplay) {
         priceDisplay.innerText = "₱" + totalPayment;

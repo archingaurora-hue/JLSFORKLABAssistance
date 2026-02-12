@@ -1,30 +1,30 @@
-/* css/main.css */
+/* Main Styles */
 :root {
-    --primary-color: #212529; /* Bootstrap Dark */
-    --accent-color: #2196F3;  /* Blue */
-    --bg-color: #f8f9fa;      /* Light Gray */
+    --primary-color: #212529; /* Dark theme */
+    --accent-color: #2196F3;  /* Accent */
+    --bg-color: #f8f9fa;      /* Bg color */
     --card-radius: 12px;
 }
 
 body {
     background-color: var(--bg-color);
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    /* Prevent iOS text zoom on focus */
+    /* Fix iOS zoom */
     -webkit-text-size-adjust: 100%; 
 }
 
-/* --- UTILITIES --- */
+/* Utils */
 .min-h-100dvh {
-    /* dvh handles mobile browser address bars better than vh */
+    /* Mobile viewport fix */
     min-height: 100dvh; 
 }
 
 .page-container {
     padding-top: 20px;
-    padding-bottom: 80px; /* Space for scrolling */
+    padding-bottom: 80px; /* Scroll padding */
 }
 
-/* --- COMPONENTS: CARDS --- */
+/* Cards */
 .app-card {
     border: none;
     border-radius: var(--card-radius);
@@ -35,15 +35,15 @@ body {
 }
 
 .app-card:active {
-    transform: scale(0.98); /* Tactile feedback on mobile tap */
+    transform: scale(0.98); /* Touch feedback */
 }
 
-/* --- COMPONENTS: INPUTS (Touch Friendly) --- */
+/* Inputs */
 .form-control {
-    padding: 12px 15px; /* Larger touch target */
+    padding: 12px 15px; /* Touch size */
     border-radius: 8px;
     border: 2px solid #e0e0e0;
-    font-size: 16px; /* Prevents auto-zoom on iPhone */
+    font-size: 16px; /* No auto-zoom */
 }
 
 .form-control:focus {
@@ -51,7 +51,7 @@ body {
     box-shadow: none;
 }
 
-/* --- COMPONENTS: BUTTONS --- */
+/* Buttons */
 .btn-primary-app {
     background-color: var(--primary-color);
     color: white;
@@ -66,7 +66,7 @@ body {
     transform: scale(0.98);
 }
 
-/* --- COMPONENTS: SMOOTH CHECKBOX (Kept from your original) --- */
+/* Checkboxes */
 .smooth-checkbox {
     display: flex;
     align-items: center;
@@ -83,7 +83,7 @@ body {
 }
 
 .checkmark {
-    height: 24px; /* Slightly larger for mobile */
+    height: 24px; /* Mobile size */
     width: 24px;
     background-color: #fff;
     border: 2px solid #ddd;
