@@ -87,6 +87,7 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
+        // Swaps the display between the Login form and the Forgot Password form
         function toggleRecover() {
             var loginDiv = document.getElementById("loginSection");
             var recoverDiv = document.getElementById("passRecovery");
@@ -99,6 +100,7 @@
             }
         }
 
+        // Toggles password input visibility between 'password' and 'text'
         function togglePassword(inputId, iconId) {
             const input = document.getElementById(inputId);
             const icon = document.getElementById(iconId);
@@ -111,6 +113,7 @@
             }
         }
 
+        // Listens for URL parameters (e.g., ?status=link_sent) to show SweetAlert popups
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
@@ -131,6 +134,12 @@
                 Swal.fire({
                     title: 'Error',
                     text: 'The reset link is invalid or has expired.',
+                    icon: 'error'
+                });
+            } else if (status === 'error') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.',
                     icon: 'error'
                 });
             }

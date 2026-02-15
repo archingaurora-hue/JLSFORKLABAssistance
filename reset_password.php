@@ -1,9 +1,16 @@
 <?php
-// Check if token/email are present
+// reset_password.php
+
+// -------------------------------------------------------------------------
+// 1. VALIDATE URL PARAMETERS
+// We ensure the user arrived here with a token and email.
+// If not, we kick them back to the login page.
+// -------------------------------------------------------------------------
 if (!isset($_GET['token']) || !isset($_GET['email'])) {
     header("Location: customer_login.php");
     exit();
 }
+
 $token = $_GET['token'];
 $email = $_GET['email'];
 ?>
@@ -55,9 +62,10 @@ $email = $_GET['email'];
                             </div>
                         </div>
 
-                        <button type="submit" name="reset_password_btn" class="btn-primary-app bg-success border-success">Save New Password</button>
+                        <button type="submit" name="reset_password_btn" class="btn-primary-app bg-success border-success w-100">Save New Password</button>
                     </form>
                 </div>
+
             </div>
         </div>
     </div>
