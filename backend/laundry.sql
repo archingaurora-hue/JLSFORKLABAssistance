@@ -6,6 +6,8 @@ CREATE TABLE IF NOT EXISTS `User` (
   `role` ENUM('Manager', 'Employee', 'Customer') NOT NULL,
   `full_name` VARCHAR(255) NOT NULL,
   `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `reset_token_hash` VARCHAR(64) NULL DEFAULT NULL,
+  `reset_token_expires_at` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
 );

@@ -61,49 +61,16 @@
                     <div class="app-card p-4">
                         <div class="text-center mb-4">
                             <h3 class="fw-bold">Reset Password</h3>
-                            <p class="text-muted small" id="recoveryStatus">Enter your email to receive an OTP.</p>
+                            <p class="text-muted small">Enter your email address. We'll send you a link to reset your password.</p>
                         </div>
 
-                        <div id="step1">
+                        <form action="backend/send_reset_link.php" method="POST">
                             <div class="mb-4">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Email Address</label>
-                                <input type="email" class="form-control" id="recovery_email" placeholder="name@example.com">
-                            </div>
-                            <button type="button" class="btn-primary-app" onclick="goToStep2()">Send OTP</button>
-                        </div>
-
-                        <div id="step2" style="display: none;">
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold text-uppercase text-center d-block">4-Digit OTP</label>
-                                <input type="text" class="form-control text-center fs-3 fw-bold" id="otp_code" placeholder="0000" maxlength="4" style="letter-spacing: 10px;">
-                            </div>
-                            <button type="button" class="btn-primary-app" onclick="goToStep3()">Verify OTP</button>
-                        </div>
-
-                        <form action="backend/pass_reset.php" method="POST" id="step3" style="display: none;">
-                            <input type="hidden" name="email" id="final_email">
-
-                            <div class="mb-3">
-                                <label class="form-label text-muted small fw-bold text-uppercase">New Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" name="new_password" id="new_pwd" required>
-                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_pwd', 'eye1')">
-                                        <i class="bi bi-eye" id="eye1"></i>
-                                    </button>
-                                </div>
+                                <input type="email" class="form-control" name="email" placeholder="name@example.com" required>
                             </div>
 
-                            <div class="mb-4">
-                                <label class="form-label text-muted small fw-bold text-uppercase">Confirm Password</label>
-                                <div class="input-group">
-                                    <input type="password" class="form-control" name="confirm_password" id="confirm_pwd" required>
-                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirm_pwd', 'eye2')">
-                                        <i class="bi bi-eye" id="eye2"></i>
-                                    </button>
-                                </div>
-                            </div>
-
-                            <button type="submit" class="btn-primary-app bg-success border-success">Reset Password</button>
+                            <button type="submit" name="send_link" class="btn-primary-app">Send Reset Link</button>
                         </form>
 
                         <div class="text-center mt-4">
@@ -144,55 +111,27 @@
             }
         }
 
-        function goToStep2() {
-            const email = document.getElementById('recovery_email').value;
-            if (!email) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Oops...',
-                    text: 'Email is required!'
-                });
-                return;
-            }
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                showConfirmButton: false,
-                timer: 3000,
-                icon: 'success',
-                title: 'OTP sent to ' + email
-            });
-            document.getElementById('final_email').value = email;
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-            document.getElementById('recoveryStatus').innerText = "Enter the 4-digit code sent to your email.";
-        }
-
-        function goToStep3() {
-            const otp = document.getElementById('otp_code').value;
-            if (otp.length === 4) {
-                document.getElementById('step2').style.display = 'none';
-                document.getElementById('step3').style.display = 'block';
-                document.getElementById('recoveryStatus').innerText = "Create a strong new password.";
-            } else {
-                Swal.fire('Invalid OTP', 'Please enter any 4 digits to proceed.', 'warning');
-            }
-        }
-
         document.addEventListener('DOMContentLoaded', function() {
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
-            if (status === 'resetsuccess') {
+
+            if (status === 'link_sent') {
                 Swal.fire({
-                    title: 'Success!',
-                    text: 'Your password has been updated.',
+                    title: 'Check your Inbox',
+                    text: 'If an account exists for that email, we have sent a password reset link.',
                     icon: 'success'
                 });
-            } else if (status === 'mismatch') {
+            } else if (status === 'password_updated') {
                 Swal.fire({
-                    title: 'Wait!',
-                    text: 'Passwords do not match.',
-                    icon: 'warning'
+                    title: 'Success!',
+                    text: 'Your password has been reset. You can now login.',
+                    icon: 'success'
+                });
+            } else if (status === 'invalid_token') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'The reset link is invalid or has expired.',
+                    icon: 'error'
                 });
             }
         });
