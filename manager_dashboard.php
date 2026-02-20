@@ -19,10 +19,22 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+    <!-- <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
         <div class="container">
             <span class="navbar-brand fw-bold fs-5">Manager Panel</span>
             <a href="employee_login.php" class="btn btn-sm btn-danger rounded-pill px-3">Exit</a>
+        </div>
+    </nav> -->
+
+    <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
+        <div class="container">
+            <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <a href="employee_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
+            </div>
         </div>
     </nav>
 
@@ -30,11 +42,11 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
 
-                <div class="text-center mb-5">
+                <!-- <div class="text-center mb-5">
                     <h1 class="fw-bold">LABAssistance</h1>
                     <p class="text-muted mb-1">Laundry Management System</p>
                     <h3 class="fw-bold text-uppercase small text-muted ls-1">Manager Dashboard</h3>
-                </div>
+                </div> -->
 
                 <div class="app-card p-4 text-center mb-4">
                     <h6 class="text-muted fw-bold text-uppercase small mb-2">Current Shop Status</h6>
