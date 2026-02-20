@@ -65,20 +65,32 @@ if ($result->num_rows > 0) {
         .bag-item:last-child {
             border-bottom: none;
         }
+
+        .label{
+            padding-top:20px;
+            display:flex;
+            justify-content:center;
+        }
     </style>
 </head>
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-dark bg-dark sticky-top shadow-sm">
+    <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
         <div class="container">
-            <span class="navbar-brand fw-bold fs-5">Task Queue</span>
-            <div class="d-flex gap-2">
-                <button class="btn btn-sm btn-outline-light rounded-circle" onclick="location.reload();"><i class="bi bi-arrow-clockwise"></i></button>
-                <a href="employee_login.php" class="btn btn-sm btn-danger rounded-pill px-3">Exit</a>
+            <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
+            <div class="d-flex align-items-center gap-2">
+                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <a href="employee_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
+                    <i class="bi bi-box-arrow-right"></i>
+                </a>
             </div>
         </div>
     </nav>
+
+       <div class="label">
+                    <h1 class="fw-bold">Task Queue</h1>
+                 </div>
 
     <div class="container page-container mt-4">
         <div class="row justify-content-center">
