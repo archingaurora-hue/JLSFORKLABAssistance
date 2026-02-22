@@ -50,7 +50,7 @@ $ordersResult = $stmt->get_result();
             <div class="col-12 col-md-8 col-lg-6">
                 <div class="app-card p-4 text-center bg-dark text-white">
                     <h4 class="fw-bold mb-1">Need Laundry Service?</h4>
-                    <p class="text-white-50 small mb-3">We pick up, wash, and deliver.</p>
+                    <p class="text-white-50 small mb-3">We wash, dry and fold!</p>
                     <a href="order.php" class="btn btn-light text-dark fw-bold w-100 rounded-pill py-3">
                         <i class="bi bi-plus-lg me-2"></i>Place New Order
                     </a>

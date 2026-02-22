@@ -1,9 +1,16 @@
 <?php
 session_start();
+require 'backend/db_conn.php';
+
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
-    header("Location: employee_login.php");
+    header("Location: staff_login.php");
     exit();
 }
+
+// Fetch Status
+$statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
+$shopData = $statusResult->fetch_assoc();
+$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -24,9 +31,7 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
             <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
-                <a href="employee_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
+                <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill"><i class="bi bi-box-arrow-right"></i></a>
             </div>
         </div>
     </nav>
@@ -35,29 +40,27 @@ if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-5">
 
-                <div class="app-card p-4 text-center mb-4">
-                    <h6 class="text-muted fw-bold text-uppercase small mb-2">Current Shop Status</h6>
-                    <h1 class="fw-bold text-success display-3 mb-0">OPEN</h1>
+                <div class="app-card p-4 text-center mb-4 shadow-sm bg-white">
+                    <h5 class="fw-bold text-uppercase mb-0 text-dark" style="letter-spacing: 1px;">Shop Status</h5>
+                    <?php if ($isOpen): ?>
+                        <h1 class="display-2 mb-0" style="color: #198754; font-weight: 800;">OPEN</h1>
+                    <?php else: ?>
+                        <h1 class="display-2 mb-0" style="color: #dc3545; font-weight: 800;">CLOSED</h1>
+                    <?php endif; ?>
+                    <p class="text-muted mb-0 fs-5 mt-1"><?php echo date("F j, Y"); ?></p>
                 </div>
 
                 <div class="d-grid gap-3">
-                    <button class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
+                    <a href="shop_status.php" class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
                         <i class="bi bi-power me-2"></i>Open/Close Shop
-                    </button>
-
+                    </a>
                     <a href="employee_dashboard.php" class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
                         <i class="bi bi-receipt me-2"></i>View Orders
                     </a>
-
                     <a href="manager_employee_table.php" class="btn btn-dark py-3 fw-bold text-uppercase rounded-3 shadow-sm">
                         <i class="bi bi-people-fill me-2"></i>View Employee Table
                     </a>
                 </div>
-
-                <div class="text-center mt-5">
-                    <p class="text-muted small">Logged in as: <strong>Manager</strong></p>
-                </div>
-
             </div>
         </div>
     </div>

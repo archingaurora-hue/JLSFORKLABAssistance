@@ -2,11 +2,15 @@
 session_start();
 require 'backend/db_conn.php';
 
-// Check permissions
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION['role'] !== 'Manager')) {
-    header("Location: employee_login.php");
+    header("Location: staff_login.php");
     exit();
 }
+
+// Fetch Shop Status
+$statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
+$shopData = $statusResult->fetch_assoc();
+$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 
 // Get active tasks
 $query = "SELECT pl.*, o.customer_name, o.services_requested 
@@ -66,10 +70,10 @@ if ($result->num_rows > 0) {
             border-bottom: none;
         }
 
-        .label{
-            padding-top:20px;
-            display:flex;
-            justify-content:center;
+        .label {
+            padding-top: 20px;
+            display: flex;
+            justify-content: center;
         }
     </style>
 </head>
@@ -81,26 +85,38 @@ if ($result->num_rows > 0) {
             <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
-                <a href="employee_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
+                <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
             </div>
         </div>
     </nav>
 
-       <div class="label">
-                    <h1 class="fw-bold">Task Queue</h1>
-                 </div>
-
     <div class="container page-container mt-4">
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="app-card p-4 text-center shadow-sm bg-white">
+                    <h5 class="fw-bold text-uppercase mb-0 text-dark" style="letter-spacing: 1px;">Shop Status</h5>
+                    <?php if ($isOpen): ?>
+                        <h1 class="display-2 mb-0" style="color: #198754; font-weight: 800;">OPEN</h1>
+                    <?php else: ?>
+                        <h1 class="display-2 mb-0" style="color: #dc3545; font-weight: 800;">CLOSED</h1>
+                    <?php endif; ?>
+                    <p class="text-muted mb-0 fs-5 mt-1"><?php echo date("F j, Y"); ?></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="label pt-0 pb-3">
+            <h3 class="fw-bold">Task Queue</h3>
+        </div>
+
         <div class="row justify-content-center">
             <div class="col-12 col-md-10 col-lg-8">
-
                 <?php if (!empty($groupedOrders)): ?>
                     <?php foreach ($groupedOrders as $order_id => $order): ?>
-
                         <div class="order-group-card mb-4 shadow-sm">
-
                             <div class="order-header">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h6 class="fw-bold mb-0 text-dark">
@@ -112,7 +128,6 @@ if ($result->num_rows > 0) {
                                     <i class="bi bi-gear-fill me-1"></i> <?php echo htmlspecialchars($order['services_requested']); ?>
                                 </small>
                             </div>
-
                             <div class="order-body">
                                 <?php foreach ($order['loads'] as $load): ?>
                                     <div class="bag-item">
@@ -120,7 +135,6 @@ if ($result->num_rows > 0) {
                                             <div class="fw-bold text-primary">
                                                 <i class="bi bi-bag-fill me-1"></i> <?php echo htmlspecialchars($load['bag_label']); ?>
                                             </div>
-
                                             <?php
                                             $s = $load['status'];
                                             $badgeClass = 'bg-secondary';
@@ -131,7 +145,6 @@ if ($result->num_rows > 0) {
                                             ?>
                                             <span class="badge rounded-pill <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
                                         </div>
-
                                         <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
                                             onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>')">
                                             Update Bag Status
@@ -140,7 +153,6 @@ if ($result->num_rows > 0) {
                                 <?php endforeach; ?>
                             </div>
                         </div>
-
                     <?php endforeach; ?>
                 <?php else: ?>
                     <div class="text-center py-5 text-muted">
@@ -149,7 +161,6 @@ if ($result->num_rows > 0) {
                         <p>No active laundry tasks at the moment.</p>
                     </div>
                 <?php endif; ?>
-
             </div>
         </div>
     </div>
@@ -166,7 +177,6 @@ if ($result->num_rows > 0) {
 
                     <form action="backend/update_status.php" method="POST">
                         <input type="hidden" name="load_id" id="modalLoadId">
-
                         <div class="form-floating mb-3">
                             <select class="form-select" name="new_status" id="modalStatusSelect">
                                 <option value="Pending Dropoff">Pending Dropoff</option>
@@ -182,7 +192,6 @@ if ($result->num_rows > 0) {
                             </select>
                             <label>Select New Status</label>
                         </div>
-
                         <button type="submit" class="btn-primary-app mb-4 w-100">Confirm Update</button>
                     </form>
 

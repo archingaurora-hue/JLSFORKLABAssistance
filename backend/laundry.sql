@@ -81,3 +81,20 @@ CREATE TABLE IF NOT EXISTS `System_Log` (
   PRIMARY KEY (`log_id`),
   FOREIGN KEY (`load_id`) REFERENCES `Process_Load`(`load_id`) ON DELETE CASCADE
 );  
+
+-- Shop Settings & Status Configuration
+CREATE TABLE IF NOT EXISTS `Shop_Status` (
+    `status_id` INT PRIMARY KEY,
+    `is_shop_open` TINYINT(1) NOT NULL DEFAULT 1,
+    `current_closing_time` TIME NULL,
+    `next_manual_open_time` DATETIME NULL,
+    `default_open_time` TIME NULL,
+    `default_close_time` TIME NULL,
+    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Insert default singleton configuration row
+INSERT IGNORE INTO `Shop_Status` 
+(`status_id`, `is_shop_open`, `current_closing_time`, `next_manual_open_time`, `default_open_time`, `default_close_time`) 
+VALUES 
+(1, 1, '20:00:00', '2026-02-23 08:00:00', '08:00:00', '21:00:00');
