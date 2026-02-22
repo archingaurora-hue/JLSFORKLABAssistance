@@ -1,3 +1,4 @@
+<?php session_start(); ?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -17,7 +18,7 @@
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4">
-                    <h1 class="fw-bold display-6"><span>LAB<span class="text-primary text-blue">Assistance</span></span></h1>
+                    <h1 class="fw-bold">LABAssistance</h1>
                     <p class="text-muted">Laundry Management System</p>
                 </div>
 
@@ -26,6 +27,13 @@
                         <div class="text-center mb-4">
                             <h3 class="fw-bold">Log In</h3>
                         </div>
+
+                        <?php
+                        if (isset($_SESSION['login_error'])) {
+                            echo '<div class="alert alert-danger text-center small py-2 mb-3" role="alert">' . $_SESSION['login_error'] . '</div>';
+                            unset($_SESSION['login_error']); // Clear the error after displaying it
+                        }
+                        ?>
 
                         <form action="backend/login_process.php" method="POST">
                             <div class="mb-3">
@@ -47,7 +55,7 @@
                                 <button type="button" class="btn btn-link text-muted small p-0 text-decoration-none" onclick="toggleRecover()">Forgot Password?</button>
                             </div>
 
-                            <button type="submit" name="signin" class="btn-primary-app">Sign In</button>
+                            <button type="submit" name="signin" class="btn-primary-app w-100">Sign In</button>
                         </form>
                     </div>
 
@@ -70,7 +78,7 @@
                                 <input type="email" class="form-control" name="email" placeholder="name@example.com" required>
                             </div>
 
-                            <button type="submit" name="send_link" class="btn-primary-app">Send Reset Link</button>
+                            <button type="submit" name="send_link" class="btn-primary-app w-100">Send Reset Link</button>
                         </form>
 
                         <div class="text-center mt-4">

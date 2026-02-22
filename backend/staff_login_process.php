@@ -6,7 +6,6 @@ if (isset($_POST['login'])) {
     $email = $_POST['email'];
     $password = $_POST['password'];
 
-    // Use $conn from db_conn.php
     $stmt = $conn->prepare("SELECT user_id, password, role, full_name FROM `User` WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -15,11 +14,14 @@ if (isset($_POST['login'])) {
     if ($result->num_rows === 1) {
         $row = $result->fetch_assoc();
 
+        // Role check
         if ($row['role'] !== 'Manager' && $row['role'] !== 'Employee') {
-            echo "<script>alert('Access Denied. Customers must use the Customer Login.'); window.location.href='../employee_login.php';</script>";
+            $_SESSION['employee_login_error'] = "Access Denied. Customers must use the Customer Login.";
+            header("Location: ../staff_login.php");
             exit();
         }
 
+        // Password check
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['user_id'];
             $_SESSION['role'] = $row['role'];
@@ -31,10 +33,11 @@ if (isset($_POST['login'])) {
                 header("Location: ../employee_dashboard.php");
             }
             exit();
-        } else {
-            echo "<script>alert('Invalid Password!'); window.location.href='../employee_login.php';</script>";
         }
-    } else {
-        echo "<script>alert('Account not found!'); window.location.href='../employee_login.php';</script>";
     }
+
+    // Generic error for BOTH incorrect password and account not found
+    $_SESSION['staff_login_error'] = "Invalid email or password.";
+    header("Location: ../staff_login.php");
+    exit();
 }

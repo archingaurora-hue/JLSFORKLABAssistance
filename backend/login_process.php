@@ -1,16 +1,6 @@
 <?php
 session_start();
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "laundry_db";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+require 'db_conn.php';
 
 if (isset($_POST['signin'])) {
     $email = $_POST['email'];
@@ -30,23 +20,13 @@ if (isset($_POST['signin'])) {
             $_SESSION['full_name'] = $row['full_name'];
             $_SESSION['email'] = $email;
 
-            // SUCCESS: Go up one level to root to find dashboard.php
             header("Location: ../dashboard.php");
             exit();
-        } else {
-            // ERROR: Go up one level to root to find customer_login.php
-            echo "<script>
-                    alert('Invalid Password!'); 
-                    window.location.href='../customer_login.php';
-                  </script>";
         }
-    } else {
-        // ERROR: Go up one level to root to find register.php
-        echo "<script>
-                alert('Email not found! Please register first.'); 
-                window.location.href='../register.php';
-              </script>";
     }
-    $stmt->close();
+
+    // Generic error for BOTH incorrect password and email not found
+    $_SESSION['login_error'] = "Invalid email or password.";
+    header("Location: ../customer_login.php");
+    exit();
 }
-$conn->close();

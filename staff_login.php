@@ -16,12 +16,12 @@
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4 text-white">
-                    <h1 class="fw-bold">LAB<span class="text-primary">Assistance</span></h1>
+                    <h1 class="fw-bold">LABAssistance</span></h1>
                     <p class="text-white-50">Staff Login</p>
                 </div>
 
                 <div class="app-card p-4">
-                    <form action="backend/employee_login_process.php" method="POST">
+                    <form action="backend/staff_login_process.php" method="POST">
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">Staff Email</label>
                             <input type="email" class="form-control" name="email" placeholder="staff@lab.com" required>
@@ -40,11 +40,6 @@
                         <button type="submit" name="login" class="btn-primary-app">Access Workspace</button>
                     </form>
                 </div>
-
-                <div class="text-center mt-4">
-                    <a href="customer_login.php" class="text-white-50 text-decoration-none small">Switch to Customer Login</a>
-                </div>
-
             </div>
         </div>
     </div>
