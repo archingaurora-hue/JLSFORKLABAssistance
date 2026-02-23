@@ -1,77 +1,60 @@
 <?php
-// backend/send_reset_link.php
-
-// -------------------------------------------------------------------------
-// 1. LOAD PHPMAILER
-// We load the library classes manually since we are not using Composer.
-// Ensure the 'PHPMailer' folder is inside the 'backend' directory.
-// -------------------------------------------------------------------------
+// Load PHPMailer classes
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\Exception;
 
+// Include required files
 require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
+require 'db_conn.php';
 
-require 'db_conn.php'; // Include database connection
-
+// Check if the form was submitted
 if (isset($_POST['send_link'])) {
     $email = $_POST['email'];
 
-    // -------------------------------------------------------------------------
-    // 2. CHECK IF USER EXISTS
-    // We only send an email if the address is found in our 'User' table.
-    // -------------------------------------------------------------------------
+    // Check if the user email exists in the database
     $stmt = $conn->prepare("SELECT user_id, full_name FROM `User` WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
 
+    // If user exists, proceed with token generation
     if ($row = $result->fetch_assoc()) {
 
-        // -------------------------------------------------------------------------
-        // 3. GENERATE SECURE TOKEN
-        // We create a random 32-character hex string.
-        // We also hash it before storing in the DB for extra security.
-        // -------------------------------------------------------------------------
+        // Generate a secure token and hash it
         $token = bin2hex(random_bytes(16));
         $token_hash = hash("sha256", $token);
 
-        // Set Expiry: Current time + 30 minutes
+        // Set token expiration to 30 minutes from now
         $expiry = date("Y-m-d H:i:s", time() + 60 * 30);
 
-        // -------------------------------------------------------------------------
-        // 4. SAVE TOKEN TO DATABASE
-        // Update the user record with the token hash and expiry time.
-        // -------------------------------------------------------------------------
+        // Save the hashed token and expiry in the database
         $update = $conn->prepare("UPDATE `User` SET reset_token_hash = ?, reset_token_expires_at = ? WHERE email = ?");
         $update->bind_param("sss", $token_hash, $expiry, $email);
         $update->execute();
 
-        // -------------------------------------------------------------------------
-        // 5. SEND EMAIL VIA PHPMAILER (GMAIL CONFIGURATION)
-        // -------------------------------------------------------------------------
+        // Initialize PHPMailer
         $mail = new PHPMailer(true);
 
         try {
-            // Server Settings for Gmail
+            // Gmail SMTP settings
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'sevillaralph1504@gmail.com';     // Replace with business email after hostinger
-            $mail->Password   = 'dbzh zbkt fgie slfn';     // Replace with business email's app password after hostinger
-            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;  // Gmail requires TLS
+            $mail->Username   = 'sevillaralph1504@gmail.com';
+            $mail->Password   = 'YOUR_APP_PASSWORD'; // Use environment variables for production
+            $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
-            // Sender & Recipient
+            // Sender and recipient details
             $mail->setFrom('sevillaralph1504@gmail.com', 'LABAssistance Support');
             $mail->addAddress($email);
 
-            // Email Content
-            // The link points to 'reset_password.php' in your MAIN folder.
-            // Note: We send the raw $token (not the hash) in the link.
+            // Create the password reset link
             $resetLink = "http://localhost/LABAssistance/reset_password.php?token=$token&email=$email";
 
+            // Set email subject and HTML body
             $mail->isHTML(true);
             $mail->Subject = 'Reset Your Password - LABAssistance';
             $mail->Body    = "
@@ -86,17 +69,18 @@ if (isset($_POST['send_link'])) {
                 </div>
             ";
 
+            // Send the email
             $mail->send();
 
-            // Redirect to Login Page with 'Success' flag
+            // Redirect to login page on success
             header("Location: ../customer_login.php?status=link_sent");
         } catch (Exception $e) {
-            // For debugging purposes only. In production, log this instead of showing user.
+            // Display error if email fails to send (for debugging only)
             echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
             exit();
         }
     } else {
-        // If email not found, we still redirect to 'success' to prevent attackers from checking which emails exist.
+        // Redirect even if email isn't found to prevent email scraping
         header("Location: ../customer_login.php?status=link_sent");
     }
     exit();
