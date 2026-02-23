@@ -2,12 +2,13 @@
 session_start();
 require 'backend/db_conn.php';
 
+// Kick out anyone who isn't an Employee or Manager
 if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION['role'] !== 'Manager')) {
     header("Location: staff_login.php");
     exit();
 }
 
-// Fetch Shop Status
+// Check if shop is open or closed
 $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
 $isOpen = ($shopData && $shopData['is_shop_open'] == 1);
@@ -20,7 +21,7 @@ $query = "SELECT pl.*, o.customer_name, o.services_requested
           ORDER BY pl.order_id DESC, pl.bag_label ASC";
 $result = $conn->query($query);
 
-// Group by order
+// Group tasks by order
 $groupedOrders = [];
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
@@ -147,7 +148,7 @@ if ($result->num_rows > 0) {
                                         </div>
                                         <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
                                             onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>')">
-                                            Update Bag Status
+                                            <?php echo $isOpen ? 'Update Bag Status' : 'View Bag Details'; ?>
                                         </button>
                                     </div>
                                 <?php endforeach; ?>
@@ -169,7 +170,7 @@ if ($result->num_rows > 0) {
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold">Update Bag Status</h5>
+                    <h5 class="modal-title fw-bold"><?php echo $isOpen ? 'Update Bag Status' : 'Bag Details'; ?></h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-3">
@@ -178,7 +179,7 @@ if ($result->num_rows > 0) {
                     <form action="backend/update_status.php" method="POST">
                         <input type="hidden" name="load_id" id="modalLoadId">
                         <div class="form-floating mb-3">
-                            <select class="form-select" name="new_status" id="modalStatusSelect">
+                            <select class="form-select" name="new_status" id="modalStatusSelect" <?php echo !$isOpen ? 'disabled' : ''; ?>>
                                 <option value="Pending Dropoff">Pending Dropoff</option>
                                 <option value="In Queue">In Queue</option>
                                 <option value="Washing">Washing</option>
@@ -192,7 +193,9 @@ if ($result->num_rows > 0) {
                             </select>
                             <label>Select New Status</label>
                         </div>
-                        <button type="submit" class="btn-primary-app mb-4 w-100">Confirm Update</button>
+                        <button type="submit" class="btn-primary-app mb-4 w-100" <?php echo !$isOpen ? 'disabled' : ''; ?>>
+                            <?php echo $isOpen ? 'Confirm Update' : 'Shop Closed - Updates Disabled'; ?>
+                        </button>
                     </form>
 
                     <h6 class="fw-bold small text-muted text-uppercase mb-2">History Log</h6>
