@@ -46,7 +46,6 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                 </thead>
                 <tbody>
                     <?php
-                    // Reset pointer for desktop loop
                     $result->data_seek(0);
                     while ($row = $result->fetch_assoc()):
                     ?>
@@ -55,7 +54,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                             <td class="fw-bold"><?php echo htmlspecialchars($row['full_name']); ?></td>
                             <td><?php echo htmlspecialchars($row['email']); ?></td>
                             <td class="text-end">
-                                <button class="btn btn-sm btn-light rounded-circle me-1" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo $row['full_name']; ?>', '<?php echo $row['email']; ?>')"><i class="bi bi-pencil"></i></button>
+                                <button class="btn btn-sm btn-light rounded-circle me-1" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')"><i class="bi bi-pencil"></i></button>
                                 <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-light text-danger rounded-circle" onclick="return confirm('Delete?');"><i class="bi bi-trash"></i></a>
                             </td>
                         </tr>
@@ -66,7 +65,6 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
         <div class="d-md-none">
             <?php
-            // Reset pointer for mobile loop
             $result->data_seek(0);
             if ($result->num_rows > 0):
                 while ($row = $result->fetch_assoc()):
@@ -79,7 +77,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                         <p class="text-muted small mb-3"><?php echo htmlspecialchars($row['email']); ?></p>
 
                         <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-dark flex-grow-1 rounded-pill" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo $row['full_name']; ?>', '<?php echo $row['email']; ?>')">
+                            <button class="btn btn-sm btn-outline-dark flex-grow-1 rounded-pill" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')">
                                 Edit
                             </button>
                             <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="return confirm('Delete this employee?');">
@@ -105,22 +103,30 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body">
-                    <form action="backend/employee_crud.php" method="POST">
+                    <form action="backend/employee_crud.php" method="POST" id="employeeForm" novalidate>
                         <input type="hidden" name="user_id" id="emp_id">
+
                         <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">Full Name</label>
-                            <input type="text" class="form-control" name="full_name" id="emp_name" required>
+                            <input type="text" class="form-control" name="full_name" id="emp_name" placeholder="Full Name" required>
                         </div>
+
                         <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">Email</label>
-                            <input type="email" class="form-control" name="email" id="emp_email" required>
+                            <input type="email" class="form-control" name="email" id="emp_email" placeholder="Email" required>
                         </div>
-                        <div class="mb-4">
+
+                        <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">Password</label>
-                            <input type="password" class="form-control" name="password" id="emp_password" placeholder="Password">
+                            <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password" required>
                             <small class="text-muted" id="passHelp">Required for new employees.</small>
                         </div>
-                        <button type="submit" name="save_employee" class="btn-primary-app">Save Employee</button>
+
+                        <div id="formError" class="alert alert-danger py-2 small d-none" role="alert">
+                            <i class="bi bi-exclamation-circle me-1"></i> Please fill in all required fields.
+                        </div>
+
+                        <button type="submit" name="save_employee" class="btn-primary-app w-100">Save Employee</button>
                     </form>
                 </div>
             </div>
@@ -134,9 +140,15 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
             document.getElementById('emp_id').value = id;
             document.getElementById('emp_name').value = name;
             document.getElementById('emp_email').value = email;
+
+            // Password logic for editing
             document.getElementById('emp_password').required = false;
             document.getElementById('emp_password').placeholder = "Leave blank to keep current";
             document.getElementById('passHelp').innerText = "Leave blank to keep current password.";
+
+            // Hide error message if it was previously triggered
+            document.getElementById('formError').classList.add('d-none');
+
             var myModal = new bootstrap.Modal(document.getElementById('employeeModal'));
             myModal.show();
         }
@@ -146,10 +158,35 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
             document.getElementById('emp_id').value = "";
             document.getElementById('emp_name').value = "";
             document.getElementById('emp_email').value = "";
+            document.getElementById('emp_password').value = "";
+
+            // Password logic for new entry
             document.getElementById('emp_password').required = true;
             document.getElementById('emp_password').placeholder = "Password";
             document.getElementById('passHelp').innerText = "Required for new employees.";
+
+            // Hide error message if it was previously triggered
+            document.getElementById('formError').classList.add('d-none');
         }
+
+        // Intercept form submission to show red text instead of alert
+        document.getElementById('employeeForm').addEventListener('submit', function(event) {
+            if (!this.checkValidity()) {
+                event.preventDefault(); // Stop form from submitting
+                event.stopPropagation();
+
+                // Show the red error box
+                document.getElementById('formError').classList.remove('d-none');
+
+                // Optional: Adds Bootstrap's native red borders to empty fields
+                this.classList.add('was-validated');
+            }
+        });
+
+        // Hide the error message as soon as the user starts typing again
+        document.getElementById('employeeForm').addEventListener('input', function() {
+            document.getElementById('formError').classList.add('d-none');
+        });
     </script>
 </body>
 
