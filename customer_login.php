@@ -18,7 +18,7 @@
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4">
-                    <h1 class="fw-bold">LABAssistance</h1>
+                    <h1 class="fw-bold display-6"><span>LAB<span class="text-primary    text-blue">Assistance</span></span></h1>
                     <p class="text-muted">Laundry Management System</p>
                 </div>
 
