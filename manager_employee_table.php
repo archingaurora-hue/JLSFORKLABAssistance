@@ -118,7 +118,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
                         <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">Password</label>
-                            <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password" required>
+                            <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password" minlength="8" required>>
                             <small class="text-muted" id="passHelp">Required for new employees.</small>
                         </div>
 

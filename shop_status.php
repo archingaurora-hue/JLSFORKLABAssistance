@@ -198,7 +198,7 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y, H:i") : date("H:
                                     <input class="form-check-input" type="checkbox" id="overrideToggle" name="override_active" value="1" <?php echo $has_override ? 'checked' : ''; ?>>
                                 </div>
                             </div>
-                            <p class="small text-muted mb-3">Toggle ON to schedule a special closing time or an exact opening date.</p>
+                            <p class="small text-muted mb-3">Toggle ON to schedule a specific closing time or opening date.</p>
 
                             <div id="overrideFields" style="<?php echo $has_override ? '' : 'opacity: 0.5; pointer-events: none;'; ?>">
                                 <div class="mb-3">
