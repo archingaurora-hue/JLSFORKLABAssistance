@@ -2,6 +2,15 @@
 <!DOCTYPE html>
 <html lang="en">
 
+<!--  -->
+<style>
+body{
+    background:#212529;
+}
+
+</style>
+<!--  -->
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -11,14 +20,15 @@
     <link rel="stylesheet" href="./css/main.css">
 </head>
 
-<body class="d-flex align-items-center justify-content-center min-h-100dvh">
+<!-- <body class="d-flex align-items-center justify-content-center min-h-100dvh"> -->
+<body class="bg-dark d-flex align-items-center justify-content-center min-h-100dvh">
 
     <div class="container">
         <div class="row justify-content-center">
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4">
-                    <h1 class="fw-bold">LABAssistance</h1>
+                    <h1 class="fw-bold text-white">LAB<span class="text-primary">Assistance</span></h1>
                     <span class="badge bg-primary fs-6 px-3 py-2 mt-1">
                         <i class="bi bi-person-badge me-1"></i> Staff Portal
                     </span>
