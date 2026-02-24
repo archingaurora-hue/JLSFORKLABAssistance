@@ -2,50 +2,47 @@
 session_start();
 require 'backend/db_conn.php';
 
-// Force Manila timezone so automatic time checks don't use server default (UTC)
 date_default_timezone_set('Asia/Manila');
 
-// Kick out non-managers
 if (!isset($_SESSION['role']) || $_SESSION['role'] !== 'Manager') {
     header("Location: staff_login.php");
     exit();
 }
 
-// -------------------------------------------------------------------------
-// 1. HANDLE FORM SUBMISSIONS
-// -------------------------------------------------------------------------
+// Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $action = $_POST['action'];
 
     if ($action === 'close_shop') {
-        $conn->query("UPDATE Shop_Status SET is_shop_open = 0 WHERE status_id = 1");
-        $_SESSION['msg'] = "Shop manually closed.";
+        $q = $conn->query("SELECT default_open_time FROM Shop_Status WHERE status_id = 1");
+        $d = $q->fetch_assoc();
+
+        $tomorrow_open = date('Y-m-d', strtotime('+1 day')) . ' ' . $d['default_open_time'];
+        $time_now = date('H:i:s');
+
+        $stmt = $conn->prepare("UPDATE Shop_Status SET is_shop_open = 0, next_manual_open_time = ?, current_closing_time = ? WHERE status_id = 1");
+        $stmt->bind_param("ss", $tomorrow_open, $time_now);
+        $stmt->execute();
+
+        $_SESSION['msg'] = "Shop closed early at " . date('H:i') . ". It will auto-reopen tomorrow.";
         $_SESSION['msg_type'] = "danger";
     } elseif ($action === 'open_shop') {
-        $conn->query("UPDATE Shop_Status SET is_shop_open = 1 WHERE status_id = 1");
-        $_SESSION['msg'] = "Shop manually opened.";
+        $conn->query("UPDATE Shop_Status SET is_shop_open = 1, next_manual_open_time = NULL, current_closing_time = NULL WHERE status_id = 1");
+        $_SESSION['msg'] = "Shop opened. Normal schedule resumed.";
         $_SESSION['msg_type'] = "success";
     } elseif ($action === 'update_times') {
         $def_open = $_POST['default_open'];
         $def_close = $_POST['default_close'];
 
-        // Check if the override toggle is switched ON
         if (isset($_POST['override_active'])) {
             $closing_time = $_POST['closing_time'];
             $next_manual_datetime = $_POST['next_open_date'] . ' ' . $_POST['next_open_time'];
         } else {
-            // If toggle is OFF, clear out the overrides in the DB
             $closing_time = null;
             $next_manual_datetime = null;
         }
 
-        $stmt = $conn->prepare("UPDATE Shop_Status SET 
-            current_closing_time = ?, 
-            next_manual_open_time = ?, 
-            default_open_time = ?, 
-            default_close_time = ? 
-            WHERE status_id = 1");
-
+        $stmt = $conn->prepare("UPDATE Shop_Status SET current_closing_time = ?, next_manual_open_time = ?, default_open_time = ?, default_close_time = ? WHERE status_id = 1");
         $stmt->bind_param("ssss", $closing_time, $next_manual_datetime, $def_open, $def_close);
         $stmt->execute();
 
@@ -57,9 +54,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     exit();
 }
 
-// -------------------------------------------------------------------------
-// 2. FETCH DATA & AUTO-EVALUATE SHOP STATUS
-// -------------------------------------------------------------------------
+// Fetch data & auto-evaluate status
 $result = $conn->query("SELECT * FROM Shop_Status WHERE status_id = 1");
 $shop = $result->fetch_assoc();
 
@@ -67,39 +62,33 @@ $now = new DateTime();
 $currentTime = $now->format('H:i:s');
 $currentDateTime = $now->format('Y-m-d H:i:s');
 
-$expected_status = 0; // Assume closed by default
+$expected_status = 0;
 
-// Does an active override exist in the future?
 if (!empty($shop['next_manual_open_time']) && $shop['next_manual_open_time'] > $currentDateTime) {
-    // We are in an override wait period. Keep shop closed until we hit that date/time.
     $expected_status = 0;
 } else {
-    // Normal daily check: Are we within operating hours?
-    // Use override closing time if it exists, otherwise use standard close time
     $close_time = !empty($shop['current_closing_time']) ? $shop['current_closing_time'] : $shop['default_close_time'];
-
     if ($currentTime >= $shop['default_open_time'] && $currentTime <= $close_time) {
         $expected_status = 1;
     }
 }
 
-// Auto-correct the DB if the time shifted while no one was looking
 if ($shop['is_shop_open'] != $expected_status) {
     $conn->query("UPDATE Shop_Status SET is_shop_open = $expected_status WHERE status_id = 1");
-    $shop['is_shop_open'] = $expected_status; // Update local variable for the UI
+    $shop['is_shop_open'] = $expected_status;
 }
 
-// -------------------------------------------------------------------------
-// 3. FORMAT DATA FOR HTML
-// -------------------------------------------------------------------------
+// Format data for HTML
 $isOpen = $shop['is_shop_open'];
 $has_override = !empty($shop['next_manual_open_time']);
 
 $nextOpenObj = $has_override ? new DateTime($shop['next_manual_open_time']) : new DateTime();
 
 $effective_close = !empty($shop['current_closing_time']) ? $shop['current_closing_time'] : $shop['default_close_time'];
-$formatted_close = date("g:i A", strtotime($effective_close));
-$formatted_open = $has_override ? $nextOpenObj->format("F j, Y g:i A") : date("g:i A", strtotime($shop['default_open_time']));
+
+// Convert all displayed times to 24-hour (00:00) format
+$formatted_close = date("H:i", strtotime($effective_close));
+$formatted_open = $has_override ? $nextOpenObj->format("F j, Y, H:i") : date("H:i", strtotime($shop['default_open_time']));
 ?>
 
 <!DOCTYPE html>
@@ -196,9 +185,9 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y g:i A") : date("g
                             <p class="small text-muted mb-3">Your regular operating schedule.</p>
 
                             <div class="d-flex flex-column flex-sm-row align-items-stretch align-items-sm-center gap-2">
-                                <input type="time" name="default_open" class="form-control" value="<?php echo $shop['default_open_time']; ?>" required>
+                                <input type="time" name="default_open" class="form-control" value="<?php echo date('H:i', strtotime($shop['default_open_time'])); ?>" required>
                                 <span class="small text-muted text-center d-none d-sm-block">to</span>
-                                <input type="time" name="default_close" class="form-control" value="<?php echo $shop['default_close_time']; ?>" required>
+                                <input type="time" name="default_close" class="form-control" value="<?php echo date('H:i', strtotime($shop['default_close_time'])); ?>" required>
                             </div>
                         </div>
 
@@ -214,7 +203,7 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y g:i A") : date("g
                             <div id="overrideFields" style="<?php echo $has_override ? '' : 'opacity: 0.5; pointer-events: none;'; ?>">
                                 <div class="mb-3">
                                     <label class="form-label small fw-bold text-dark">Today's Closing Time:</label>
-                                    <input type="time" name="closing_time" id="overrideClose" class="form-control" value="<?php echo $shop['current_closing_time'] ?? ''; ?>">
+                                    <input type="time" name="closing_time" id="overrideClose" class="form-control" value="<?php echo !empty($shop['current_closing_time']) ? date('H:i', strtotime($shop['current_closing_time'])) : ''; ?>">
                                 </div>
 
                                 <div>
@@ -246,7 +235,6 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y g:i A") : date("g
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
-        // Toggle override fields
         const overrideToggle = document.getElementById('overrideToggle');
         const overrideFields = document.getElementById('overrideFields');
         const inputs = overrideFields.querySelectorAll('input');
@@ -261,12 +249,11 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y g:i A") : date("g
                 overrideFields.style.pointerEvents = 'none';
                 inputs.forEach(input => {
                     input.required = false;
-                    input.value = ''; // clear values when disabled
+                    input.value = '';
                 });
             }
         });
 
-        // SweetAlert Confirmation for Manual Open/Close
         function confirmStatusChange(action) {
             let config = action === 'close' ? {
                 title: "Close Shop?",
