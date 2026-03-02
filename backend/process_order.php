@@ -81,8 +81,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Save order
     // Set initial status
     $stmt = $conn->prepare("INSERT INTO `Order` 
-        (order_id, customer_id, customer_name, tracking_code, services_requested, supplies_requested, bag_counts, customer_note, estimated_price, final_price, status) 
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 'Pending Dropoff')");
+        (order_id, customer_id, customer_name, tracking_code, services_requested, supplies_requested, bag_counts, customer_note, estimated_price, final_price) 
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
 
     $stmt->bind_param("sissssssdd", $order_id, $customer_id, $customer_name, $tracking_code, $services_str, $supplies_str, $bag_counts, $note, $estimated_price, $final_price);
 
@@ -91,7 +91,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         // Save bag details
         // Init bag status
-        $loadInsert = $conn->prepare("INSERT INTO `Process_Load` (order_id, load_category, bag_label, status) VALUES (?, ?, ?, 'Pending Dropoff')");
+        $loadInsert = $conn->prepare("INSERT INTO `Process_Load` (order_id, load_category, bag_label) VALUES (?, ?, ?)");
 
         if ($isFoldOnly) {
             for ($i = 1; $i <= $qtyFold; $i++) {

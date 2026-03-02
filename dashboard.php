@@ -78,10 +78,6 @@ $ordersResult = $stmt->get_result();
                                         <?php echo $order['services_requested']; ?>
                                     </p>
                                 </div>
-                                <div class="text-end">
-                                    <span class="badge bg-primary rounded-pill mb-1"><?php echo $order['status']; ?></span>
-                                    <div class="small text-muted" style="font-size: 0.7rem;">Tap for details</div>
-                                </div>
                             </div>
                         </div>
 
@@ -111,7 +107,11 @@ $ordersResult = $stmt->get_result();
                                                             <strong><?php echo $load['bag_label']; ?></strong>
                                                             <div class="small text-muted"><?php echo $load['load_category']; ?></div>
                                                         </div>
-                                                        <span class="badge bg-secondary"><?php echo $load['status']; ?></span>
+                                                        <span class="badge bg-secondary status-badge"
+                                                            data-load-id="<?php echo $load['load_id']; ?>">
+                                                            <?php echo $load['status']; ?>
+                                                        </span>
+                                                        <div class="live-timer" data-load-id="<?php echo $load['load_id']; ?>">--:--</div>
                                                     </li>
                                                 <?php endwhile; ?>
                                             <?php else: ?>
@@ -177,6 +177,7 @@ $ordersResult = $stmt->get_result();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/timer_manager.js"></script>
 </body>
 
 </html>

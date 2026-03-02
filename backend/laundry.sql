@@ -19,9 +19,6 @@ CREATE TABLE IF NOT EXISTS `Order` (
   `customer_name` VARCHAR(255) NOT NULL,
   `tracking_code` INT(4) NOT NULL,
   
-  -- Order status
-  `status` ENUM('Pending Dropoff', 'Processing', 'Ready for Pickup', 'Completed', 'Cancelled') NOT NULL DEFAULT 'Pending Dropoff',
-  
   -- Service info
   `services_requested` TEXT NOT NULL, 
   `supplies_requested` TEXT,          
@@ -65,6 +62,7 @@ CREATE TABLE IF NOT EXISTS `Process_Load` (
   
   `start_time` DATETIME DEFAULT NULL,
   `end_time` DATETIME DEFAULT NULL,
+  `timer_paused` int(11) DEFAULT NULL,
   
   PRIMARY KEY (`load_id`),
   FOREIGN KEY (`order_id`) REFERENCES `Order`(`order_id`) ON DELETE CASCADE
@@ -91,6 +89,13 @@ CREATE TABLE IF NOT EXISTS `Shop_Status` (
     `default_open_time` TIME NULL,
     `default_close_time` TIME NULL,
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+-- Timer Settings
+CREATE TABLE IF NOT EXISTS `timer_settings` (
+  `id` int(1) NOT NULL,
+  `end_time` datetime NOT NULL,
+  PRIMARY KEY (`id`)
 );
 
 -- Insert default singleton configuration row

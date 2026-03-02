@@ -144,7 +144,14 @@ if ($result->num_rows > 0) {
                                             elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
                                             elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
                                             ?>
-                                            <span class="badge rounded-pill <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
+                                            <span class="badge rounded-pill <?php echo $badgeClass; ?> status-badge"
+                                                data-load-id="<?php echo $load['load_id']; ?>">
+                                                <?php echo $s; ?>
+                                            </span>
+                                            <!-- TIMER FOR ALL LOADS: -->
+                                            <div class="col-md-2">
+                                                <div class="live-timer fw-bold" data-load-id="<?php echo $load['load_id']; ?>">--:--</div>
+                                            </div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
                                             onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>')">
@@ -193,10 +200,24 @@ if ($result->num_rows > 0) {
                             </select>
                             <label>Select New Status</label>
                         </div>
-                        <button type="submit" class="btn-primary-app mb-4 w-100" <?php echo !$isOpen ? 'disabled' : ''; ?>>
+                        <button type="submit" class="btn-primary-app mb-4 w-100"
+                            <?php echo !$isOpen ? 'disabled' : ''; ?>>
                             <?php echo $isOpen ? 'Confirm Update' : 'Shop Closed - Updates Disabled'; ?>
                         </button>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-dark btn-lg">Confirm</button>
+                        </div>
                     </form>
+
+                    <!-- TIMER INSIDE UPDATE MODAL-->
+                    <div id="timerContainer" class="mb-3 bg-white text-center">
+                        <div id="modalTimerDisplay" class="live-timer mb-2 display-4" data-load-id=""> 00:00</div>
+                        <div class="btn-group w-100">
+                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('reset')">Reset</button>
+                            <button type="button" id="modalPauseBtn" class="btn btn-outline-dark" onclick="togglePause()">Start</button>
+                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('finish')">Finish now</button>
+                        </div>
+                    </div>
 
                     <h6 class="fw-bold small text-muted text-uppercase mb-2">History Log</h6>
                     <div id="logContainer" class="bg-light p-3 rounded-3 small" style="max-height: 150px; overflow-y: auto;">
@@ -208,6 +229,7 @@ if ($result->num_rows > 0) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/timer_manager.js"></script>
     <script>
         var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
 
@@ -215,6 +237,7 @@ if ($result->num_rows > 0) {
             document.getElementById('modalLoadId').value = loadId;
             document.getElementById('modalBagLabel').innerText = bagLabel;
             document.getElementById('modalStatusSelect').value = currentStatus;
+            document.getElementById('modalTimerDisplay').setAttribute('data-load-id', loadId);
             fetchLogs(loadId);
             statusModal.show();
         }
@@ -226,6 +249,85 @@ if ($result->num_rows > 0) {
                 .then(response => response.text())
                 .then(data => container.innerHTML = data)
                 .catch(err => container.innerHTML = 'Error loading logs.');
+        }
+
+        function initTimer(loadId) {
+            fetch(`backend/timer_action.php?action=get&load_id=${loadId}`)
+                .then(res => res.json())
+                .then(data => {
+
+                    document.getElementById('modalStatusSelect').value = data.status;
+                    // Updates timer across all dashboards:
+                    const existing = globalTimerData.find(t => t.load_id == loadId);
+
+                    if (existing) {
+                        existing.remaining = parseInt(data.remaining);
+                        existing.is_paused = data.is_paused;
+                    } else {
+                        globalTimerData.push({
+                            load_id: loadId,
+                            remaining: parseInt(data.remaining),
+                            is_paused: data.is_paused
+                        });
+                    }
+                    updateAllDisplays();
+                });
+        }
+
+        // PAUSE
+        function togglePause() {
+            const loadId = document.getElementById('modalLoadId').value;
+            const timer = globalTimerData.find(t => t.load_id == loadId);
+            const action = timer && timer.is_paused ? 'resume' : 'pause';
+
+            fetch(`backend/timer_action.php?action=${action}&load_id=${loadId}`)
+                .then(res => res.json())
+                .then(data => {
+                    initTimer(loadId);
+                    syncWithServer();
+                });
+        }
+
+        // Update Timer
+        function updateTimerDB(action) {
+            const loadId = document.getElementById('modalLoadId').value;
+            fetch(`backend/timer_action.php?action=${action}&load_id=${loadId}`)
+                .then(res => res.json())
+                .then(data => {
+                    // After any action, re-run init to refresh everything
+                    initTimer(loadId);
+
+                    // Finish button:
+                    if (action === 'finish') {
+                        autoCycleStatus(loadId);
+                    }
+                });
+            syncWithServer()
+        }
+
+        // Auto cycle to next status:
+        function autoCycleStatus(loadId) {
+            const formData = new URLSearchParams();
+            formData.append('load_id', loadId);
+
+            fetch('backend/timer_autocycle.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/x-www-form-urlencoded'
+                    },
+                    body: formData.toString()
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        initTimer(loadId);
+
+                        if (data.is_final) {
+                            document.getElementById('modalTimerDisplay').innerText = "DONE";
+                        }
+                    }
+                });
+            syncWithServer()
         }
     </script>
 </body>
