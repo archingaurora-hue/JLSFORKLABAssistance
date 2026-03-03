@@ -85,7 +85,8 @@ if ($result->num_rows > 0) {
         <div class="container">
             <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <span class="small text-muted d-none d-sm-inline">Hi,
+                    <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
                 <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
@@ -121,12 +122,14 @@ if ($result->num_rows > 0) {
                             <div class="order-header">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h6 class="fw-bold mb-0 text-dark">
-                                        <i class="bi bi-person-fill me-1"></i> <?php echo htmlspecialchars($order['customer_name']); ?>
+                                        <i class="bi bi-person-fill me-1"></i>
+                                        <?php echo htmlspecialchars($order['customer_name']); ?>
                                     </h6>
                                     <span class="badge bg-dark">Order #<?php echo $order_id; ?></span>
                                 </div>
                                 <small class="text-muted d-block">
-                                    <i class="bi bi-gear-fill me-1"></i> <?php echo htmlspecialchars($order['services_requested']); ?>
+                                    <i class="bi bi-gear-fill me-1"></i>
+                                    <?php echo htmlspecialchars($order['services_requested']); ?>
                                 </small>
                             </div>
                             <div class="order-body">
@@ -134,15 +137,20 @@ if ($result->num_rows > 0) {
                                     <div class="bag-item">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <div class="fw-bold text-primary">
-                                                <i class="bi bi-bag-fill me-1"></i> <?php echo htmlspecialchars($load['bag_label']); ?>
+                                                <i class="bi bi-bag-fill me-1"></i>
+                                                <?php echo htmlspecialchars($load['bag_label']); ?>
                                             </div>
                                             <?php
                                             $s = $load['status'];
                                             $badgeClass = 'bg-secondary';
-                                            if ($s == 'In Queue') $badgeClass = 'bg-dark';
-                                            elseif (strpos($s, 'Washing') !== false) $badgeClass = 'bg-primary';
-                                            elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
-                                            elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
+                                            if ($s == 'In Queue')
+                                                $badgeClass = 'bg-dark';
+                                            elseif (strpos($s, 'Washing') !== false)
+                                                $badgeClass = 'bg-primary';
+                                            elseif (strpos($s, 'Drying') !== false)
+                                                $badgeClass = 'bg-warning text-dark';
+                                            elseif ($s == 'Awaiting Pickup')
+                                                $badgeClass = 'bg-success';
                                             ?>
                                             <span class="badge rounded-pill <?php echo $badgeClass; ?> status-badge"
                                                 data-load-id="<?php echo $load['load_id']; ?>">
@@ -150,7 +158,8 @@ if ($result->num_rows > 0) {
                                             </span>
                                             <!-- TIMER FOR ALL LOADS: -->
                                             <div class="col-md-2">
-                                                <div class="live-timer fw-bold" data-load-id="<?php echo $load['load_id']; ?>">--:--</div>
+                                                <div class="live-timer fw-bold" data-load-id="<?php echo $load['load_id']; ?>">--:--
+                                                </div>
                                             </div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
@@ -200,8 +209,7 @@ if ($result->num_rows > 0) {
                             </select>
                             <label>Select New Status</label>
                         </div>
-                        <button type="submit" class="btn-primary-app mb-4 w-100"
-                            <?php echo !$isOpen ? 'disabled' : ''; ?>>
+                        <button type="submit" class="btn-primary-app mb-4 w-100" <?php echo !$isOpen ? 'disabled' : ''; ?>>
                             <?php echo $isOpen ? 'Confirm Update' : 'Shop Closed - Updates Disabled'; ?>
                         </button>
                         <div class="d-grid">
@@ -213,14 +221,18 @@ if ($result->num_rows > 0) {
                     <div id="timerContainer" class="mb-3 bg-white text-center">
                         <div id="modalTimerDisplay" class="live-timer mb-2 display-4" data-load-id=""> 00:00</div>
                         <div class="btn-group w-100">
-                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('reset')">Reset</button>
-                            <button type="button" id="modalPauseBtn" class="btn btn-outline-dark" onclick="togglePause()">Start</button>
-                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('finish')">Finish now</button>
+                            <button type="button" class="btn btn-outline-dark"
+                                onclick="updateTimerDB('reset')">Reset</button>
+                            <button type="button" id="modalPauseBtn" class="btn btn-outline-dark"
+                                onclick="togglePause()">Start</button>
+                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('finish')">Finish
+                                now</button>
                         </div>
                     </div>
 
                     <h6 class="fw-bold small text-muted text-uppercase mb-2">History Log</h6>
-                    <div id="logContainer" class="bg-light p-3 rounded-3 small" style="max-height: 150px; overflow-y: auto;">
+                    <div id="logContainer" class="bg-light p-3 rounded-3 small"
+                        style="max-height: 150px; overflow-y: auto;">
                         <span class="text-muted">Loading...</span>
                     </div>
                 </div>
@@ -311,12 +323,12 @@ if ($result->num_rows > 0) {
             formData.append('load_id', loadId);
 
             fetch('backend/timer_autocycle.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded'
-                    },
-                    body: formData.toString()
-                })
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded'
+                },
+                body: formData.toString()
+            })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {

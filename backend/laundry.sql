@@ -91,13 +91,6 @@ CREATE TABLE IF NOT EXISTS `Shop_Status` (
     `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Timer Settings
-CREATE TABLE IF NOT EXISTS `timer_settings` (
-  `id` int(1) NOT NULL,
-  `end_time` datetime NOT NULL,
-  PRIMARY KEY (`id`)
-);
-
 -- Insert default singleton configuration row
 INSERT IGNORE INTO `Shop_Status` 
 (`status_id`, `is_shop_open`, `current_closing_time`, `next_manual_open_time`, `default_open_time`, `default_close_time`) 

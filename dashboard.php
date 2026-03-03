@@ -10,6 +10,11 @@ if (!isset($_SESSION['user_id'])) {
 
 $user_id = $_SESSION['user_id'];
 
+// Check if shop is open or closed
+$statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
+$shopData = $statusResult->fetch_assoc();
+$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
+
 // Fetch user orders
 $orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";
 $stmt = $conn->prepare($orderQuery);
@@ -36,7 +41,8 @@ $ordersResult = $stmt->get_result();
         <div class="container">
             <span class="navbar-brand fw-bold">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <span class="small text-muted d-none d-sm-inline">Hi,
+                    <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
                 <a href="customer_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
@@ -45,6 +51,22 @@ $ordersResult = $stmt->get_result();
     </nav>
 
     <div class="container page-container">
+
+        <div class="row justify-content-center mb-4">
+            <div class="col-12 col-md-10 col-lg-8">
+                <div class="app-card p-4 text-center shadow-sm bg-white">
+                    <h5 class="fw-bold text-uppercase mb-0 text-dark" style="letter-spacing: 1px;">Shop Status</h5>
+                    <?php if ($isOpen): ?>
+                        <h1 class="display-2 mb-0" style="color: #198754; font-weight: 800;">OPEN</h1>
+                    <?php else: ?>
+                        <h1 class="display-2 mb-0" style="color: #dc3545; font-weight: 800;">CLOSED</h1>
+                    <?php endif; ?>
+                    <p class="text-muted mb-0 fs-5 mt-1">
+                        <?php echo date("F j, Y"); ?>
+                    </p>
+                </div>
+            </div>
+        </div>
 
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-8 col-lg-6">
@@ -65,12 +87,14 @@ $ordersResult = $stmt->get_result();
                 <?php if ($ordersResult->num_rows > 0): ?>
                     <?php while ($order = $ordersResult->fetch_assoc()): ?>
 
-                        <div class="app-card mb-3 p-3" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
+                        <div class="app-card mb-3 p-3" style="cursor: pointer;" data-bs-toggle="modal"
+                            data-bs-target="#modal<?php echo $order['order_id']; ?>">
                             <div class="d-flex justify-content-between align-items-start">
                                 <div>
                                     <div class="d-flex align-items-center gap-2 mb-2">
                                         <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
-                                        <span class="small text-muted">Tracking: <strong><?php echo $order['tracking_code']; ?></strong></span>
+                                        <span class="small text-muted">Tracking:
+                                            <strong><?php echo $order['tracking_code']; ?></strong></span>
                                     </div>
                                     <h5 class="fw-bold mb-0">₱<?php echo number_format($order['final_price'], 2); ?></h5>
                                     <p class="text-muted small mb-0 mt-1">
@@ -87,9 +111,11 @@ $ordersResult = $stmt->get_result();
                                     <div class="modal-header border-0 pb-0">
                                         <div>
                                             <h5 class="modal-title fw-bold">Order #<?php echo $order['order_id']; ?></h5>
-                                            <p class="small text-muted mb-0">Tracking: <?php echo $order['tracking_code']; ?></p>
+                                            <p class="small text-muted mb-0">Tracking: <?php echo $order['tracking_code']; ?>
+                                            </p>
                                         </div>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
+                                            aria-label="Close"></button>
                                     </div>
                                     <div class="modal-body pt-4">
 
@@ -111,7 +137,8 @@ $ordersResult = $stmt->get_result();
                                                             data-load-id="<?php echo $load['load_id']; ?>">
                                                             <?php echo $load['status']; ?>
                                                         </span>
-                                                        <div class="live-timer" data-load-id="<?php echo $load['load_id']; ?>">--:--</div>
+                                                        <div class="live-timer" data-load-id="<?php echo $load['load_id']; ?>">--:--
+                                                        </div>
                                                     </li>
                                                 <?php endwhile; ?>
                                             <?php else: ?>
@@ -136,7 +163,8 @@ $ordersResult = $stmt->get_result();
                                                     <div class="mb-3 pb-2 border-bottom border-light last-no-border">
                                                         <div class="d-flex justify-content-between">
                                                             <strong class="small text-dark"><?php echo $log['status_event']; ?></strong>
-                                                            <small class="text-muted" style="font-size: 0.7rem;"><?php echo date("M d, h:i A", strtotime($log['timestamp'])); ?></small>
+                                                            <small class="text-muted"
+                                                                style="font-size: 0.7rem;"><?php echo date("M d, h:i A", strtotime($log['timestamp'])); ?></small>
                                                         </div>
                                                         <div class="small text-muted fst-italic mt-1">
                                                             <i class="bi bi-box-seam me-1"></i><?php echo $log['bag_label']; ?>
@@ -155,7 +183,8 @@ $ordersResult = $stmt->get_result();
 
                                     </div>
                                     <div class="modal-footer border-0">
-                                        <button type="button" class="btn btn-light w-100 fw-bold" data-bs-dismiss="modal">Close Details</button>
+                                        <button type="button" class="btn btn-light w-100 fw-bold" data-bs-dismiss="modal">Close
+                                            Details</button>
                                     </div>
                                 </div>
                             </div>
