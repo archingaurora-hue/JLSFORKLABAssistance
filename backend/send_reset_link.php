@@ -43,7 +43,7 @@ if (isset($_POST['send_link'])) {
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
             $mail->Username   = 'sevillaralph1504@gmail.com';
-            $mail->Password   = 'wagc ultm nqrk hnfp'; // Use environment variables for production
+            $mail->Password   = 'wagc ultm nqrk hnfp';
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
