@@ -11,7 +11,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION[
 // Check if shop is open or closed
 $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
-$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
+$isOpen = ($shopData && $shopData['is_shop_open'] == 0);
 
 // Get active tasks
 $query = "SELECT pl.*, o.customer_name, o.services_requested 
@@ -163,7 +163,7 @@ if ($result->num_rows > 0) {
                                             </div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
-                                            onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>')">
+                                            onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>', '<?php echo addslashes($order['services_requested']); ?>')">
                                             <?php echo $isOpen ? 'Update Bag Status' : 'View Bag Details'; ?>
                                         </button>
                                     </div>
@@ -212,9 +212,6 @@ if ($result->num_rows > 0) {
                         <button type="submit" class="btn-primary-app mb-4 w-100" <?php echo !$isOpen ? 'disabled' : ''; ?>>
                             <?php echo $isOpen ? 'Confirm Update' : 'Shop Closed - Updates Disabled'; ?>
                         </button>
-                        <div class="d-grid">
-                            <button type="submit" class="btn btn-dark btn-lg">Confirm</button>
-                        </div>
                     </form>
 
                     <!-- TIMER INSIDE UPDATE MODAL-->
@@ -230,6 +227,7 @@ if ($result->num_rows > 0) {
                         </div>
                     </div>
 
+                    <!-- System Logs -->
                     <h6 class="fw-bold small text-muted text-uppercase mb-2">History Log</h6>
                     <div id="logContainer" class="bg-light p-3 rounded-3 small"
                         style="max-height: 150px; overflow-y: auto;">
@@ -245,11 +243,27 @@ if ($result->num_rows > 0) {
     <script>
         var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
 
-        function openUpdateModal(loadId, bagLabel, currentStatus) {
+        function openUpdateModal(loadId, bagLabel, currentStatus, services) {
             document.getElementById('modalLoadId').value = loadId;
             document.getElementById('modalBagLabel').innerText = bagLabel;
             document.getElementById('modalStatusSelect').value = currentStatus;
             document.getElementById('modalTimerDisplay').setAttribute('data-load-id', loadId);
+
+            // Filter dropdown based on services
+            // Dropdown function is only for testing purposes, remove later if needed
+            const s = services.toLowerCase();
+            const allowed = ['Pending Dropoff', 'In Queue'];
+            if (s.includes('wash')) allowed.push('Washing', 'Wash Complete');
+            if (s.includes('dry')) allowed.push('Drying', 'Drying Complete');
+            if (s.includes('fold')) allowed.push('Folding', 'Folding Complete');
+            allowed.push('Awaiting Pickup', 'Completed');
+
+            const select = document.getElementById('modalStatusSelect');
+            Array.from(select.options).forEach(opt => {
+                opt.hidden = !allowed.includes(opt.value);
+            });
+
+            select.value = currentStatus;
             fetchLogs(loadId);
             statusModal.show();
         }
@@ -306,41 +320,53 @@ if ($result->num_rows > 0) {
             fetch(`backend/timer_action.php?action=${action}&load_id=${loadId}`)
                 .then(res => res.json())
                 .then(data => {
-                    // After any action, re-run init to refresh everything
                     initTimer(loadId);
-
-                    // Finish button:
                     if (action === 'finish') {
                         autoCycleStatus(loadId);
                     }
+                    syncWithServer();
+                    fetchLogs(loadId);
                 });
-            syncWithServer()
         }
 
         // Auto cycle to next status:
-        function autoCycleStatus(loadId) {
+        function autoCycleStatus(loadId, source = 'button') {
+            const timerEntry = globalTimerData.find(t => t.load_id == loadId);
+            if (timerEntry) timerEntry.autocycled = true;
+
             const formData = new URLSearchParams();
             formData.append('load_id', loadId);
+            formData.append('source', source);
 
             fetch('backend/timer_autocycle.php', {
                 method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
-                },
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
                 body: formData.toString()
             })
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
                         initTimer(loadId);
-
+                        syncWithServer();
+                        fetchLogs(loadId);
                         if (data.is_final) {
                             document.getElementById('modalTimerDisplay').innerText = "DONE";
                         }
                     }
                 });
-            syncWithServer()
         }
+
+        // Update logs:
+        let logPollingInterval = null;
+
+        document.getElementById('statusModal').addEventListener('shown.bs.modal', function () {
+            const loadId = document.getElementById('modalLoadId').value;
+            logPollingInterval = setInterval(() => fetchLogs(loadId), 3000); // refresh every 3s
+        });
+
+        document.getElementById('statusModal').addEventListener('hidden.bs.modal', function () {
+            clearInterval(logPollingInterval); // stop when modal closes
+        });
     </script>
 </body>
 

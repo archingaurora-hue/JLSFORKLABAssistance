@@ -56,6 +56,8 @@ if ($action == 'reset') { // reset function
     $row = $res->fetch_assoc();
     $paused_sec = intval($row['timer_paused'] ?? 120);
     $conn->query("UPDATE process_load SET end_time = DATE_ADD(NOW(), INTERVAL $paused_sec SECOND), timer_paused = NULL WHERE load_id = $load_id");
+} elseif ($action == 'finish') { //finish function
+    $conn->query("UPDATE process_load SET timer_paused = 0, end_time = NULL WHERE load_id = $load_id");
 }
 
 // FETCH CURRENT STATE

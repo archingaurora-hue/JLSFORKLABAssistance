@@ -13,7 +13,7 @@ $user_id = $_SESSION['user_id'];
 // Check if shop is open or closed
 $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
-$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
+$isOpen = ($shopData && $shopData['is_shop_open'] == 0);
 
 // Fetch user orders
 $orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";
@@ -147,38 +147,9 @@ $ordersResult = $stmt->get_result();
                                         </ul>
 
                                         <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Timeline</h6>
-                                        <div class="bg-light p-3 rounded-3" style="max-height: 250px; overflow-y: auto;">
-                                            <?php
-                                            // Get order logs
-                                            $logQuery = "SELECT sl.*, pl.bag_label 
-                                                         FROM `System_Log` sl
-                                                         JOIN `Process_Load` pl ON sl.load_id = pl.load_id
-                                                         WHERE pl.order_id = '" . $order['order_id'] . "'
-                                                         ORDER BY sl.timestamp DESC";
-                                            $logs = $conn->query($logQuery);
-                                            ?>
-
-                                            <?php if ($logs->num_rows > 0): ?>
-                                                <?php while ($log = $logs->fetch_assoc()): ?>
-                                                    <div class="mb-3 pb-2 border-bottom border-light last-no-border">
-                                                        <div class="d-flex justify-content-between">
-                                                            <strong class="small text-dark"><?php echo $log['status_event']; ?></strong>
-                                                            <small class="text-muted"
-                                                                style="font-size: 0.7rem;"><?php echo date("M d, h:i A", strtotime($log['timestamp'])); ?></small>
-                                                        </div>
-                                                        <div class="small text-muted fst-italic mt-1">
-                                                            <i class="bi bi-box-seam me-1"></i><?php echo $log['bag_label']; ?>
-                                                            <span class="mx-1">•</span>
-                                                            updated by <?php echo $log['employee_name']; ?>
-                                                        </div>
-                                                    </div>
-                                                <?php endwhile; ?>
-                                            <?php else: ?>
-                                                <div class="text-center text-muted small py-3">
-                                                    <i class="bi bi-clock-history d-block mb-1 fs-4"></i>
-                                                    No logs available yet.
-                                                </div>
-                                            <?php endif; ?>
+                                        <div class="log-container bg-light p-3 rounded-3"
+                                            style="max-height: 250px; overflow-y: auto;">
+                                            <div class="text-center text-muted small py-3">Loading...</div>
                                         </div>
 
                                     </div>
@@ -207,6 +178,32 @@ $ordersResult = $stmt->get_result();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/timer_manager.js"></script>
+    <script>
+        let logPollingInterval = null;
+
+        document.querySelectorAll('.modal').forEach(modal => {
+            modal.addEventListener('show.bs.modal', function () {
+                const orderId = this.id.replace('modal', '');
+                const container = this.querySelector('.log-container');
+
+                function fetchCustomerLogs() {
+                    fetch('backend/fetch_customer_logs.php?order_id=' + orderId)
+                        .then(response => response.text())
+                        .then(data => { container.innerHTML = data; })
+                        .catch(() => {
+                            container.innerHTML = '<div class="text-center text-muted small py-3">Error loading logs.</div>';
+                        });
+                }
+
+                fetchCustomerLogs();
+                logPollingInterval = setInterval(fetchCustomerLogs, 5000);
+            });
+
+            modal.addEventListener('hide.bs.modal', function () {
+                clearInterval(logPollingInterval);
+            });
+        });
+    </script>
 </body>
 
 </html>
