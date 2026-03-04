@@ -1,51 +1,62 @@
-// TIMER FUNCTIONS
-
 let globalTimerData = [];
+const firedAutocycles = new Set();
+
+const formatTime = (seconds) => {
+  const mins = Math.floor(seconds / 60)
+    .toString()
+    .padStart(2, "0");
+  const secs = (seconds % 60).toString().padStart(2, "0");
+  return `${mins}:${secs}`;
+};
 
 function updateAllDisplays() {
-  // UI for timer
   document.querySelectorAll(".live-timer").forEach((el) => {
     const loadId = el.getAttribute("data-load-id");
     const data = globalTimerData.find((t) => t.load_id == loadId);
-    const isModal = el.id === "modalTimerDisplay";
-
     if (!data) return;
 
-    // UI elements inside the modal
-    const pauseBtn = document.getElementById("modalPauseBtn");
-    const resetBtn = document.querySelector(
-      'button[onclick*="updateTimerDB"][onclick*="reset"]',
-    );
+    const isModal = el.id === "modalTimerDisplay";
+    const isReady = data.remaining <= 0;
 
-    if (data.remaining <= 0) {
-      el.innerText = isModal ? "--:--" : "READY";
-      el.classList.add("text-success");
+    // Update the UI
+    el.innerText = isReady
+      ? isModal
+        ? "--:--"
+        : "READY"
+      : formatTime(data.remaining);
+    el.classList.toggle("text-success", isReady);
 
-      if (isModal && pauseBtn) pauseBtn.style.display = "none";
-      if (isModal && resetBtn) resetBtn.innerText = "Back";
-    } else {
-      let mins = Math.floor(data.remaining / 60);
-      let secs = data.remaining % 60;
-      el.innerText = `${mins.toString().padStart(2, "0")}:${secs.toString().padStart(2, "0")}`;
-      el.classList.remove("text-success");
+    // Update Modal Buttons
+    if (isModal) {
+      const pauseBtn = document.getElementById("modalPauseBtn");
+      const resetBtn = document.querySelector('button[onclick*="reset"]');
 
-      if (isModal && pauseBtn) {
-        pauseBtn.style.display = "inline-block";
-        pauseBtn.innerText = data.is_paused ? "Start" : "Pause";
-      }
-      if (isModal && resetBtn) resetBtn.innerText = "Reset";
+      if (pauseBtn) pauseBtn.style.display = isReady ? "none" : "inline-block";
+      if (pauseBtn) pauseBtn.innerText = data.is_paused ? "Start" : "Pause";
+      if (resetBtn) resetBtn.innerText = isReady ? "Back" : "Reset";
     }
   });
-
-  // UI for statuses
+  // Update status display
   document.querySelectorAll(".status-badge").forEach((badge) => {
     const loadId = badge.getAttribute("data-load-id");
     const data = globalTimerData.find((t) => t.load_id == loadId);
-
-    if (!data) return;
-
-    badge.innerText = data.status;
+    if (data) badge.innerText = data.status;
   });
+}
+
+function initTimer(loadId) {
+  // Fetch state
+  fetch(`backend/timer_action.php?action=get_state&load_id=${loadId}`)
+    .then((res) => res.json())
+    .then((data) => {
+      const index = globalTimerData.findIndex((t) => t.load_id == loadId);
+      if (index !== -1) {
+        globalTimerData[index] = data;
+      } else {
+        globalTimerData.push(data);
+      }
+      updateAllDisplays();
+    });
 }
 
 function syncWithServer() {
@@ -57,8 +68,6 @@ function syncWithServer() {
     })
     .catch((err) => console.error("Timer sync failed:", err));
 }
-
-const firedAutocycles = new Set();
 
 // Local Tick
 setInterval(() => {

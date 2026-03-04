@@ -13,7 +13,7 @@ $user_id = $_SESSION['user_id'];
 // Check if shop is open or closed
 $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
-$isOpen = ($shopData && $shopData['is_shop_open'] == 0);
+$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 
 // Fetch user orders
 $orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";

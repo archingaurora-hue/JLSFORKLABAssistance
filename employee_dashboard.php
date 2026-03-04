@@ -11,7 +11,7 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION[
 // Check if shop is open or closed
 $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
-$isOpen = ($shopData && $shopData['is_shop_open'] == 0);
+$isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 
 // Get active tasks
 $query = "SELECT pl.*, o.customer_name, o.services_requested 
@@ -300,7 +300,7 @@ if ($result->num_rows > 0) {
                 });
         }
 
-        // PAUSE
+        // Pause
         function togglePause() {
             const loadId = document.getElementById('modalLoadId').value;
             const timer = globalTimerData.find(t => t.load_id == loadId);
@@ -355,18 +355,6 @@ if ($result->num_rows > 0) {
                     }
                 });
         }
-
-        // Update logs:
-        let logPollingInterval = null;
-
-        document.getElementById('statusModal').addEventListener('shown.bs.modal', function () {
-            const loadId = document.getElementById('modalLoadId').value;
-            logPollingInterval = setInterval(() => fetchLogs(loadId), 3000); // refresh every 3s
-        });
-
-        document.getElementById('statusModal').addEventListener('hidden.bs.modal', function () {
-            clearInterval(logPollingInterval); // stop when modal closes
-        });
     </script>
 </body>
 
