@@ -47,9 +47,9 @@
                         <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-1">Select Services</h6>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="50" style="transform: scale(1.3);">
+                            <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="55" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Wash</div>
-                            <span class="fw-bold text-dark">₱50<small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱55<small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
@@ -59,9 +59,9 @@
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="35" style="transform: scale(1.3);">
+                            <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="30" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Fold</div>
-                            <span class="fw-bold text-dark">₱35<small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱30<small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <div id="errorWetClothes" class="alert alert-danger mt-2 d-none small">
@@ -90,7 +90,7 @@
                         <div class="app-card p-4">
                             <div class="row g-3" id="standardInputs">
                                 <div class="col-6 text-center border-end">
-                                    <label class="small text-muted fw-bold mb-2">COLORED</label>
+                                    <label class="small text-muted fw-bold mb-2">COLORED/MIXED</label>
                                     <input type="number" id="qtyColored" name="qtyColored" class="form-control text-center fs-4 fw-bold border-0 bg-light" value="0" min="0">
                                 </div>
                                 <div class="col-6 text-center">

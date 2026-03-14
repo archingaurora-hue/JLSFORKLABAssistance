@@ -47,9 +47,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Pricing logic
     $costPerLoad = 0;
-    if ($isWash) $costPerLoad += 50;
+    if ($isWash) $costPerLoad += 55;
     if ($isDry) $costPerLoad += 60;
-    if ($isFold) $costPerLoad += 35;
+    if ($isFold) $costPerLoad += 30;
     if ($isWash) {
         if (in_array("Detergent", $supplies)) $costPerLoad += 20;
         if (in_array("Fabric Softener", $supplies)) $costPerLoad += 10;

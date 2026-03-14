@@ -99,9 +99,9 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let costPerLoad = 0;
-        if (isWash) costPerLoad += 50;
+        if (isWash) costPerLoad += 55; 
         if (isDry) costPerLoad += 60;
-        if (isFold) costPerLoad += 35;
+        if (isFold) costPerLoad += 30; 
         
         if (isWash) {
             if (supplyDetergent.checked) costPerLoad += 20;

@@ -32,9 +32,9 @@ function hideNewOrder(){
 // Cost Calculator
 function calculateTotal() {
     // Service Rates
-    const RATE_WASH = 50;
+    const RATE_WASH = 55;
     const RATE_DRY = 60;
-    const RATE_FOLD = 35;
+    const RATE_FOLD = 30;
     const RATE_DETERGENT = 20;
 
     // Parse quantities
