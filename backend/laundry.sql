@@ -32,10 +32,10 @@ ON DUPLICATE KEY UPDATE status_id=1;
 -- --------------------------------------------------------
 
 --
--- Table structure for table `Users`
+-- Table structure for table `User`
 --
 
-CREATE TABLE IF NOT EXISTS `Users` (
+CREATE TABLE IF NOT EXISTS `User` (
   `user_id` int(11) NOT NULL AUTO_INCREMENT,
   `full_name` varchar(100) NOT NULL,
   `email` varchar(100) NOT NULL,
