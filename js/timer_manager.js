@@ -90,3 +90,34 @@ setInterval(() => {
 // Background Sync
 setInterval(syncWithServer, 1000);
 document.addEventListener("DOMContentLoaded", syncWithServer);
+
+document.addEventListener('DOMContentLoaded', function() {
+    function updateTimers() {
+        const timers = document.querySelectorAll('.live-timer');
+        const now = new Date().getTime();
+
+        timers.forEach(timer => {
+            const endTimeStr = timer.getAttribute('data-end');
+            if (!endTimeStr) return;
+            
+            const endTime = new Date(endTimeStr).getTime();
+            const distance = endTime - now;
+
+            if (distance <= 0) {
+                timer.innerText = "00:00 (DONE)";
+                timer.classList.remove('text-danger');
+                timer.classList.add('text-success');
+            } else {
+                const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+                
+                timer.innerText = 
+                    (minutes < 10 ? "0" : "") + minutes + ":" + 
+                    (seconds < 10 ? "0" : "") + seconds;
+            }
+        });
+    }
+
+    setInterval(updateTimers, 1000);
+    updateTimers(); 
+});

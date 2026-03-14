@@ -33,6 +33,17 @@ $ordersResult = $stmt->get_result();
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/main.css">
+    <style>
+        .tracking-card {
+            border-left: 4px solid #0d6efd;
+            background-color: #f8f9fa;
+        }
+
+        .order-summary-card {
+            background-color: #ffffff;
+            border: 1px solid #e9ecef;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
@@ -50,11 +61,11 @@ $ordersResult = $stmt->get_result();
         </div>
     </nav>
 
-    <div class="container page-container">
+    <div class="container page-container mt-4">
 
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-10 col-lg-8">
-                <div class="app-card p-4 text-center shadow-sm bg-white">
+                <div class="app-card p-4 text-center shadow-sm bg-white rounded-3">
                     <h5 class="fw-bold text-uppercase mb-0 text-dark" style="letter-spacing: 1px;">Shop Status</h5>
                     <?php if ($isOpen): ?>
                         <h1 class="display-2 mb-0" style="color: #198754; font-weight: 800;">OPEN</h1>
@@ -70,10 +81,10 @@ $ordersResult = $stmt->get_result();
 
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-8 col-lg-6">
-                <div class="app-card p-4 text-center bg-dark text-white">
+                <div class="app-card p-4 text-center bg-dark text-white rounded-3 shadow-sm">
                     <h4 class="fw-bold mb-1">Need Laundry Service?</h4>
                     <p class="text-white-50 small mb-3">We wash, dry and fold!</p>
-                    <a href="order.php" class="btn btn-light text-dark fw-bold w-100 rounded-pill py-3">
+                    <a href="order.php" class="btn btn-light text-dark fw-bold w-100 rounded-pill py-3 shadow-sm">
                         <i class="bi bi-plus-lg me-2"></i>Place New Order
                     </a>
                 </div>
@@ -87,75 +98,113 @@ $ordersResult = $stmt->get_result();
                 <?php if ($ordersResult->num_rows > 0): ?>
                     <?php while ($order = $ordersResult->fetch_assoc()): ?>
 
-                        <div class="app-card mb-3 p-3" style="cursor: pointer;" data-bs-toggle="modal"
-                            data-bs-target="#modal<?php echo $order['order_id']; ?>">
-                            <div class="d-flex justify-content-between align-items-start">
-                                <div>
-                                    <div class="d-flex align-items-center gap-2 mb-2">
-                                        <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
-                                        <span class="small text-muted">Tracking:
-                                            <strong><?php echo $order['tracking_code']; ?></strong></span>
-                                    </div>
-                                    <h5 class="fw-bold mb-0">₱<?php echo number_format($order['final_price'], 2); ?></h5>
-                                    <p class="text-muted small mb-0 mt-1">
-                                        <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags •
-                                        <?php echo $order['services_requested']; ?>
-                                    </p>
+                        <div class="app-card mb-3 p-3 bg-white rounded-3 shadow-sm border" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <div class="d-flex align-items-center gap-2">
+                                    <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
+                                    <span class="small fw-bold text-primary"><?php echo $order['status']; ?></span>
                                 </div>
+                                <h5 class="fw-bold mb-0 text-dark">₱<?php echo number_format($order['final_price'], 2); ?></h5>
+                            </div>
+                            <div class="text-muted small">
+                                <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags • <?php echo $order['services_requested']; ?>
                             </div>
                         </div>
 
                         <div class="modal fade" id="modal<?php echo $order['order_id']; ?>" tabindex="-1" aria-hidden="true">
                             <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content border-0">
-                                    <div class="modal-header border-0 pb-0">
-                                        <div>
-                                            <h5 class="modal-title fw-bold">Order #<?php echo $order['order_id']; ?></h5>
-                                            <p class="small text-muted mb-0">Tracking: <?php echo $order['tracking_code']; ?>
-                                            </p>
-                                        </div>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal"
-                                            aria-label="Close"></button>
+                                <div class="modal-content border-0 rounded-4">
+                                    <div class="modal-header border-0 pb-0 pt-4 px-4">
+                                        <h5 class="modal-title fw-bold">Order Details</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                                     </div>
-                                    <div class="modal-body pt-4">
 
-                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Bag Status</h6>
+                                    <div class="modal-body p-4">
+                                        <div class="d-flex justify-content-between align-items-center mb-4">
+                                            <div>
+                                                <span class="text-muted small d-block text-uppercase fw-bold">Tracking Number</span>
+                                                <span class="fw-bold fs-5 text-dark"><?php echo $order['tracking_code']; ?></span>
+                                            </div>
+                                            <?php
+                                            $masterStatusClass = $order['status'] == 'Completed' ? 'bg-success' : 'bg-primary';
+                                            ?>
+                                            <span class="badge <?php echo $masterStatusClass; ?> fs-6 px-3 py-2 rounded-pill"><?php echo $order['status']; ?></span>
+                                        </div>
+
+                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Track Order Progress</h6>
                                         <?php
-                                        // Get bag details
+                                        // Fetch individual bag progress
                                         $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
                                         $loads = $conn->query($loadQuery);
                                         ?>
-                                        <ul class="list-group list-group-flush mb-4 rounded-3 border">
+                                        <div class="mb-4">
                                             <?php if ($loads->num_rows > 0): ?>
                                                 <?php while ($load = $loads->fetch_assoc()): ?>
-                                                    <li class="list-group-item d-flex justify-content-between align-items-center">
-                                                        <div>
-                                                            <strong><?php echo $load['bag_label']; ?></strong>
-                                                            <div class="small text-muted"><?php echo $load['load_category']; ?></div>
+                                                    <div class="tracking-card rounded-3 p-3 mb-2 shadow-sm">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div class="fw-bold text-dark">
+                                                                <i class="bi bi-bag-check text-primary me-1"></i> <?php echo $load['bag_label']; ?>
+                                                            </div>
+                                                            <?php
+                                                            $s = $load['status'];
+                                                            $badgeClass = 'bg-secondary';
+                                                            if ($s == 'In Queue') $badgeClass = 'bg-dark';
+                                                            elseif (strpos($s, 'Washing') !== false) $badgeClass = 'bg-primary';
+                                                            elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
+                                                            elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
+                                                            elseif ($s == 'Completed') $badgeClass = 'bg-success bg-opacity-75';
+                                                            ?>
+                                                            <span class="badge <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
                                                         </div>
-                                                        <span class="badge bg-secondary status-badge"
-                                                            data-load-id="<?php echo $load['load_id']; ?>">
-                                                            <?php echo $load['status']; ?>
-                                                        </span>
-                                                        <div class="live-timer" data-load-id="<?php echo $load['load_id']; ?>">--:--
-                                                        </div>
-                                                    </li>
+
+                                                        <?php if (!empty($load['timer_end'])): ?>
+                                                            <div class="d-flex justify-content-between align-items-center bg-white border rounded px-2 py-1 mt-2">
+                                                                <span class="small text-muted fw-bold"><i class="bi bi-stopwatch"></i> TIME LEFT</span>
+                                                                <span class="fw-bold text-danger live-timer" data-end="<?php echo date('c', strtotime($load['timer_end'])); ?>">--:--</span>
+                                                            </div>
+                                                        <?php endif; ?>
+                                                    </div>
                                                 <?php endwhile; ?>
                                             <?php else: ?>
-                                                <li class="list-group-item text-muted small text-center">No bags assigned yet.</li>
+                                                <div class="text-muted small text-center bg-light p-3 rounded">Bags are being processed.</div>
                                             <?php endif; ?>
-                                        </ul>
-
-                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Timeline</h6>
-                                        <div class="log-container bg-light p-3 rounded-3"
-                                            style="max-height: 250px; overflow-y: auto;">
-                                            <div class="text-center text-muted small py-3">Loading...</div>
                                         </div>
 
+                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Information</h6>
+                                        <div class="order-summary-card rounded-3 p-3 shadow-sm mb-2">
+                                            <div class="d-flex justify-content-between mb-2 small">
+                                                <span class="text-muted">Services</span>
+                                                <span class="fw-bold text-end"><?php echo $order['services_requested']; ?></span>
+                                            </div>
+                                            <?php if (!empty($order['supplies_requested'])): ?>
+                                                <div class="d-flex justify-content-between mb-2 small">
+                                                    <span class="text-muted">Add-ons</span>
+                                                    <span class="fw-bold text-end"><?php echo $order['supplies_requested']; ?></span>
+                                                </div>
+                                            <?php endif; ?>
+                                            <div class="d-flex justify-content-between mb-2 small">
+                                                <span class="text-muted">Bags</span>
+                                                <span class="fw-bold text-end"><?php echo $order['bag_counts']; ?></span>
+                                            </div>
+                                            <?php if (!empty($order['customer_note'])): ?>
+                                                <div class="d-flex justify-content-between mb-2 small">
+                                                    <span class="text-muted">Instructions</span>
+                                                    <span class="fw-bold text-end text-truncate" style="max-width: 60%;" title="<?php echo htmlspecialchars($order['customer_note']); ?>">
+                                                        <?php echo htmlspecialchars($order['customer_note']); ?>
+                                                    </span>
+                                                </div>
+                                            <?php endif; ?>
+
+                                            <hr class="my-2 border-secondary opacity-25">
+
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <span class="fw-bold text-dark">Total</span>
+                                                <span class="fw-bold fs-5 text-primary">₱<?php echo number_format($order['final_price'], 2); ?></span>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <div class="modal-footer border-0">
-                                        <button type="button" class="btn btn-light w-100 fw-bold" data-bs-dismiss="modal">Close
-                                            Details</button>
+                                    <div class="modal-footer border-0 px-4 pb-4">
+                                        <button type="button" class="btn btn-light w-100 fw-bold border" data-bs-dismiss="modal">Close</button>
                                     </div>
                                 </div>
                             </div>
@@ -177,31 +226,38 @@ $ordersResult = $stmt->get_result();
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/timer_manager.js"></script>
     <script>
-        let logPollingInterval = null;
+        // Live Countdown Timer Logic for Customers
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateTimers() {
+                const timers = document.querySelectorAll('.live-timer');
+                const now = new Date().getTime();
 
-        document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('show.bs.modal', function () {
-                const orderId = this.id.replace('modal', '');
-                const container = this.querySelector('.log-container');
+                timers.forEach(timer => {
+                    const endTimeStr = timer.getAttribute('data-end');
+                    if (!endTimeStr) return;
 
-                function fetchCustomerLogs() {
-                    fetch('backend/fetch_customer_logs.php?order_id=' + orderId)
-                        .then(response => response.text())
-                        .then(data => { container.innerHTML = data; })
-                        .catch(() => {
-                            container.innerHTML = '<div class="text-center text-muted small py-3">Error loading logs.</div>';
-                        });
-                }
+                    const endTime = new Date(endTimeStr).getTime();
+                    const distance = endTime - now;
 
-                fetchCustomerLogs();
-                logPollingInterval = setInterval(fetchCustomerLogs, 5000);
-            });
+                    if (distance <= 0) {
+                        timer.innerText = "00:00 (FINISHED)";
+                        timer.classList.remove('text-danger');
+                        timer.classList.add('text-success');
+                    } else {
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            modal.addEventListener('hide.bs.modal', function () {
-                clearInterval(logPollingInterval);
-            });
+                        timer.innerText =
+                            (minutes < 10 ? "0" : "") + minutes + ":" +
+                            (seconds < 10 ? "0" : "") + seconds;
+                    }
+                });
+            }
+
+            // Run timer every second
+            setInterval(updateTimers, 1000);
+            updateTimers();
         });
     </script>
 </body>

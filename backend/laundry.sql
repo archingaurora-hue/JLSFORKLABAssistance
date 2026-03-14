@@ -1,98 +1,106 @@
--- Users table
-CREATE TABLE IF NOT EXISTS `User` (
-  `user_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `email` VARCHAR(255) NOT NULL,
-  `password` VARCHAR(255) NOT NULL,
-  `role` ENUM('Manager', 'Employee', 'Customer') NOT NULL,
-  `full_name` VARCHAR(255) NOT NULL,
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `reset_token_hash` VARCHAR(64) NULL DEFAULT NULL,
-  `reset_token_expires_at` DATETIME NULL DEFAULT NULL,
+-- phpMyAdmin SQL Dump
+-- Database: `laundry_db`
+
+SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+START TRANSACTION;
+SET time_zone = "+08:00"; -- Asia/Manila
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Shop_Status`
+--
+
+CREATE TABLE IF NOT EXISTS `Shop_Status` (
+  `status_id` int(11) NOT NULL AUTO_INCREMENT,
+  `is_shop_open` tinyint(1) NOT NULL DEFAULT 1,
+  `default_open_time` time NOT NULL DEFAULT '08:00:00',
+  `default_close_time` time NOT NULL DEFAULT '20:00:00',
+  `current_closing_time` time DEFAULT NULL,
+  `next_manual_open_time` datetime DEFAULT NULL,
+  PRIMARY KEY (`status_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `Shop_Status`
+--
+
+INSERT INTO `Shop_Status` (`status_id`, `is_shop_open`, `default_open_time`, `default_close_time`, `current_closing_time`, `next_manual_open_time`) VALUES
+(1, 1, '08:00:00', '20:00:00', NULL, NULL)
+ON DUPLICATE KEY UPDATE status_id=1;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Users`
+--
+
+CREATE TABLE IF NOT EXISTS `Users` (
+  `user_id` int(11) NOT NULL AUTO_INCREMENT,
+  `full_name` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `password` varchar(255) NOT NULL,
+  `role` enum('Customer','Employee','Manager') NOT NULL DEFAULT 'Customer',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Orders table
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Order`
+--
+
 CREATE TABLE IF NOT EXISTS `Order` (
-  `order_id` VARCHAR(20) NOT NULL,
-  `customer_id` INT(11) NOT NULL,
-  `customer_name` VARCHAR(255) NOT NULL,
-  `tracking_code` INT(4) NOT NULL,
-  
-  -- Service info
-  `services_requested` TEXT NOT NULL, 
-  `supplies_requested` TEXT,          
-  `bag_counts` TEXT NOT NULL,         
-  `customer_note` TEXT,
-  `estimated_price` DECIMAL(10,2) NOT NULL,
-  
-  -- Payment details
-  `additional_fees` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `final_price` DECIMAL(10,2) NOT NULL DEFAULT 0.00,
-  `payment_status` ENUM('Unpaid', 'Paid') NOT NULL DEFAULT 'Unpaid',
-  `created_at` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  
-  PRIMARY KEY (`order_id`),
-  FOREIGN KEY (`customer_id`) REFERENCES `User`(`user_id`) ON DELETE CASCADE
-);
+  `order_id` varchar(50) NOT NULL,
+  `customer_id` int(11) NOT NULL,
+  `customer_name` varchar(100) NOT NULL,
+  `tracking_code` varchar(20) NOT NULL,
+  `services_requested` varchar(255) NOT NULL,
+  `supplies_requested` varchar(255) DEFAULT NULL,
+  `bag_counts` varchar(255) NOT NULL,
+  `customer_note` text DEFAULT NULL,
+  `estimated_price` decimal(10,2) NOT NULL,
+  `final_price` decimal(10,2) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Pending',
+  `current_phase` varchar(50) NOT NULL DEFAULT 'Pending',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`order_id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Bag tracking
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Process_Load` (The Bags)
+--
+
 CREATE TABLE IF NOT EXISTS `Process_Load` (
-  `load_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `order_id` VARCHAR(20) NOT NULL,
-  
-  -- Bag details
-  `load_category` ENUM('Colored', 'White', 'Fold Only', 'Other') NOT NULL,
-  `bag_label` VARCHAR(50) NOT NULL, -- e.g. "Colored #1"
-  
-  -- Status options
-  `status` ENUM(
-      'Pending Dropoff', 
-      'In Queue', 
-      'Washing', 
-      'Wash Complete', 
-      'Drying', 
-      'Drying Complete', 
-      'Folding', 
-      'Folding Complete', 
-      'Awaiting Pickup', 
-      'Completed',
-      'Order Completed' 
-  ) NOT NULL DEFAULT 'Pending Dropoff',
-  
-  `start_time` DATETIME DEFAULT NULL,
-  `end_time` DATETIME DEFAULT NULL,
-  `timer_paused` int(11) DEFAULT NULL,
-  
+  `load_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(50) NOT NULL,
+  `load_category` varchar(50) NOT NULL,
+  `bag_label` varchar(100) NOT NULL,
+  `status` varchar(50) NOT NULL DEFAULT 'Pending Dropoff',
+  `timer_end` datetime DEFAULT NULL,
   PRIMARY KEY (`load_id`),
-  FOREIGN KEY (`order_id`) REFERENCES `Order`(`order_id`) ON DELETE CASCADE
-);
+  KEY `order_id` (`order_id`),
+  CONSTRAINT `fk_process_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Audit logs
-CREATE TABLE IF NOT EXISTS `System_Log` (
-  `log_id` INT(11) NOT NULL AUTO_INCREMENT,
-  `load_id` INT(11) NOT NULL, 
-  `status_event` VARCHAR(50) NOT NULL, -- Change event
-  `employee_name` VARCHAR(255) NOT NULL, -- Employee
-  `timestamp` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `Order_Logs`
+--
+
+CREATE TABLE IF NOT EXISTS `Order_Logs` (
+  `log_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(50) NOT NULL,
+  `log_message` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`log_id`),
-  FOREIGN KEY (`load_id`) REFERENCES `Process_Load`(`load_id`) ON DELETE CASCADE
-);  
+  KEY `order_id` (`order_id`),
+  CONSTRAINT `fk_log_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- Shop Settings & Status Configuration
-CREATE TABLE IF NOT EXISTS `Shop_Status` (
-    `status_id` INT PRIMARY KEY,
-    `is_shop_open` TINYINT(1) NOT NULL DEFAULT 1,
-    `current_closing_time` TIME NULL,
-    `next_manual_open_time` DATETIME NULL,
-    `default_open_time` TIME NULL,
-    `default_close_time` TIME NULL,
-    `updated_at` TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
-
--- Insert default singleton configuration row
-INSERT IGNORE INTO `Shop_Status` 
-(`status_id`, `is_shop_open`, `current_closing_time`, `next_manual_open_time`, `default_open_time`, `default_close_time`) 
-VALUES 
-(1, 1, '20:00:00', '2026-02-23 08:00:00', '08:00:00', '21:00:00');
+COMMIT;

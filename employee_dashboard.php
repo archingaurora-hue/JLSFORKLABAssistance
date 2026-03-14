@@ -13,12 +13,13 @@ $statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_
 $shopData = $statusResult->fetch_assoc();
 $isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 
-// Get active tasks
-$query = "SELECT pl.*, o.customer_name, o.services_requested 
-          FROM `Process_Load` pl
-          JOIN `Order` o ON pl.order_id = o.order_id
-          WHERE pl.status != 'Completed' AND pl.status != 'Order Completed'
-          ORDER BY pl.order_id DESC, pl.bag_label ASC";
+// Get active tasks (Filter out completed orders and completed bags)
+$query = "SELECT o.order_id, o.customer_name, o.services_requested, o.status as order_status,
+                 pl.load_id, pl.bag_label, pl.status, pl.timer_end
+          FROM `Order` o
+          JOIN `Process_Load` pl ON o.order_id = pl.order_id
+          WHERE o.status != 'Completed' AND pl.status != 'Completed'
+          ORDER BY o.order_id DESC, pl.bag_label ASC";
 $result = $conn->query($query);
 
 // Group tasks by order
@@ -30,9 +31,11 @@ if ($result->num_rows > 0) {
             $groupedOrders[$order_id] = [
                 'customer_name' => $row['customer_name'],
                 'services_requested' => $row['services_requested'],
+                'order_status' => $row['order_status'],
                 'loads' => []
             ];
         }
+        // Push the entire row so we have bag_label, load_id, status, and timer_end
         $groupedOrders[$order_id]['loads'][] = $row;
     }
 }
@@ -63,18 +66,7 @@ if ($result->num_rows > 0) {
         }
 
         .bag-item {
-            border-bottom: 1px solid #f0f0f0;
-            padding: 12px 15px;
-        }
-
-        .bag-item:last-child {
-            border-bottom: none;
-        }
-
-        .label {
-            padding-top: 20px;
-            display: flex;
-            justify-content: center;
+            background-color: #fafafa;
         }
     </style>
 </head>
@@ -98,7 +90,7 @@ if ($result->num_rows > 0) {
 
         <div class="row justify-content-center mb-4">
             <div class="col-12 col-md-10 col-lg-8">
-                <div class="app-card p-4 text-center shadow-sm bg-white">
+                <div class="app-card p-4 text-center shadow-sm bg-white rounded-3">
                     <h5 class="fw-bold text-uppercase mb-0 text-dark" style="letter-spacing: 1px;">Shop Status</h5>
                     <?php if ($isOpen): ?>
                         <h1 class="display-2 mb-0" style="color: #198754; font-weight: 800;">OPEN</h1>
@@ -110,8 +102,8 @@ if ($result->num_rows > 0) {
             </div>
         </div>
 
-        <div class="label pt-0 pb-3">
-            <h3 class="fw-bold">Task Queue</h3>
+        <div class="d-flex justify-content-center pb-3">
+            <h3 class="fw-bold">Active Task Queue</h3>
         </div>
 
         <div class="row justify-content-center">
@@ -119,6 +111,7 @@ if ($result->num_rows > 0) {
                 <?php if (!empty($groupedOrders)): ?>
                     <?php foreach ($groupedOrders as $order_id => $order): ?>
                         <div class="order-group-card mb-4 shadow-sm">
+
                             <div class="order-header">
                                 <div class="d-flex justify-content-between align-items-center mb-1">
                                     <h6 class="fw-bold mb-0 text-dark">
@@ -132,43 +125,88 @@ if ($result->num_rows > 0) {
                                     <?php echo htmlspecialchars($order['services_requested']); ?>
                                 </small>
                             </div>
-                            <div class="order-body">
+
+                            <div class="order-body p-2 bg-white">
                                 <?php foreach ($order['loads'] as $load): ?>
-                                    <div class="bag-item">
+                                    <div class="bag-item border rounded p-3 mb-2 shadow-sm">
                                         <div class="d-flex justify-content-between align-items-center mb-2">
                                             <div class="fw-bold text-primary">
                                                 <i class="bi bi-bag-fill me-1"></i>
                                                 <?php echo htmlspecialchars($load['bag_label']); ?>
                                             </div>
+
                                             <?php
                                             $s = $load['status'];
                                             $badgeClass = 'bg-secondary';
-                                            if ($s == 'In Queue')
-                                                $badgeClass = 'bg-dark';
-                                            elseif (strpos($s, 'Washing') !== false)
-                                                $badgeClass = 'bg-primary';
-                                            elseif (strpos($s, 'Drying') !== false)
-                                                $badgeClass = 'bg-warning text-dark';
-                                            elseif ($s == 'Awaiting Pickup')
-                                                $badgeClass = 'bg-success';
+                                            if ($s == 'In Queue') $badgeClass = 'bg-dark';
+                                            elseif (strpos($s, 'Washing') !== false) $badgeClass = 'bg-primary';
+                                            elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
+                                            elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
                                             ?>
-                                            <span class="badge rounded-pill <?php echo $badgeClass; ?> status-badge"
-                                                data-load-id="<?php echo $load['load_id']; ?>">
-                                                <?php echo $s; ?>
-                                            </span>
-                                            <!-- TIMER FOR ALL LOADS: -->
-                                            <div class="col-md-2">
-                                                <div class="live-timer fw-bold" data-load-id="<?php echo $load['load_id']; ?>">--:--
+                                            <span class="badge rounded-pill <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
+                                        </div>
+
+                                        <?php if (!empty($load['timer_end'])): ?>
+                                            <div class="alert alert-warning py-1 px-2 mb-2 d-flex justify-content-between align-items-center small">
+                                                <span class="fw-bold"><i class="bi bi-stopwatch"></i> <?php echo strtoupper($s); ?>:</span>
+                                                <span class="fs-6 fw-bold live-timer text-danger" data-end="<?php echo date('c', strtotime($load['timer_end'])); ?>">--:--</span>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <?php if ($isOpen && $s !== 'Completed'): ?>
+                                            <button class="btn btn-sm btn-outline-secondary w-100 py-1" type="button" data-bs-toggle="collapse" data-bs-target="#bag-controls-<?php echo $load['load_id']; ?>">
+                                                <i class="bi bi-gear"></i> Manage Bag
+                                            </button>
+
+                                            <div class="collapse mt-2" id="bag-controls-<?php echo $load['load_id']; ?>">
+                                                <div class="bg-light p-2 rounded">
+
+                                                    <?php
+                                                    $needsMachine = (stripos($order['services_requested'], 'Wash') !== false || stripos($order['services_requested'], 'Dry') !== false);
+                                                    ?>
+
+                                                    <?php if (($s === 'In Queue' && $needsMachine) || $s === 'Washing' || $s === 'Drying'): ?>
+                                                        <form action="backend/update_status.php" method="POST" class="mb-2">
+                                                            <input type="hidden" name="action" value="start_timer">
+                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                            <label class="small fw-bold text-muted mb-1">
+                                                                <?php echo ($s === 'In Queue') ? 'Start Machine (Enter Mins):' : 'Reset/Set Timer:'; ?>
+                                                            </label>
+                                                            <div class="input-group input-group-sm">
+                                                                <input type="number" name="minutes" class="form-control" placeholder="Mins" required min="1">
+                                                                <button type="submit" class="btn btn-primary">Start Timer</button>
+                                                            </div>
+                                                        </form>
+                                                    <?php endif; ?>
+
+                                                    <?php if (!($s === 'In Queue' && $needsMachine)): ?>
+                                                        <form action="backend/update_status.php" method="POST">
+                                                            <input type="hidden" name="action" value="next_phase">
+                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold">
+                                                                <?php
+                                                                if ($s === 'Pending Dropoff') echo 'Mark as Received (Queue)';
+                                                                elseif ($s === 'Washing' || $s === 'Drying' || $s === 'Folding') echo 'Move to Next Phase';
+                                                                elseif ($s === 'Awaiting Pickup') echo 'Complete Order';
+                                                                else echo 'Next Step';
+                                                                ?>
+                                                                <i class="bi bi-arrow-right-short"></i>
+                                                            </button>
+                                                        </form>
+                                                    <?php endif; ?>
                                                 </div>
                                             </div>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-dark w-100 rounded-pill fw-bold"
-                                            onclick="openUpdateModal('<?php echo $load['load_id']; ?>', '<?php echo $load['bag_label']; ?>', '<?php echo $load['status']; ?>', '<?php echo addslashes($order['services_requested']); ?>')">
-                                            <?php echo $isOpen ? 'Update Bag Status' : 'View Bag Details'; ?>
-                                        </button>
+                                        <?php endif; ?>
                                     </div>
                                 <?php endforeach; ?>
                             </div>
+
+                            <div class="p-2 bg-white border-top text-center">
+                                <button class="btn btn-sm btn-link text-decoration-none w-100" onclick="viewLogs('<?php echo $order_id; ?>')">
+                                    <i class="bi bi-journal-text"></i> View Order History Logs
+                                </button>
+                            </div>
+
                         </div>
                     <?php endforeach; ?>
                 <?php else: ?>
@@ -182,56 +220,16 @@ if ($result->num_rows > 0) {
         </div>
     </div>
 
-    <div class="modal fade" id="statusModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
+    <div class="modal fade" id="logsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
             <div class="modal-content border-0">
                 <div class="modal-header border-0 pb-0">
-                    <h5 class="modal-title fw-bold"><?php echo $isOpen ? 'Update Bag Status' : 'Bag Details'; ?></h5>
+                    <h5 class="modal-title fw-bold">Order History Logs</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body pt-3">
-                    <p class="text-muted mb-3">Bag: <span id="modalBagLabel" class="fw-bold text-dark"></span></p>
-
-                    <form action="backend/update_status.php" method="POST">
-                        <input type="hidden" name="load_id" id="modalLoadId">
-                        <div class="form-floating mb-3">
-                            <select class="form-select" name="new_status" id="modalStatusSelect" <?php echo !$isOpen ? 'disabled' : ''; ?>>
-                                <option value="Pending Dropoff">Pending Dropoff</option>
-                                <option value="In Queue">In Queue</option>
-                                <option value="Washing">Washing</option>
-                                <option value="Wash Complete">Wash Complete</option>
-                                <option value="Drying">Drying</option>
-                                <option value="Drying Complete">Drying Complete</option>
-                                <option value="Folding">Folding</option>
-                                <option value="Folding Complete">Folding Complete</option>
-                                <option value="Awaiting Pickup">Awaiting Pickup</option>
-                                <option value="Completed">Completed</option>
-                            </select>
-                            <label>Select New Status</label>
-                        </div>
-                        <button type="submit" class="btn-primary-app mb-4 w-100" <?php echo !$isOpen ? 'disabled' : ''; ?>>
-                            <?php echo $isOpen ? 'Confirm Update' : 'Shop Closed - Updates Disabled'; ?>
-                        </button>
-                    </form>
-
-                    <!-- TIMER INSIDE UPDATE MODAL-->
-                    <div id="timerContainer" class="mb-3 bg-white text-center">
-                        <div id="modalTimerDisplay" class="live-timer mb-2 display-4" data-load-id=""> 00:00</div>
-                        <div class="btn-group w-100">
-                            <button type="button" class="btn btn-outline-dark"
-                                onclick="updateTimerDB('reset')">Reset</button>
-                            <button type="button" id="modalPauseBtn" class="btn btn-outline-dark"
-                                onclick="togglePause()">Start</button>
-                            <button type="button" class="btn btn-outline-dark" onclick="updateTimerDB('finish')">Finish
-                                now</button>
-                        </div>
-                    </div>
-
-                    <!-- System Logs -->
-                    <h6 class="fw-bold small text-muted text-uppercase mb-2">History Log</h6>
-                    <div id="logContainer" class="bg-light p-3 rounded-3 small"
-                        style="max-height: 150px; overflow-y: auto;">
-                        <span class="text-muted">Loading...</span>
+                    <div id="logContainer" class="bg-light p-3 rounded-3 small">
+                        <span class="text-muted">Fetching logs...</span>
                     </div>
                 </div>
             </div>
@@ -239,121 +237,51 @@ if ($result->num_rows > 0) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/timer_manager.js"></script>
     <script>
-        var statusModal = new bootstrap.Modal(document.getElementById('statusModal'));
+        // Live Countdown Timer Logic for individual bags
+        document.addEventListener('DOMContentLoaded', function() {
+            function updateTimers() {
+                const timers = document.querySelectorAll('.live-timer');
+                const now = new Date().getTime();
 
-        function openUpdateModal(loadId, bagLabel, currentStatus, services) {
-            document.getElementById('modalLoadId').value = loadId;
-            document.getElementById('modalBagLabel').innerText = bagLabel;
-            document.getElementById('modalStatusSelect').value = currentStatus;
-            document.getElementById('modalTimerDisplay').setAttribute('data-load-id', loadId);
+                timers.forEach(timer => {
+                    const endTimeStr = timer.getAttribute('data-end');
+                    if (!endTimeStr) return;
 
-            // Filter dropdown based on services
-            // Dropdown function is only for testing purposes, remove later if needed
-            const s = services.toLowerCase();
-            const allowed = ['Pending Dropoff', 'In Queue'];
-            if (s.includes('wash')) allowed.push('Washing', 'Wash Complete');
-            if (s.includes('dry')) allowed.push('Drying', 'Drying Complete');
-            if (s.includes('fold')) allowed.push('Folding', 'Folding Complete');
-            allowed.push('Awaiting Pickup', 'Completed');
+                    const endTime = new Date(endTimeStr).getTime();
+                    const distance = endTime - now;
 
-            const select = document.getElementById('modalStatusSelect');
-            Array.from(select.options).forEach(opt => {
-                opt.hidden = !allowed.includes(opt.value);
-            });
+                    if (distance <= 0) {
+                        timer.innerText = "00:00 (FINISHED)";
+                        timer.classList.remove('text-danger');
+                        timer.classList.add('text-success');
+                    } else {
+                        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
 
-            select.value = currentStatus;
-            fetchLogs(loadId);
-            statusModal.show();
-        }
+                        timer.innerText =
+                            (minutes < 10 ? "0" : "") + minutes + ":" +
+                            (seconds < 10 ? "0" : "") + seconds;
+                    }
+                });
+            }
 
-        function fetchLogs(loadId) {
+            setInterval(updateTimers, 1000);
+            updateTimers();
+        });
+
+        // Logs Viewer Logic
+        var logsModal = new bootstrap.Modal(document.getElementById('logsModal'));
+
+        function viewLogs(orderId) {
             const container = document.getElementById('logContainer');
-            container.innerHTML = '<div class="text-center text-muted">Loading...</div>';
-            fetch('backend/fetch_logs.php?load_id=' + loadId)
+            container.innerHTML = '<div class="text-center text-muted spinner-border spinner-border-sm" role="status"></div> Loading...';
+            logsModal.show();
+
+            fetch('backend/fetch_logs.php?order_id=' + orderId)
                 .then(response => response.text())
                 .then(data => container.innerHTML = data)
-                .catch(err => container.innerHTML = 'Error loading logs.');
-        }
-
-        function initTimer(loadId) {
-            fetch(`backend/timer_action.php?action=get&load_id=${loadId}`)
-                .then(res => res.json())
-                .then(data => {
-
-                    document.getElementById('modalStatusSelect').value = data.status;
-                    // Updates timer across all dashboards:
-                    const existing = globalTimerData.find(t => t.load_id == loadId);
-
-                    if (existing) {
-                        existing.remaining = parseInt(data.remaining);
-                        existing.is_paused = data.is_paused;
-                    } else {
-                        globalTimerData.push({
-                            load_id: loadId,
-                            remaining: parseInt(data.remaining),
-                            is_paused: data.is_paused
-                        });
-                    }
-                    updateAllDisplays();
-                });
-        }
-
-        // Pause
-        function togglePause() {
-            const loadId = document.getElementById('modalLoadId').value;
-            const timer = globalTimerData.find(t => t.load_id == loadId);
-            const action = timer && timer.is_paused ? 'resume' : 'pause';
-
-            fetch(`backend/timer_action.php?action=${action}&load_id=${loadId}`)
-                .then(res => res.json())
-                .then(data => {
-                    initTimer(loadId);
-                    syncWithServer();
-                });
-        }
-
-        // Update Timer
-        function updateTimerDB(action) {
-            const loadId = document.getElementById('modalLoadId').value;
-            fetch(`backend/timer_action.php?action=${action}&load_id=${loadId}`)
-                .then(res => res.json())
-                .then(data => {
-                    initTimer(loadId);
-                    if (action === 'finish') {
-                        autoCycleStatus(loadId);
-                    }
-                    syncWithServer();
-                    fetchLogs(loadId);
-                });
-        }
-
-        // Auto cycle to next status:
-        function autoCycleStatus(loadId, source = 'button') {
-            const timerEntry = globalTimerData.find(t => t.load_id == loadId);
-            if (timerEntry) timerEntry.autocycled = true;
-
-            const formData = new URLSearchParams();
-            formData.append('load_id', loadId);
-            formData.append('source', source);
-
-            fetch('backend/timer_autocycle.php', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: formData.toString()
-            })
-                .then(res => res.json())
-                .then(data => {
-                    if (data.success) {
-                        initTimer(loadId);
-                        syncWithServer();
-                        fetchLogs(loadId);
-                        if (data.is_final) {
-                            document.getElementById('modalTimerDisplay').innerText = "DONE";
-                        }
-                    }
-                });
+                .catch(err => container.innerHTML = '<span class="text-danger">Error loading logs.</span>');
         }
     </script>
 </body>
