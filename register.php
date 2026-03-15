@@ -42,6 +42,13 @@
                                         <i class="bi bi-eye" id="eyeReg"></i>
                                     </button>
                                 </div>
+                                <ul id="reg_criteria" class="list-unstyled small mt-2 mb-0" style="font-size: 0.8rem;">
+                                    <li id="reg_crit_len" class="text-danger"><i class="bi bi-x-circle me-1"></i>8+ characters</li>
+                                    <li id="reg_crit_up" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 uppercase letter</li>
+                                    <li id="reg_crit_low" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 lowercase letter</li>
+                                    <li id="reg_crit_num" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 number</li>
+                                    <li id="reg_crit_spec" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 special character</li>
+                                </ul>
                             </div>
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Confirm Password</label>
@@ -51,7 +58,7 @@
                                         <i class="bi bi-eye" id="eyeConf"></i>
                                     </button>
                                 </div>
-                                <small id="passwordMatchText" class="text-danger d-none">Passwords do not match</small>
+                                <small id="passwordMatchText" class="text-danger d-none fw-bold"><i class="bi bi-exclamation-circle me-1"></i>Passwords do not match</small>
                             </div>
                         </div>
 
@@ -129,30 +136,55 @@
             }
         }
 
-        // Real-time password matching validation
         const pwd = document.getElementById('reg_pwd');
         const confPwd = document.getElementById('reg_conf_pwd');
         const matchText = document.getElementById('passwordMatchText');
+        const criteriaList = document.getElementById('reg_criteria');
         const submitBtn = document.getElementById('submitBtn');
 
-        function checkPasswordsMatch() {
-            if (confPwd.value === '') {
-                matchText.classList.add('d-none');
-                submitBtn.disabled = false;
-                return;
-            }
-
-            if (pwd.value !== confPwd.value) {
-                matchText.classList.remove('d-none');
-                submitBtn.disabled = true;
+        function updateCriterion(id, isMet) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('i');
+            if (isMet) {
+                el.classList.replace('text-danger', 'text-success');
+                icon.classList.replace('bi-x-circle', 'bi-check-circle');
             } else {
-                matchText.classList.add('d-none');
-                submitBtn.disabled = false;
+                el.classList.replace('text-success', 'text-danger');
+                icon.classList.replace('bi-check-circle', 'bi-x-circle');
             }
         }
 
-        pwd.addEventListener('input', checkPasswordsMatch);
-        confPwd.addEventListener('input', checkPasswordsMatch);
+        function validatePassword() {
+            const p = pwd.value;
+            const c = confPwd.value;
+
+            const hasLen = p.length >= 8;
+            const hasUp = /[A-Z]/.test(p);
+            const hasLow = /[a-z]/.test(p);
+            const hasNum = /[0-9]/.test(p);
+            const hasSpec = /[^A-Za-z0-9]/.test(p);
+
+            updateCriterion('reg_crit_len', hasLen);
+            updateCriterion('reg_crit_up', hasUp);
+            updateCriterion('reg_crit_low', hasLow);
+            updateCriterion('reg_crit_num', hasNum);
+            updateCriterion('reg_crit_spec', hasSpec);
+
+            const isStrong = hasLen && hasUp && hasLow && hasNum && hasSpec;
+
+            // Check match
+            const isMatch = (c.length > 0 && p === c);
+            if (c.length > 0 && !isMatch) {
+                matchText.classList.remove('d-none');
+            } else {
+                matchText.classList.add('d-none');
+            }
+
+            submitBtn.disabled = !(isStrong && isMatch);
+        }
+
+        pwd.addEventListener('input', validatePassword);
+        confPwd.addEventListener('input', validatePassword);
     </script>
 </body>
 

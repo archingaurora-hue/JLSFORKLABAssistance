@@ -1,11 +1,4 @@
 <?php
-// reset_password.php
-
-// -------------------------------------------------------------------------
-// 1. VALIDATE URL PARAMETERS
-// We ensure the user arrived here with a token and email.
-// If not, we kick them back to the login page.
-// -------------------------------------------------------------------------
 if (!isset($_GET['token']) || !isset($_GET['email'])) {
     header("Location: customer_login.php");
     exit();
@@ -50,6 +43,13 @@ $email = $_GET['email'];
                                     <i class="bi bi-eye" id="eye1"></i>
                                 </button>
                             </div>
+                            <ul id="reset_criteria" class="list-unstyled small mt-2 mb-0" style="font-size: 0.8rem;">
+                                <li id="res_crit_len" class="text-danger"><i class="bi bi-x-circle me-1"></i>8+ characters</li>
+                                <li id="res_crit_up" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 uppercase letter</li>
+                                <li id="res_crit_low" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 lowercase letter</li>
+                                <li id="res_crit_num" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 number</li>
+                                <li id="res_crit_spec" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 special character</li>
+                            </ul>
                         </div>
 
                         <div class="mb-4">
@@ -60,9 +60,10 @@ $email = $_GET['email'];
                                     <i class="bi bi-eye" id="eye2"></i>
                                 </button>
                             </div>
+                            <small id="passwordMatchText" class="text-danger d-none fw-bold mt-1"><i class="bi bi-exclamation-circle me-1"></i>Passwords do not match</small>
                         </div>
 
-                        <button type="submit" name="reset_password_btn" class="btn-primary-app bg-success border-success w-100">Save New Password</button>
+                        <button type="submit" name="reset_password_btn" id="submitBtn" class="btn-primary-app bg-success border-success w-100" disabled>Save New Password</button>
                     </form>
                 </div>
 
@@ -82,6 +83,60 @@ $email = $_GET['email'];
                 icon.classList.replace("bi-eye-slash", "bi-eye");
             }
         }
+
+        // Password Validation Rules
+        const pwd = document.getElementById('new_pwd');
+        const confPwd = document.getElementById('confirm_pwd');
+        const matchText = document.getElementById('passwordMatchText');
+        const submitBtn = document.getElementById('submitBtn');
+
+        function updateCriterion(id, isMet) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('i');
+            if (isMet) {
+                el.classList.replace('text-danger', 'text-success');
+                icon.classList.replace('bi-x-circle', 'bi-check-circle');
+            } else {
+                el.classList.replace('text-success', 'text-danger');
+                icon.classList.replace('bi-check-circle', 'bi-x-circle');
+            }
+        }
+
+        function validatePassword() {
+            const p = pwd.value;
+            const c = confPwd.value;
+
+            const hasLen = p.length >= 8;
+            const hasUp = /[A-Z]/.test(p);
+            const hasLow = /[a-z]/.test(p);
+            const hasNum = /[0-9]/.test(p);
+            const hasSpec = /[^A-Za-z0-9]/.test(p);
+
+            updateCriterion('res_crit_len', hasLen);
+            updateCriterion('res_crit_up', hasUp);
+            updateCriterion('res_crit_low', hasLow);
+            updateCriterion('res_crit_num', hasNum);
+            updateCriterion('res_crit_spec', hasSpec);
+
+            const isStrong = hasLen && hasUp && hasLow && hasNum && hasSpec;
+
+            // Check match
+            const isMatch = (c.length > 0 && p === c);
+            if (c.length > 0 && !isMatch) {
+                matchText.classList.remove('d-none');
+            } else {
+                matchText.classList.add('d-none');
+            }
+
+            // Enable submit button only if strong and matched
+            submitBtn.disabled = !(isStrong && isMatch);
+        }
+
+        pwd.addEventListener('input', validatePassword);
+        confPwd.addEventListener('input', validatePassword);
+
+        // Initialize state on load
+        validatePassword();
     </script>
 </body>
 

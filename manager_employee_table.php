@@ -118,8 +118,22 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
                         <div class="mb-3">
                             <label class="form-label small text-muted fw-bold">Password</label>
-                            <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password" minlength="8" required>>
+                            <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password">
                             <small class="text-muted" id="passHelp">Required for new employees.</small>
+
+                            <ul id="emp_criteria" class="list-unstyled small mt-2 mb-0" style="font-size: 0.8rem;">
+                                <li id="emp_crit_len" class="text-danger"><i class="bi bi-x-circle me-1"></i>8+ characters</li>
+                                <li id="emp_crit_up" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 uppercase letter</li>
+                                <li id="emp_crit_low" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 lowercase letter</li>
+                                <li id="emp_crit_num" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 number</li>
+                                <li id="emp_crit_spec" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 special character</li>
+                            </ul>
+                        </div>
+
+                        <div class="mb-3" id="confirm_password_div">
+                            <label class="form-label small text-muted fw-bold">Confirm Password</label>
+                            <input type="password" class="form-control" name="confirm_password" id="emp_confirm_password" placeholder="Confirm Password">
+                            <small id="emp_passwordMatchText" class="text-danger d-none fw-bold mt-1"><i class="bi bi-exclamation-circle me-1"></i>Passwords do not match</small>
                         </div>
 
                         <div id="formError" class="alert alert-danger py-2 small d-none" role="alert">
@@ -186,6 +200,73 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
         // Hide the error message as soon as the user starts typing again
         document.getElementById('employeeForm').addEventListener('input', function() {
             document.getElementById('formError').classList.add('d-none');
+        });
+        const empPwd = document.getElementById('emp_password');
+        const empConfPwd = document.getElementById('emp_confirm_password');
+        const empMatchText = document.getElementById('emp_passwordMatchText');
+        const empCriteria = document.getElementById('emp_criteria');
+        const isEditing = document.getElementById('emp_id');
+        const passHelp = document.getElementById('passHelp');
+
+        function updateEmpCriterion(id, isMet) {
+            const el = document.getElementById(id);
+            const icon = el.querySelector('i');
+            if (isMet) {
+                el.classList.replace('text-danger', 'text-success');
+                icon.classList.replace('bi-x-circle', 'bi-check-circle');
+            } else {
+                el.classList.replace('text-success', 'text-danger');
+                icon.classList.replace('bi-check-circle', 'bi-x-circle');
+            }
+        }
+
+        function validateEmpPassword() {
+            const p = empPwd.value;
+            const c = empConfPwd.value;
+
+            const hasLen = p.length >= 8;
+            const hasUp = /[A-Z]/.test(p);
+            const hasLow = /[a-z]/.test(p);
+            const hasNum = /[0-9]/.test(p);
+            const hasSpec = /[^A-Za-z0-9]/.test(p);
+
+            updateEmpCriterion('emp_crit_len', hasLen);
+            updateEmpCriterion('emp_crit_up', hasUp);
+            updateEmpCriterion('emp_crit_low', hasLow);
+            updateEmpCriterion('emp_crit_num', hasNum);
+            updateEmpCriterion('emp_crit_spec', hasSpec);
+
+            const isStrong = hasLen && hasUp && hasLow && hasNum && hasSpec;
+
+            // Check match
+            if (c.length > 0 && p !== c) {
+                empMatchText.classList.remove('d-none');
+            } else {
+                empMatchText.classList.add('d-none');
+            }
+
+            // If editing and blank, hide the help text and consider valid
+            if (isEditing.value !== "" && p === "") {
+                passHelp.classList.remove('d-none');
+                return true;
+            }
+
+            passHelp.classList.add('d-none');
+
+            if (p === "" && isEditing.value === "") return false; // Block new employee empty password
+
+            return isStrong && (p === c);
+        }
+
+        empPwd.addEventListener('input', validateEmpPassword);
+        empConfPwd.addEventListener('input', validateEmpPassword);
+
+        document.getElementById('employeeForm').addEventListener('submit', function(event) {
+            if (!validateEmpPassword()) {
+                event.preventDefault();
+                document.getElementById('formError').classList.remove('d-none');
+                document.getElementById('formError').innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Please ensure passwords match and meet requirements.';
+            }
         });
     </script>
 </body>
