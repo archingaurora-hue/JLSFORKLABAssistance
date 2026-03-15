@@ -38,7 +38,7 @@ $email = $_GET['email'];
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">New Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" name="new_password" id="new_pwd" required>
+                                <input type="password" class="form-control" name="new_password" id="new_pwd" autocomplete="new-password" required>
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('new_pwd', 'eye1')">
                                     <i class="bi bi-eye" id="eye1"></i>
                                 </button>
@@ -55,7 +55,7 @@ $email = $_GET['email'];
                         <div class="mb-4">
                             <label class="form-label text-muted small fw-bold text-uppercase">Confirm Password</label>
                             <div class="input-group">
-                                <input type="password" class="form-control" name="confirm_password" id="confirm_pwd" required>
+                                <input type="password" class="form-control" name="confirm_password" id="confirm_pwd" autocomplete="new-password" required>
                                 <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirm_pwd', 'eye2')">
                                     <i class="bi bi-eye" id="eye2"></i>
                                 </button>
