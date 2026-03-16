@@ -429,6 +429,32 @@ $ordersResult = $stmt->get_result();
             return validateDashPassword();
         }
     </script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+    <?php
+    // Check if a new order was just successfully placed
+    if (isset($_SESSION['order_success']) && $_SESSION['order_success'] === true):
+    ?>
+        <script>
+            document.addEventListener("DOMContentLoaded", function() {
+                Swal.fire({
+                    title: 'Order Placed!',
+                    html: `Your laundry has been added to the queue.<br><br>
+                           <strong>Order ID:</strong> <?php echo $_SESSION['new_order_id']; ?><br>
+                           <strong>Tracking Code:</strong> <span class="text-primary fs-5"><?php echo $_SESSION['new_tracking']; ?></span>`,
+                    icon: 'success',
+                    confirmButtonText: 'Got it!',
+                    confirmButtonColor: '#198754' // Bootstrap success green
+                });
+            });
+        </script>
+    <?php
+        // Clear the session variables so the popup doesn't keep showing when the user refreshes the page
+        unset($_SESSION['order_success']);
+        unset($_SESSION['new_order_id']);
+        unset($_SESSION['new_tracking']);
+    endif;
+    ?>
 </body>
 
 </html>

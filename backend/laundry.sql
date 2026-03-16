@@ -82,6 +82,8 @@ CREATE TABLE IF NOT EXISTS `Process_Load` (
   `bag_label` varchar(100) NOT NULL,
   `status` varchar(50) NOT NULL DEFAULT 'Pending Dropoff',
   `timer_end` datetime DEFAULT NULL,
+  `timer_duration` int(11) DEFAULT NULL,
+  `timer_remaining` int(11) DEFAULT NULL,
   PRIMARY KEY (`load_id`),
   KEY `order_id` (`order_id`),
   CONSTRAINT `fk_process_order` FOREIGN KEY (`order_id`) REFERENCES `Order` (`order_id`) ON DELETE CASCADE

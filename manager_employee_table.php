@@ -14,51 +14,81 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manage Employees</title>
+    <title>Manage Employees - LABAssistance</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="./css/main.css">
+    <style>
+        .table-custom-header th {
+            background-color: #f8f9fa;
+            border-bottom: 2px solid #dee2e6;
+            color: #6c757d;
+            font-weight: 700;
+        }
+    </style>
 </head>
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-light bg-white shadow-sm sticky-top mb-4">
-        <div class="container">
-            <a href="manager_dashboard.php" class="btn btn-sm btn-light rounded-circle"><i class="bi bi-arrow-left"></i></a>
-            <span class="navbar-brand mb-0 h1 fw-bold fs-5 mx-auto">Employees</span>
-            <button class="btn btn-sm btn-dark rounded-circle" data-bs-toggle="modal" data-bs-target="#employeeModal" onclick="resetForm()">
-                <i class="bi bi-plus-lg"></i>
-            </button>
+    <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
+        <div class="container d-flex justify-content-between align-items-center">
+            <span class="navbar-brand fw-bold text-white mb-0">LAB<span class="text-primary">Assistance</span></span>
+            <a href="manager_dashboard.php" class="btn btn-sm btn-outline-light rounded-pill">
+                <i class="bi bi-arrow-left me-1"></i> <span class="d-none d-sm-inline">Dashboard</span>
+            </a>
         </div>
     </nav>
 
-    <div class="container page-container">
+    <div class="container page-container mt-4">
 
-        <div class="app-card p-4 d-none d-md-block">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h3 class="fw-bold mb-0 text-dark">Employee Roster</h3>
+            <button class="btn btn-primary rounded-pill shadow-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#employeeModal" onclick="resetForm()">
+                <i class="bi bi-person-plus-fill me-1"></i> Add <span class="d-none d-sm-inline">Employee</span>
+            </button>
+        </div>
+
+        <div class="app-card p-0 overflow-hidden shadow-sm d-none d-md-block mb-4" style="border-radius: 12px; border: 1px solid #dee2e6; background: #fff;">
             <table class="table table-hover align-middle mb-0">
-                <thead>
-                    <tr class="text-muted small text-uppercase">
-                        <th>ID</th>
-                        <th>Name</th>
-                        <th>Email</th>
-                        <th class="text-end">Actions</th>
+                <thead class="table-custom-header">
+                    <tr class="small text-uppercase text-muted">
+                        <th class="ps-4 py-3">ID</th>
+                        <th class="py-3">Name</th>
+                        <th class="py-3">Email</th>
+                        <th class="text-end pe-4 py-3">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     <?php
                     $result->data_seek(0);
-                    while ($row = $result->fetch_assoc()):
+                    if ($result->num_rows > 0):
+                        while ($row = $result->fetch_assoc()):
                     ?>
+                            <tr>
+                                <td class="ps-4 text-muted fw-bold">#<?php echo $row['user_id']; ?></td>
+                                <td class="fw-bold text-dark">
+                                    <i class="bi bi-person-circle text-primary me-2 fs-5 align-middle"></i>
+                                    <?php echo htmlspecialchars($row['full_name']); ?>
+                                </td>
+                                <td class="text-muted"><?php echo htmlspecialchars($row['email']); ?></td>
+                                <td class="text-end pe-4">
+                                    <button class="btn btn-sm btn-outline-secondary rounded-pill px-3 me-1" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')" title="Edit Employee">
+                                        <i class="bi bi-pencil-square"></i> Edit
+                                    </button>
+                                    <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-danger rounded-pill px-3" onclick="return confirm('Are you sure you want to delete this employee?');" title="Delete Employee">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        <?php endwhile;
+                    else: ?>
                         <tr>
-                            <td><?php echo $row['user_id']; ?></td>
-                            <td class="fw-bold"><?php echo htmlspecialchars($row['full_name']); ?></td>
-                            <td><?php echo htmlspecialchars($row['email']); ?></td>
-                            <td class="text-end">
-                                <button class="btn btn-sm btn-light rounded-circle me-1" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')"><i class="bi bi-pencil"></i></button>
-                                <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-light text-danger rounded-circle" onclick="return confirm('Delete?');"><i class="bi bi-trash"></i></a>
+                            <td colspan="4" class="text-center py-5 text-muted">
+                                <i class="bi bi-people display-4 d-block mb-3 opacity-50"></i>
+                                No employees found.
                             </td>
                         </tr>
-                    <?php endwhile; ?>
+                    <?php endif; ?>
                 </tbody>
             </table>
         </div>
@@ -69,19 +99,22 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
             if ($result->num_rows > 0):
                 while ($row = $result->fetch_assoc()):
             ?>
-                    <div class="app-card mb-3 p-3">
+                    <div class="app-card mb-3 p-3 shadow-sm" style="border-radius: 12px; border: 1px solid #dee2e6; background: #fff;">
                         <div class="d-flex justify-content-between align-items-center mb-2">
-                            <span class="fw-bold"><?php echo htmlspecialchars($row['full_name']); ?></span>
-                            <span class="badge bg-light text-dark border">ID: <?php echo $row['user_id']; ?></span>
+                            <span class="fw-bold text-dark fs-6">
+                                <i class="bi bi-person-circle text-primary me-1"></i>
+                                <?php echo htmlspecialchars($row['full_name']); ?>
+                            </span>
+                            <span class="badge bg-dark rounded-pill">ID: #<?php echo $row['user_id']; ?></span>
                         </div>
-                        <p class="text-muted small mb-3"><?php echo htmlspecialchars($row['email']); ?></p>
+                        <p class="text-muted small mb-3 ms-4"><i class="bi bi-envelope me-1"></i> <?php echo htmlspecialchars($row['email']); ?></p>
 
-                        <div class="d-flex gap-2">
-                            <button class="btn btn-sm btn-outline-dark flex-grow-1 rounded-pill" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')">
-                                Edit
+                        <div class="d-flex gap-2 mt-2 pt-2 border-top">
+                            <button class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill fw-bold" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['full_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')">
+                                <i class="bi bi-pencil-square me-1"></i> Edit
                             </button>
-                            <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill" onclick="return confirm('Delete this employee?');">
-                                Delete
+                            <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill fw-bold" onclick="return confirm('Delete this employee?');">
+                                <i class="bi bi-trash me-1"></i> Delete
                             </a>
                         </div>
                     </div>
@@ -89,7 +122,10 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                 endwhile;
             else:
                 ?>
-                <p class="text-center text-muted">No employees found.</p>
+                <div class="text-center py-5 text-muted">
+                    <i class="bi bi-people display-4 d-block mb-3 opacity-50"></i>
+                    No employees found.
+                </div>
             <?php endif; ?>
         </div>
 
@@ -97,27 +133,27 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
     <div class="modal fade" id="employeeModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header border-0">
-                    <h5 class="modal-title fw-bold" id="modalTitle">Add Employee</h5>
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark" id="modalTitle">Add Employee</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <div class="modal-body">
+                <div class="modal-body pt-4">
                     <form action="backend/employee_crud.php" method="POST" id="employeeForm" novalidate>
                         <input type="hidden" name="user_id" id="emp_id">
 
                         <div class="mb-3">
-                            <label class="form-label small text-muted fw-bold">Full Name</label>
-                            <input type="text" class="form-control" name="full_name" id="emp_name" placeholder="Full Name" required>
+                            <label class="form-label small text-muted fw-bold text-uppercase">Full Name</label>
+                            <input type="text" class="form-control" name="full_name" id="emp_name" placeholder="Juan Dela Cruz" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small text-muted fw-bold">Email</label>
-                            <input type="email" class="form-control" name="email" id="emp_email" placeholder="Email" required>
+                            <label class="form-label small text-muted fw-bold text-uppercase">Email</label>
+                            <input type="email" class="form-control" name="email" id="emp_email" placeholder="name@example.com" required>
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label small text-muted fw-bold">Password</label>
+                            <label class="form-label small text-muted fw-bold text-uppercase">Password</label>
                             <input type="password" class="form-control" name="password" id="emp_password" autocomplete="new-password" placeholder="Password">
                             <small class="text-muted" id="passHelp">Required for new employees.</small>
 
@@ -130,8 +166,8 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                             </ul>
                         </div>
 
-                        <div class="mb-3" id="confirm_password_div">
-                            <label class="form-label small text-muted fw-bold">Confirm Password</label>
+                        <div class="mb-4" id="confirm_password_div">
+                            <label class="form-label small text-muted fw-bold text-uppercase">Confirm Password</label>
                             <input type="password" class="form-control" name="confirm_password" id="emp_confirm_password" placeholder="Confirm Password">
                             <small id="emp_passwordMatchText" class="text-danger d-none fw-bold mt-1"><i class="bi bi-exclamation-circle me-1"></i>Passwords do not match</small>
                         </div>
@@ -140,7 +176,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                             <i class="bi bi-exclamation-circle me-1"></i> Please fill in all required fields.
                         </div>
 
-                        <button type="submit" name="save_employee" class="btn-primary-app w-100">Save Employee</button>
+                        <button type="submit" name="save_employee" class="btn-primary-app w-100 py-2 fw-bold">Save Employee</button>
                     </form>
                 </div>
             </div>
@@ -173,11 +209,15 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
             document.getElementById('emp_name').value = "";
             document.getElementById('emp_email').value = "";
             document.getElementById('emp_password').value = "";
+            document.getElementById('emp_confirm_password').value = "";
 
             // Password logic for new entry
             document.getElementById('emp_password').required = true;
             document.getElementById('emp_password').placeholder = "Password";
             document.getElementById('passHelp').innerText = "Required for new employees.";
+
+            // Reset criteria styling
+            validateEmpPassword();
 
             // Hide error message if it was previously triggered
             document.getElementById('formError').classList.add('d-none');
@@ -191,6 +231,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
                 // Show the red error box
                 document.getElementById('formError').classList.remove('d-none');
+                document.getElementById('formError').innerHTML = '<i class="bi bi-exclamation-circle me-1"></i> Please fill in all required fields.';
 
                 // Optional: Adds Bootstrap's native red borders to empty fields
                 this.classList.add('was-validated');

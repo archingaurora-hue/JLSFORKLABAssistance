@@ -116,10 +116,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
         $loadInsert->close();
 
-        echo "<script>
-                alert('Order Placed! ID: $order_id. Tracking: $tracking_code'); 
-                window.location.href='../dashboard.php';
-              </script>";
+        // Store success info in session to be picked up by SweetAlert
+        $_SESSION['order_success'] = true;
+        $_SESSION['new_order_id'] = $order_id;
+        $_SESSION['new_tracking'] = $tracking_code;
+
+        // Redirect cleanly
+        header("Location: ../dashboard.php");
+        exit();
     } else {
         echo "Error: " . $stmt->error;
     }
