@@ -18,6 +18,7 @@ CREATE TABLE IF NOT EXISTS `Shop_Status` (
   `default_close_time` time NOT NULL DEFAULT '20:00:00',
   `current_closing_time` time DEFAULT NULL,
   `next_manual_open_time` datetime DEFAULT NULL,
+  `next_manual_close_time` datetime DEFAULT NULL,
   PRIMARY KEY (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

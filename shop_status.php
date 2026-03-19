@@ -20,15 +20,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $tomorrow_open = date('Y-m-d', strtotime('+1 day')) . ' ' . $d['default_open_time'];
         $time_now = date('H:i:s');
 
-        $stmt = $conn->prepare("UPDATE Shop_Status SET is_shop_open = 0, next_manual_open_time = ?, current_closing_time = ? WHERE status_id = 1");
+        // Added next_manual_close_time = NULL to clear any active open overrides
+        $stmt = $conn->prepare("UPDATE Shop_Status SET is_shop_open = 0, next_manual_open_time = ?, next_manual_close_time = NULL, current_closing_time = ? WHERE status_id = 1");
         $stmt->bind_param("ss", $tomorrow_open, $time_now);
         $stmt->execute();
 
         $_SESSION['msg'] = "Shop closed early at " . date('H:i') . ". It will auto-reopen tomorrow.";
         $_SESSION['msg_type'] = "danger";
     } elseif ($action === 'open_shop') {
-        $conn->query("UPDATE Shop_Status SET is_shop_open = 1, next_manual_open_time = NULL, current_closing_time = NULL WHERE status_id = 1");
-        $_SESSION['msg'] = "Shop opened. Normal schedule resumed.";
+        $q = $conn->query("SELECT default_close_time FROM Shop_Status WHERE status_id = 1");
+        $d = $q->fetch_assoc();
+        $time_now = date('H:i:s');
+
+        // Logic to determine if the next close time is today or tomorrow
+        if ($time_now >= $d['default_close_time']) {
+            $next_close = date('Y-m-d', strtotime('+1 day')) . ' ' . $d['default_close_time'];
+        } else {
+            $next_close = date('Y-m-d') . ' ' . $d['default_close_time'];
+        }
+
+        // Sets the new next_manual_close_time override
+        $stmt = $conn->prepare("UPDATE Shop_Status SET is_shop_open = 1, next_manual_open_time = NULL, next_manual_close_time = ?, current_closing_time = NULL WHERE status_id = 1");
+        $stmt->bind_param("s", $next_close);
+        $stmt->execute();
+
+        $_SESSION['msg'] = "Shop forced open. It will auto-close at " . date('M d, Y h:i A', strtotime($next_close)) . ".";
         $_SESSION['msg_type'] = "success";
     } elseif ($action === 'update_times') {
         $def_open = $_POST['default_open'];
@@ -62,11 +78,19 @@ $now = new DateTime();
 $currentTime = $now->format('H:i:s');
 $currentDateTime = $now->format('Y-m-d H:i:s');
 
+
 $expected_status = 0;
 
-if (!empty($shop['next_manual_open_time']) && $shop['next_manual_open_time'] > $currentDateTime) {
+// Priority 1: Is there an active "OPEN NOW" override?
+if (!empty($shop['next_manual_close_time']) && $shop['next_manual_close_time'] > $currentDateTime) {
+    $expected_status = 1;
+}
+// Priority 2: Is there an active "CLOSE NOW" override?
+elseif (!empty($shop['next_manual_open_time']) && $shop['next_manual_open_time'] > $currentDateTime) {
     $expected_status = 0;
-} else {
+}
+// Priority 3: Normal operating hours
+else {
     $close_time = !empty($shop['current_closing_time']) ? $shop['current_closing_time'] : $shop['default_close_time'];
     if ($currentTime >= $shop['default_open_time'] && $currentTime <= $close_time) {
         $expected_status = 1;

@@ -25,17 +25,24 @@ if ($status_query && $status_query->num_rows > 0) {
 
     $expected_status = 0;
 
+
     // Determine if shop should be open
-    if (!empty($shop_data['next_manual_open_time']) && $shop_data['next_manual_open_time'] > $currentDateTime) {
-        $expected_status = 0; // Active override
-    } else {
+    // PRIORITY 1: Check if there is an active "OPEN NOW" override
+    if (!empty($shop_data['next_manual_close_time']) && $shop_data['next_manual_close_time'] > $currentDateTime) {
+        $expected_status = 1;
+    }
+    // PRIORITY 2: Check if there is an active "CLOSE NOW" override
+    elseif (!empty($shop_data['next_manual_open_time']) && $shop_data['next_manual_open_time'] > $currentDateTime) {
+        $expected_status = 0;
+    }
+    // PRIORITY 3: Fall back to normal operating hours
+    else {
         $close_time = !empty($shop_data['current_closing_time']) ? $shop_data['current_closing_time'] : $shop_data['default_close_time'];
 
         if ($currentTime >= $shop_data['default_open_time'] && $currentTime <= $close_time) {
-            $expected_status = 1; // Within regular hours
+            $expected_status = 1;
         }
     }
-
     // Update DB if status changed
     if ($shop_data['is_shop_open'] != $expected_status) {
         $conn->query("UPDATE Shop_Status SET is_shop_open = $expected_status WHERE status_id = 1");
