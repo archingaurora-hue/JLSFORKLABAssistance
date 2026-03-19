@@ -183,9 +183,13 @@ if ($result->num_rows > 0) {
                                     <div>
                                         <div id="price-view-<?php echo $order_id; ?>" class="d-flex align-items-center gap-2">
                                             <span class="fw-bold text-success" style="font-size: 1.1rem;">₱<?php echo number_format($order['final_price'], 2); ?></span>
-                                            <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="togglePriceEdit('<?php echo $order_id; ?>')" title="Edit Price">
-                                                <i class="bi bi-pencil-square"></i> Edit
-                                            </button>
+                                            <?php
+                                            if (!isset($_SESSION['role']) || ($_SESSION['role'] == 'Manager')) { ?>
+                                                <button type="button" class="btn btn-sm btn-outline-secondary py-0 px-2" onclick="togglePriceEdit('<?php echo $order_id; ?>')" title="Edit Price">
+                                                    <i class="bi bi-pencil-square"></i> Edit
+                                                </button>
+                                            <?php }
+                                            ?>
                                         </div>
 
                                         <form id="price-form-<?php echo $order_id; ?>" action="backend/update_price.php" method="POST" class="d-none align-items-center" style="max-width: 200px;">
