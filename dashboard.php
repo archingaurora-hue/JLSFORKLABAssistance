@@ -26,6 +26,33 @@ $stmt = $conn->prepare($orderQuery);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
 $ordersResult = $stmt->get_result();
+
+// Group orders into arrays based on status
+$pendingOrders = [];
+$inProgressOrders = [];
+$completedOrders = [];
+$cancelledOrders = [];
+
+while ($order = $ordersResult->fetch_assoc()) {
+    $status = $order['status'];
+    if ($status === 'Pending Dropoff' || $status === 'Pending') {
+        $pendingOrders[] = $order;
+    } elseif ($status === 'Completed') {
+        $completedOrders[] = $order;
+    } elseif ($status === 'Cancelled') {
+        $cancelledOrders[] = $order;
+    } else {
+        $inProgressOrders[] = $order;
+    }
+}
+
+// Prepare arrays for iteration
+$orderGroups = [
+    ['title' => 'Pending Dropoff', 'id' => 'Pending', 'orders' => $pendingOrders, 'color' => '#ffc107', 'text_color' => 'text-dark'],
+    ['title' => 'In Progress', 'id' => 'InProgress', 'orders' => $inProgressOrders, 'color' => '#0d6efd', 'text_color' => 'text-primary'],
+    ['title' => 'Completed', 'id' => 'Completed', 'orders' => $completedOrders, 'color' => '#198754', 'text_color' => 'text-success'],
+    ['title' => 'Cancelled', 'id' => 'Cancelled', 'orders' => $cancelledOrders, 'color' => '#dc3545', 'text_color' => 'text-danger']
+];
 ?>
 
 <!DOCTYPE html>
@@ -47,6 +74,29 @@ $ordersResult = $stmt->get_result();
         .order-summary-card {
             background-color: #ffffff;
             border: 1px solid #e9ecef;
+        }
+
+        /* Accordion Ribbon Styling */
+        .accordion-ribbon .accordion-item {
+            border: none;
+            background: transparent;
+            margin-bottom: 0.75rem;
+        }
+
+        .accordion-ribbon .accordion-button {
+            border-radius: 8px !important;
+            background-color: #ffffff;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            font-weight: 700;
+        }
+
+        .accordion-ribbon .accordion-button:not(.collapsed) {
+            background-color: #f8f9fa;
+            box-shadow: inset 0 -1px 0 rgba(0, 0, 0, .125);
+        }
+
+        .accordion-ribbon .accordion-button::after {
+            filter: grayscale(1);
         }
     </style>
 </head>
@@ -117,145 +167,113 @@ $ordersResult = $stmt->get_result();
 
         <div class="row justify-content-center">
             <div class="col-12 col-md-8 col-lg-6">
-                <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-2">Recent Orders</h6>
+
+                <div class="d-flex justify-content-between align-items-center mb-2 ps-2">
+                    <h6 class="text-muted fw-bold text-uppercase small mb-0">Your Orders</h6>
+                </div>
 
                 <?php if ($ordersResult->num_rows > 0): ?>
-                    <?php while ($order = $ordersResult->fetch_assoc()): ?>
+                    <div class="input-group shadow-sm mb-4">
+                        <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-search"></i></span>
+                        <input type="text" id="searchTracking" class="form-control border-start-0 ps-0" placeholder="Tracking code or Order ID...">
+                        <button class="btn btn-primary px-3 fw-bold" type="button" onclick="trackOrder()">Track</button>
+                    </div>
 
-                        <div class="app-card mb-3 p-3 bg-white rounded-3 shadow-sm border" style="cursor: pointer;" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
-                            <div class="d-flex justify-content-between align-items-center mb-2">
-                                <div class="d-flex align-items-center gap-2">
-                                    <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
-                                    <span class="small fw-bold text-primary"><?php echo $order['status']; ?></span>
-                                </div>
-                                <h5 class="fw-bold mb-0 text-dark">₱<?php echo number_format($order['final_price'], 2); ?></h5>
-                            </div>
-                            <div class="text-muted small">
-                                <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags • <?php echo $order['services_requested']; ?>
-                            </div>
-                        </div>
+                    <div class="accordion accordion-ribbon" id="ordersAccordion">
+                        <?php foreach ($orderGroups as $index => $group): ?>
+                            <div class="accordion-item">
+                                <h2 class="accordion-header" id="heading<?php echo $group['id']; ?>">
+                                    <button class="accordion-button <?php echo $index === 0 && count($group['orders']) > 0 ? '' : 'collapsed'; ?>" type="button" data-bs-toggle="collapse" data-bs-target="#collapse<?php echo $group['id']; ?>" aria-expanded="<?php echo $index === 0 && count($group['orders']) > 0 ? 'true' : 'false'; ?>" aria-controls="collapse<?php echo $group['id']; ?>" style="border-left: 5px solid <?php echo $group['color']; ?>;">
+                                        <span class="<?php echo $group['text_color']; ?> me-2"><i class="bi bi-folder2-open"></i></span>
+                                        <?php echo $group['title']; ?>
+                                        <span class="badge bg-secondary ms-2 rounded-pill group-count"><?php echo count($group['orders']); ?></span>
+                                    </button>
+                                </h2>
+                                <div id="collapse<?php echo $group['id']; ?>" class="accordion-collapse collapse <?php echo $index === 0 && count($group['orders']) > 0 ? 'show' : ''; ?>" aria-labelledby="heading<?php echo $group['id']; ?>" data-bs-parent="#ordersAccordion">
+                                    <div class="accordion-body px-1 py-2">
 
-                        <?php
-                        // Check loads outside modal body to determine if order is cancellable
-                        $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
-                        $loadsResult = $conn->query($loadQuery);
+                                        <?php if (count($group['orders']) > 0): ?>
+                                            <?php foreach ($group['orders'] as $order): ?>
 
-                        $loadArray = [];
-                        $canCancel = ($order['status'] !== 'Cancelled' && $order['status'] !== 'Completed');
+                                                <?php
+                                                // Check loads FIRST to calculate the true Display Status
+                                                $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
+                                                $loadsResult = $conn->query($loadQuery);
+                                                $loadArray = [];
 
-                        while ($load = $loadsResult->fetch_assoc()) {
-                            $loadArray[] = $load;
-                            if (!in_array($load['status'], ['Pending Dropoff', 'In Queue', 'Pending'])) {
-                                $canCancel = false;
-                            }
-                        }
-                        ?>
+                                                $canCancel = ($order['status'] !== 'Cancelled' && $order['status'] !== 'Completed');
+                                                $allAwaiting = true;
+                                                $hasLoads = false;
 
-                        <div class="modal fade" id="modal<?php echo $order['order_id']; ?>" tabindex="-1" aria-hidden="true">
-                            <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
-                                <div class="modal-content border-0 rounded-4">
-                                    <div class="modal-header border-0 pb-0 pt-4 px-4">
-                                        <h5 class="modal-title fw-bold">Order Details</h5>
-                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                                    </div>
+                                                while ($load = $loadsResult->fetch_assoc()) {
+                                                    $loadArray[] = $load;
+                                                    $hasLoads = true;
+                                                    if (!in_array($load['status'], ['Pending Dropoff', 'In Queue', 'Pending'])) {
+                                                        $canCancel = false;
+                                                    }
+                                                    if ($load['status'] !== 'Awaiting Pickup') {
+                                                        $allAwaiting = false;
+                                                    }
+                                                }
 
-                                    <div class="modal-body p-4">
-                                        <div class="d-flex justify-content-between align-items-center mb-4">
-                                            <div>
-                                                <span class="text-muted small d-block text-uppercase fw-bold">Tracking Number</span>
-                                                <span class="fw-bold fs-5 text-dark"><?php echo $order['tracking_code']; ?></span>
-                                            </div>
-                                            <?php
-                                            $masterStatusClass = $order['status'] == 'Completed' ? 'bg-success' : ($order['status'] == 'Cancelled' ? 'bg-danger' : 'bg-primary');
-                                            ?>
-                                            <span class="badge <?php echo $masterStatusClass; ?> fs-6 px-3 py-2 rounded-pill"><?php echo $order['status']; ?></span>
-                                        </div>
+                                                // Dynamic Status Evaluation
+                                                $displayStatus = $order['status'];
+                                                if ($hasLoads && $allAwaiting && $order['status'] !== 'Completed' && $order['status'] !== 'Cancelled') {
+                                                    $displayStatus = 'Awaiting Pickup';
+                                                }
 
-                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Track Order Progress</h6>
-                                        <div class="mb-4">
-                                            <?php if (count($loadArray) > 0): ?>
-                                                <?php foreach ($loadArray as $load): ?>
-                                                    <div class="tracking-card rounded-3 p-3 mb-2 shadow-sm">
-                                                        <div class="d-flex justify-content-between align-items-center">
-                                                            <div class="fw-bold text-dark">
-                                                                <i class="bi bi-bag-check text-primary me-1"></i> <?php echo $load['bag_label']; ?>
-                                                            </div>
-                                                            <?php
-                                                            $s = $load['status'];
-                                                            $badgeClass = 'bg-secondary';
-                                                            if ($s == 'In Queue') $badgeClass = 'bg-dark';
-                                                            elseif (strpos($s, 'Washing') !== false) $badgeClass = 'bg-primary';
-                                                            elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
-                                                            elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
-                                                            elseif ($s == 'Completed') $badgeClass = 'bg-success bg-opacity-75';
-                                                            elseif ($s == 'Cancelled') $badgeClass = 'bg-danger';
-                                                            ?>
-                                                            <span class="badge <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
+                                                // Colors based on Status
+                                                $statusTextColor = 'text-primary';
+                                                $masterBadgeClass = 'bg-primary';
+
+                                                if ($displayStatus === 'Completed') {
+                                                    $statusTextColor = 'text-success';
+                                                    $masterBadgeClass = 'bg-success';
+                                                } elseif ($displayStatus === 'Cancelled') {
+                                                    $statusTextColor = 'text-danger';
+                                                    $masterBadgeClass = 'bg-danger';
+                                                } elseif ($displayStatus === 'Awaiting Pickup') {
+                                                    $statusTextColor = 'text-success'; // Turns green if waiting for pickup
+                                                    $masterBadgeClass = 'bg-success';
+                                                }
+                                                ?>
+
+                                                <div class="app-card mb-3 p-3 bg-white rounded-3 shadow-sm border order-card-item" data-tracking="<?php echo htmlspecialchars($order['tracking_code'] ?? ''); ?>" data-orderid="<?php echo htmlspecialchars($order['order_id']); ?>">
+                                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                                        <div class="d-flex align-items-center gap-2">
+                                                            <span class="badge bg-light text-dark border">#<?php echo $order['order_id']; ?></span>
+                                                            <span class="small fw-bold <?php echo $statusTextColor; ?>"><?php echo $displayStatus; ?></span>
                                                         </div>
-
-                                                        <?php if (!empty($load['timer_end']) && $s !== 'Cancelled'): ?>
-                                                            <div class="d-flex justify-content-between align-items-center bg-white border rounded px-2 py-1 mt-2">
-                                                                <span class="small text-muted fw-bold"><i class="bi bi-stopwatch"></i> TIME LEFT</span>
-                                                                <span class="fw-bold text-danger live-timer" data-end="<?php echo date('c', strtotime($load['timer_end'])); ?>">--:--</span>
-                                                            </div>
-                                                        <?php endif; ?>
+                                                        <h5 class="fw-bold mb-0 text-dark">₱<?php echo number_format($order['final_price'], 2); ?></h5>
                                                     </div>
-                                                <?php endforeach; ?>
-                                            <?php else: ?>
-                                                <div class="text-muted small text-center bg-light p-3 rounded">Bags are being processed.</div>
-                                            <?php endif; ?>
-                                        </div>
 
-                                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Information</h6>
-                                        <div class="order-summary-card rounded-3 p-3 shadow-sm mb-2">
-                                            <div class="d-flex justify-content-between mb-2 small">
-                                                <span class="text-muted">Services</span>
-                                                <span class="fw-bold text-end"><?php echo $order['services_requested']; ?></span>
-                                            </div>
-                                            <?php if (!empty($order['supplies_requested'])): ?>
-                                                <div class="d-flex justify-content-between mb-2 small">
-                                                    <span class="text-muted">Add-ons</span>
-                                                    <span class="fw-bold text-end"><?php echo $order['supplies_requested']; ?></span>
+                                                    <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
+                                                        <div>
+                                                            <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags • <?php echo $order['services_requested']; ?>
+                                                        </div>
+                                                        <div class="fw-bold text-secondary">
+                                                            TRK: <?php echo htmlspecialchars($order['tracking_code'] ?? ''); ?>
+                                                        </div>
+                                                    </div>
+
+                                                    <button type="button" class="btn btn-outline-primary btn-sm w-100 fw-bold rounded-pill" data-bs-toggle="modal" data-bs-target="#modal<?php echo $order['order_id']; ?>">
+                                                        <i class="bi bi-eye-fill me-1"></i> View Order Details
+                                                    </button>
                                                 </div>
-                                            <?php endif; ?>
-                                            <div class="d-flex justify-content-between mb-2 small">
-                                                <span class="text-muted">Bags</span>
-                                                <span class="fw-bold text-end"><?php echo $order['bag_counts']; ?></span>
+
+                                            <?php endforeach; ?>
+                                        <?php else: ?>
+                                            <div class="text-muted small text-center bg-transparent py-2">
+                                                No <?php echo strtolower($group['title']); ?> found.
                                             </div>
-                                            <?php if (!empty($order['customer_note'])): ?>
-                                                <div class="d-flex justify-content-between mb-2 small">
-                                                    <span class="text-muted">Instructions</span>
-                                                    <span class="fw-bold text-end text-truncate" style="max-width: 60%;" title="<?php echo htmlspecialchars($order['customer_note']); ?>">
-                                                        <?php echo htmlspecialchars($order['customer_note']); ?>
-                                                    </span>
-                                                </div>
-                                            <?php endif; ?>
-
-                                            <hr class="my-2 border-secondary opacity-25">
-
-                                            <div class="d-flex justify-content-between align-items-center">
-                                                <span class="fw-bold text-dark">Total</span>
-                                                <span class="fw-bold fs-5 text-primary">₱<?php echo number_format($order['final_price'], 2); ?></span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="modal-footer border-0 px-4 pb-4 flex-column">
-                                        <?php if ($canCancel): ?>
-                                            <form action="backend/cancel_order.php" method="POST" class="w-100 mb-2">
-                                                <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
-                                                <button type="submit" class="btn btn-outline-danger w-100 fw-bold border" onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone.');">
-                                                    Cancel Order
-                                                </button>
-                                            </form>
                                         <?php endif; ?>
-                                        <button type="button" class="btn btn-light w-100 fw-bold border" data-bs-dismiss="modal">Close</button>
+
                                     </div>
                                 </div>
                             </div>
-                        </div>
+                        <?php endforeach; ?>
+                    </div>
 
-                    <?php endwhile; ?>
                 <?php else: ?>
                     <div class="text-center py-5 text-muted">
                         <div class="mb-3">
@@ -270,6 +288,149 @@ $ordersResult = $stmt->get_result();
         </div>
     </div>
 
+    <?php
+    if ($ordersResult->num_rows > 0):
+        foreach ($orderGroups as $group):
+            foreach ($group['orders'] as $order):
+
+                // Fetch loads for this specific order (re-fetch needed since it's outside the previous loop scope)
+                $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
+                $loadsResult = $conn->query($loadQuery);
+                $loadArray = [];
+                $canCancel = ($order['status'] !== 'Cancelled' && $order['status'] !== 'Completed');
+                $allAwaiting = true;
+                $hasLoads = false;
+
+                while ($load = $loadsResult->fetch_assoc()) {
+                    $loadArray[] = $load;
+                    $hasLoads = true;
+                    if (!in_array($load['status'], ['Pending Dropoff', 'In Queue', 'Pending'])) {
+                        $canCancel = false;
+                    }
+                    if ($load['status'] !== 'Awaiting Pickup') {
+                        $allAwaiting = false;
+                    }
+                }
+
+                // Recalculate status for the modal
+                $displayStatus = $order['status'];
+                if ($hasLoads && $allAwaiting && $order['status'] !== 'Completed' && $order['status'] !== 'Cancelled') {
+                    $displayStatus = 'Awaiting Pickup';
+                }
+
+                $masterBadgeClass = 'bg-primary';
+                if ($displayStatus === 'Completed' || $displayStatus === 'Awaiting Pickup') {
+                    $masterBadgeClass = 'bg-success';
+                } elseif ($displayStatus === 'Cancelled') {
+                    $masterBadgeClass = 'bg-danger';
+                }
+    ?>
+                <div class="modal fade" id="modal<?php echo $order['order_id']; ?>" tabindex="-1" aria-hidden="true">
+                    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+                        <div class="modal-content border-0 rounded-4">
+                            <div class="modal-header border-0 pb-0 pt-4 px-4">
+                                <h5 class="modal-title fw-bold">Order Details</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+
+                            <div class="modal-body p-4">
+                                <div class="d-flex justify-content-between align-items-center mb-4">
+                                    <div>
+                                        <span class="text-muted small d-block text-uppercase fw-bold">Tracking Number</span>
+                                        <span class="fw-bold fs-5 text-dark"><?php echo $order['tracking_code']; ?></span>
+                                    </div>
+                                    <span class="badge <?php echo $masterBadgeClass; ?> fs-6 px-3 py-2 rounded-pill"><?php echo $displayStatus; ?></span>
+                                </div>
+
+                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Track Order Progress</h6>
+                                <div class="mb-4">
+                                    <?php if (count($loadArray) > 0): ?>
+                                        <?php foreach ($loadArray as $load): ?>
+                                            <div class="tracking-card rounded-3 p-3 mb-2 shadow-sm">
+                                                <div class="d-flex justify-content-between align-items-center">
+                                                    <div class="fw-bold text-dark">
+                                                        <i class="bi bi-bag-check text-primary me-1"></i> <?php echo $load['bag_label']; ?>
+                                                    </div>
+                                                    <?php
+                                                    $s = $load['status'];
+                                                    $badgeClass = 'bg-secondary';
+                                                    if ($s == 'In Queue') $badgeClass = 'bg-dark';
+                                                    elseif (strpos($s, 'Washing') !== false) $badgeClass = 'bg-primary';
+                                                    elseif (strpos($s, 'Drying') !== false) $badgeClass = 'bg-warning text-dark';
+                                                    elseif ($s == 'Awaiting Pickup') $badgeClass = 'bg-success';
+                                                    elseif ($s == 'Completed') $badgeClass = 'bg-success bg-opacity-75';
+                                                    elseif ($s == 'Cancelled') $badgeClass = 'bg-danger';
+                                                    ?>
+                                                    <span class="badge <?php echo $badgeClass; ?>"><?php echo $s; ?></span>
+                                                </div>
+
+                                                <?php if (!empty($load['timer_end']) && $s !== 'Cancelled'): ?>
+                                                    <div class="d-flex justify-content-between align-items-center bg-white border rounded px-2 py-1 mt-2">
+                                                        <span class="small text-muted fw-bold"><i class="bi bi-stopwatch"></i> TIME LEFT</span>
+                                                        <span class="fw-bold text-danger live-timer" data-end="<?php echo date('c', strtotime($load['timer_end'])); ?>">--:--</span>
+                                                    </div>
+                                                <?php endif; ?>
+                                            </div>
+                                        <?php endforeach; ?>
+                                    <?php else: ?>
+                                        <div class="text-muted small text-center bg-light p-3 rounded">Bags are being processed.</div>
+                                    <?php endif; ?>
+                                </div>
+
+                                <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Information</h6>
+                                <div class="order-summary-card rounded-3 p-3 shadow-sm mb-2">
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Services</span>
+                                        <span class="fw-bold text-end"><?php echo $order['services_requested']; ?></span>
+                                    </div>
+                                    <?php if (!empty($order['supplies_requested'])): ?>
+                                        <div class="d-flex justify-content-between mb-2 small">
+                                            <span class="text-muted">Add-ons</span>
+                                            <span class="fw-bold text-end"><?php echo $order['supplies_requested']; ?></span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <div class="d-flex justify-content-between mb-2 small">
+                                        <span class="text-muted">Bags</span>
+                                        <span class="fw-bold text-end"><?php echo $order['bag_counts']; ?></span>
+                                    </div>
+                                    <?php if (!empty($order['customer_note'])): ?>
+                                        <div class="d-flex justify-content-between mb-2 small">
+                                            <span class="text-muted">Instructions</span>
+                                            <span class="fw-bold text-end text-truncate" style="max-width: 60%;" title="<?php echo htmlspecialchars($order['customer_note']); ?>">
+                                                <?php echo htmlspecialchars($order['customer_note']); ?>
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+
+                                    <hr class="my-2 border-secondary opacity-25">
+
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="fw-bold text-dark">Total</span>
+                                        <span class="fw-bold fs-5 text-primary">₱<?php echo number_format($order['final_price'], 2); ?></span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="modal-footer border-0 px-4 pb-4 flex-column">
+                                <?php if ($canCancel): ?>
+                                    <form action="backend/cancel_order.php" method="POST" class="w-100 mb-2">
+                                        <input type="hidden" name="order_id" value="<?php echo $order['order_id']; ?>">
+                                        <button type="submit" class="btn btn-outline-danger w-100 fw-bold border" onclick="return confirm('Are you sure you want to cancel this order? This action cannot be undone.');">
+                                            Cancel Order
+                                        </button>
+                                    </form>
+                                <?php endif; ?>
+                                <button type="button" class="btn btn-light w-100 fw-bold border" data-bs-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+    <?php
+            endforeach;
+        endforeach;
+    endif;
+    ?>
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4">
@@ -314,7 +475,60 @@ $ordersResult = $stmt->get_result();
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        // Live Countdown Timer Logic for Customers
+        // Popup Trigger Logic for "Track" Button
+        function trackOrder() {
+            const input = document.getElementById('searchTracking').value.toLowerCase().trim();
+            if (input === '') return;
+
+            const cards = document.querySelectorAll('.order-card-item');
+            let found = false;
+
+            for (let i = 0; i < cards.length; i++) {
+                const card = cards[i];
+                const tracking = card.getAttribute('data-tracking').toLowerCase();
+                const orderId = card.getAttribute('data-orderid').toLowerCase();
+
+                if (tracking === input || orderId === input) {
+                    found = true;
+
+                    // Automatically open the accordion folder if it's closed
+                    const accordionCollapse = card.closest('.accordion-collapse');
+                    if (accordionCollapse && !accordionCollapse.classList.contains('show')) {
+                        const bsCollapse = bootstrap.Collapse.getOrCreateInstance(accordionCollapse);
+                        bsCollapse.show();
+                    }
+
+                    // Open the modal
+                    const rawOrderId = card.getAttribute('data-orderid');
+                    const modalEl = document.getElementById('modal' + rawOrderId);
+
+                    if (modalEl) {
+                        const modalObj = bootstrap.Modal.getOrCreateInstance(modalEl);
+                        modalObj.show();
+                    }
+                    break;
+                }
+            }
+
+            if (!found) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Order Not Found',
+                    text: 'We could not find an active or past order with that ID or tracking number.',
+                    confirmButtonColor: '#0d6efd'
+                });
+            }
+        }
+
+        // Trigger the search button if the user hits the "Enter" key
+        document.getElementById('searchTracking').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                trackOrder();
+            }
+        });
+
+        // Live Countdown Timer Logic
         document.addEventListener('DOMContentLoaded', function() {
             function updateTimers() {
                 const timers = document.querySelectorAll('.live-timer');
@@ -342,26 +556,11 @@ $ordersResult = $stmt->get_result();
                 });
             }
 
-            // Run timer every second
             setInterval(updateTimers, 1000);
             updateTimers();
         });
     </script>
     <script>
-        // Form Validation for Password Matching
-        function validatePasswordMatch() {
-            const newPassword = document.getElementById('new_password').value;
-            const confirmPassword = document.getElementById('confirm_password').value;
-            const errorText = document.getElementById('password_error');
-
-            if (newPassword !== '' && newPassword !== confirmPassword) {
-                errorText.classList.remove('d-none'); // Show error message
-                return false; // Prevent form submission
-            }
-
-            errorText.classList.add('d-none'); // Hide error message
-            return true; // Allow form submission
-        }
         const dashPwd = document.getElementById('new_password');
         const dashConfPwd = document.getElementById('confirm_password');
         const dashCriteria = document.getElementById('dash_criteria');
@@ -403,7 +602,6 @@ $ordersResult = $stmt->get_result();
                 errorText.classList.add('d-none');
             }
 
-            // If leaving blank to keep current password, it's valid
             if (p === "") {
                 errorText.classList.add('d-none');
                 return true;
@@ -412,14 +610,6 @@ $ordersResult = $stmt->get_result();
             return isStrong && p === c;
         }
 
-        dashPwd.addEventListener('input', validateDashPassword);
-        dashConfPwd.addEventListener('input', validateDashPassword);
-
-        function validatePasswordMatch() {
-            return validateDashPassword();
-        }
-
-        // Initialize on page load so the red criteria are visible immediately
         validateDashPassword();
 
         dashPwd.addEventListener('input', validateDashPassword);
@@ -432,7 +622,6 @@ $ordersResult = $stmt->get_result();
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <?php
-    // Check if a new order was just successfully placed
     if (isset($_SESSION['order_success']) && $_SESSION['order_success'] === true):
     ?>
         <script>
@@ -444,12 +633,11 @@ $ordersResult = $stmt->get_result();
                            <strong>Tracking Code:</strong> <span class="text-primary fs-5"><?php echo $_SESSION['new_tracking']; ?></span>`,
                     icon: 'success',
                     confirmButtonText: 'Got it!',
-                    confirmButtonColor: '#198754' // Bootstrap success green
+                    confirmButtonColor: '#198754'
                 });
             });
         </script>
     <?php
-        // Clear the session variables so the popup doesn't keep showing when the user refreshes the page
         unset($_SESSION['order_success']);
         unset($_SESSION['new_order_id']);
         unset($_SESSION['new_tracking']);
