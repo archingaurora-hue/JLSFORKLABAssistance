@@ -464,10 +464,18 @@ $orderGroups = [
                             </div>
                         </div>
                     </div>
-                    <div class="modal-footer border-0 px-4 pb-4">
-                        <button type="button" class="btn btn-light fw-bold border" data-bs-dismiss="modal">Cancel</button>
-                        <button type="submit" class="btn btn-primary fw-bold px-4">Save Changes</button>
+                    <div class="modal-footer border-0 px-4 pb-4 d-flex justify-content-between w-100">
+                        <button type="button" class="btn btn-outline-danger fw-bold" onclick="confirmDeleteAccount()">Delete Account</button>
+
+                        <div>
+                            <button type="button" class="btn btn-light fw-bold border" data-bs-dismiss="modal">Cancel</button>
+                            <button type="submit" class="btn btn-primary fw-bold px-4">Save Changes</button>
+                        </div>
                     </div>
+                </form>
+
+                <form id="deleteAccountForm" action="backend/delete_account.php" method="POST" style="display: none;">
+                    <input type="hidden" name="action" value="delete_account">
                 </form>
             </div>
         </div>
@@ -643,6 +651,24 @@ $orderGroups = [
         unset($_SESSION['new_tracking']);
     endif;
     ?>
+
+    <script>
+        function confirmDeleteAccount() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone. All your orders and personal data will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete my account'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteAccountForm').submit();
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>
