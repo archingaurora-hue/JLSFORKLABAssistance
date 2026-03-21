@@ -175,7 +175,7 @@ $orderGroups = [
                 <?php if ($ordersResult->num_rows > 0): ?>
                     <div class="input-group shadow-sm mb-4">
                         <span class="input-group-text bg-white border-end-0 text-primary"><i class="bi bi-search"></i></span>
-                        <input type="text" id="searchTracking" class="form-control border-start-0 ps-0" placeholder="Tracking code or Order ID...">
+                        <input type="text" id="searchTracking" class="form-control border-start-0 ps-0" placeholder="4-Digit Tracking Number">
                         <button class="btn btn-primary px-3 fw-bold" type="button" onclick="trackOrder()">Track</button>
                     </div>
 
