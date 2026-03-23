@@ -71,7 +71,7 @@
                         <div class="form-check mb-4 mt-2">
                             <input class="form-check-input" type="checkbox" value="" id="agreeTerms" required>
                             <label class="form-check-label text-muted small" for="agreeTerms">
-                                I agree to the <a href="#" data-bs-toggle="modal" data-bs-target="#termsModal" class="text-primary fw-bold text-decoration-underline">Terms and Conditions</a>
+                                I agree to the <a href="terms_and_conditions.php" class="text-primary fw-bold text-decoration-underline">Terms and Conditions</a>
                                 <br class="d-md-none">
                                 <span class="text-secondary fst-italic" style="font-size: 0.85em;">(Click to read)</span>
                             </label>
@@ -86,38 +86,6 @@
                     <a href="customer_login.php" class="text-dark fw-bold text-decoration-none">Log In</a>
                 </div>
 
-            </div>
-        </div>
-    </div>
-
-    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-scrollable modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title fw-bold" id="termsModalLabel">Terms & Conditions and Privacy Policy</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body text-muted small">
-                    <h6>Data Privacy Act of 2012 (Republic Act No. 10173)</h6>
-                    <p>By registering for an account with LABAssistance, you acknowledge and agree to the collection, processing, and storage of your personal data in accordance with the Philippine Data Privacy Act of 2012.</p>
-
-                    <p><strong>1. Collection of Personal Information</strong><br>
-                        We collect personal information such as your full name and email address strictly for the purpose of creating your account, facilitating our services, and verifying your identity.</p>
-
-                    <p><strong>2. Use and Protection of Data</strong><br>
-                        Your data will be stored securely in our database. We implement reasonable organizational, physical, and technical security measures to protect your personal information from unauthorized access, alteration, or disclosure.</p>
-
-                    <p><strong>3. Non-Disclosure</strong><br>
-                        LABAssistance will not sell, rent, or share your personal information with third parties without your explicit consent, except when required by law.</p>
-
-                    <p><strong>4. User Rights</strong><br>
-                        Under the Data Privacy Act, you have the right to access, correct, or request the deletion of your personal data from our systems at any time.</p>
-
-                    <p>By checking the "I agree" box, you confirm that you have read, understood, and consented to these terms.</p>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary w-100" data-bs-dismiss="modal">I Understand</button>
-                </div>
             </div>
         </div>
     </div>
