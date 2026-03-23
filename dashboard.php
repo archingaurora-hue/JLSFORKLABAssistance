@@ -276,10 +276,10 @@ $orderGroups = [
 
                 <?php else: ?>
                     <div class="text-center py-5 text-muted">
-                        <div class="mb-3">
+                        <div class="mb-4" style="padding-bottom: 6px;">
                             <i class="bi bi-basket display-1 text-light bg-secondary p-4 rounded-circle bg-opacity-10"></i>
                         </div>
-                        <h5 class="fw-bold">No orders yet</h5>
+                        <h5 class="fw-bold mt-1">No orders yet</h5>
                         <p class="text-muted small">Your active and past orders will appear here.</p>
                     </div>
                 <?php endif; ?>
