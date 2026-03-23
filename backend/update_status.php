@@ -1,4 +1,6 @@
 <?php
+// Start output buffering to catch any rogue PHP warnings/notices
+ob_start();
 session_start();
 require 'db_conn.php';
 
@@ -9,13 +11,12 @@ require 'PHPMailer/src/Exception.php';
 require 'PHPMailer/src/PHPMailer.php';
 require 'PHPMailer/src/SMTP.php';
 
+$email_sent = false;
+
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
     $employee_name = $_SESSION['full_name'] ?? 'Staff';
 
-    // ==========================================
-    // ORDER-LEVEL ACTIONS
-    // ==========================================
     if ($action === 'receive_order') {
         $order_id = $_POST['order_id'];
         $upd = $conn->prepare("UPDATE `Process_Load` SET status = 'In Queue' WHERE order_id = ? AND status = 'Pending Dropoff'");
@@ -38,13 +39,65 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $conn->query("UPDATE `Order` SET status = 'Completed' WHERE order_id = '$order_id'");
         $conn->query("INSERT INTO `Order_Logs` (order_id, log_message) VALUES ('$order_id', '$employee_name completed the order. Customer picked up the laundry.')");
 
+        // --- Email Thank You / Pickup Confirmation ---
+        $orderQuery = $conn->query("SELECT o.customer_name, o.services_requested, o.final_price, u.email FROM `Order` o JOIN `User` u ON o.customer_id = u.user_id WHERE o.order_id = '$order_id'");
+
+        if ($orderQuery && $orderQuery->num_rows > 0) {
+            $orderData = $orderQuery->fetch_assoc();
+            $customerEmail = $orderData['email'];
+
+            if (!empty($customerEmail)) {
+                $mail = new PHPMailer(true);
+                try {
+                    $mail->isSMTP();
+                    $mail->Host       = 'smtp.gmail.com';
+                    $mail->SMTPAuth   = true;
+                    $mail->Username   = 'sevillaralph1504@gmail.com';
+                    $mail->Password   = 'wagc ultm nqrk hnfp';
+                    $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                    $mail->Port       = 587;
+
+                    $mail->setFrom('sevillaralph1504@gmail.com', 'LABAssistance Support');
+                    $mail->addAddress($customerEmail);
+                    $mail->isHTML(true);
+                    $mail->Subject = "Thank You! Laundry Picked Up Successfully (Order #$order_id)";
+
+                    $price = number_format($orderData['final_price'], 2);
+                    $mail->Body = "
+                        <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; max-width: 600px; margin: 0 auto;'>
+                            <h2 style='color: #0d6efd; text-align: center;'>Thank You for Choosing LABAssistance!</h2>
+                            <p>Hello <strong>" . htmlspecialchars($orderData['customer_name']) . "</strong>,</p>
+                            <p>This is a confirmation that your laundry order has been successfully picked up from our shop.</p>
+                            <div style='background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                                <h3 style='margin-top: 0; border-bottom: 2px solid #ddd; padding-bottom: 5px; color: #333;'>Final Order Details</h3>
+                                <p><strong>Order ID:</strong> #{$order_id}</p>
+                                <p><strong>Services Completed:</strong> {$orderData['services_requested']}</p>
+                                <p><strong>Total Paid:</strong> ₱{$price}</p>
+                            </div>
+                            <p>We hope you are fully satisfied with our services. Have a great day and we look forward to serving you again soon!</p>
+                        </div>
+                    ";
+                    $mail->send();
+                    $email_sent = true;
+                    $conn->query("INSERT INTO `Order_Logs` (order_id, log_message) VALUES ('$order_id', 'Pickup confirmation & Thank You email sent to customer.')");
+                } catch (Exception $e) {
+                    // Suppress error so DB logic finishes cleanly
+                }
+            }
+        }
+
+        // Handle AJAX Response
+        if (isset($_POST['is_ajax']) && $_POST['is_ajax'] == '1') {
+            ob_end_clean();
+            header('Content-Type: application/json');
+            echo json_encode(['success' => true, 'email_sent' => $email_sent]);
+            exit();
+        }
+
         header("Location: " . $_SERVER['HTTP_REFERER']);
         exit();
     }
 
-    // ==========================================
-    // BAG-LEVEL ACTIONS
-    // ==========================================
     $load_id = $_POST['load_id'] ?? 0;
     if ($load_id) {
         $stmt = $conn->prepare("SELECT pl.*, o.services_requested, o.final_price, o.customer_name 
@@ -111,8 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         } elseif ($action === 'next_phase') {
             $next = 'Awaiting Pickup';
 
-            // Fixed logic to match the new UI buttons perfectly
-            if ($curr === 'In Queue') $next = 'Folding'; // Only hit if it skipped the machine entirely
+            if ($curr === 'In Queue') $next = 'Folding';
             elseif ($curr === 'Washing') $next = $hasD ? 'Drying' : ($hasF ? 'Folding' : 'Awaiting Pickup');
             elseif ($curr === 'Drying') $next = $hasF ? 'Folding' : 'Awaiting Pickup';
             elseif ($curr === 'Folding') $next = 'Awaiting Pickup';
@@ -123,9 +175,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $conn->query("INSERT INTO `Order_Logs` (order_id, log_message) VALUES ('$order_id', '$employee_name moved $bag_label to $next.')");
 
-            // --- Email Completion Report ---
+            // --- Email Completion Report (Only runs if next phase is Awaiting Pickup) ---
             $not_ready_query = $conn->query("SELECT COUNT(*) as c FROM `Process_Load` WHERE order_id = '$order_id' AND status IN ('Pending Dropoff', 'In Queue', 'Washing', 'Drying', 'Folding')");
-            if ($not_ready_query->fetch_assoc()['c'] == 0 && $next === 'Awaiting Pickup') {
+
+            if ($not_ready_query && $not_ready_query->fetch_assoc()['c'] == 0 && $next === 'Awaiting Pickup') {
                 $orderQuery = $conn->query("SELECT email FROM `User` WHERE user_id = (SELECT customer_id FROM `Order` WHERE order_id = '$order_id')");
                 if ($orderQuery && $orderQuery->num_rows > 0) {
                     $customerEmail = $orderQuery->fetch_assoc()['email'];
@@ -165,13 +218,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                 </div>
                             ";
                             $mail->send();
+                            $email_sent = true;
                             $conn->query("INSERT INTO `Order_Logs` (order_id, log_message) VALUES ('$order_id', 'Completion report successfully emailed to customer.')");
                         } catch (Exception $e) {
+                            // Suppress error so DB logic finishes cleanly
                         }
                     }
                 }
             }
         }
     }
+
+    // Check if XHR request
+    if (isset($_POST['is_ajax']) && $_POST['is_ajax'] == '1') {
+        ob_end_clean(); // Wipes any PHP warnings from the buffer before sending JSON
+        header('Content-Type: application/json');
+        echo json_encode(['success' => true, 'email_sent' => $email_sent]);
+        exit();
+    }
+
     header("Location: " . $_SERVER['HTTP_REFERER']);
+    exit();
 }

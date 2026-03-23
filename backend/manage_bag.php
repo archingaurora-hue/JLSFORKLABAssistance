@@ -60,11 +60,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt->close();
             }
         }
-    }
-    // ==========================================
-    // DELETE BAG LOGIC
-    // ==========================================
-    elseif ($action === 'delete_bag') {
+    } elseif ($action === 'delete_bag') {
         $load_id = intval($_POST['load_id'] ?? 0);
         $order_id = $_POST['order_id'] ?? '';
 
@@ -111,6 +107,22 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $conn->query("UPDATE `Order` SET status = '$masterStatus' WHERE order_id = '$order_id'");
             }
             $stmt->close();
+        }
+    } elseif ($action === 'cancel_order') {
+        $order_id = $_POST['order_id'] ?? '';
+
+        if (!empty($order_id)) {
+            // Cancel the order
+            $conn->query("UPDATE `Order` SET status = 'Cancelled' WHERE order_id = '$order_id'");
+
+            // Cancel remaining loads
+            $conn->query("UPDATE `Process_Load` SET status = 'Cancelled' WHERE order_id = '$order_id'");
+
+            // Log the cancellation action
+            $log_msg = "$employee_name cancelled the order by removing the final bag.";
+            $log_stmt = $conn->prepare("INSERT INTO `Order_Logs` (order_id, log_message) VALUES (?, ?)");
+            $log_stmt->bind_param("ss", $order_id, $log_msg);
+            $log_stmt->execute();
         }
     }
 }
