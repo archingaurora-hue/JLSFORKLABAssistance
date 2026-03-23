@@ -16,12 +16,12 @@ $error_msg = $_SESSION['error_msg'] ?? '';
 unset($_SESSION['success_msg'], $_SESSION['error_msg']);
 
 // Check if shop is open or closed
-$statusResult = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
+$statusResult = $conn->query("SELECT is_shop_open FROM `shop_status` WHERE status_id = 1");
 $shopData = $statusResult->fetch_assoc();
 $isOpen = ($shopData && $shopData['is_shop_open'] == 1);
 
 // Fetch user orders
-$orderQuery = "SELECT * FROM `Order` WHERE customer_id = ? ORDER BY created_at DESC";
+$orderQuery = "SELECT * FROM `order` WHERE customer_id = ? ORDER BY created_at DESC";
 $stmt = $conn->prepare($orderQuery);
 $stmt->bind_param("i", $user_id);
 $stmt->execute();
@@ -197,7 +197,7 @@ $orderGroups = [
 
                                                 <?php
                                                 // Check loads FIRST to calculate the true Display Status
-                                                $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
+                                                $loadQuery = "SELECT * FROM `process_load` WHERE order_id = '" . $order['order_id'] . "'";
                                                 $loadsResult = $conn->query($loadQuery);
                                                 $loadArray = [];
 
@@ -233,7 +233,7 @@ $orderGroups = [
                                                     $statusTextColor = 'text-danger';
                                                     $masterBadgeClass = 'bg-danger';
                                                 } elseif ($displayStatus === 'Awaiting Pickup') {
-                                                    $statusTextColor = 'text-success'; // Turns green if waiting for pickup
+                                                    $statusTextColor = 'text-success';
                                                     $masterBadgeClass = 'bg-success';
                                                 }
                                                 ?>
@@ -249,7 +249,7 @@ $orderGroups = [
 
                                                     <div class="d-flex justify-content-between align-items-center text-muted small mb-3">
                                                         <div>
-                                                            <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> bags • <?php echo $order['services_requested']; ?>
+                                                            <i class="bi bi-basket-fill me-1"></i> <?php echo $order['bag_counts']; ?> • <?php echo $order['services_requested']; ?>
                                                         </div>
                                                         <div class="fw-bold text-secondary">
                                                             TRK: <?php echo htmlspecialchars($order['tracking_code'] ?? ''); ?>
@@ -294,7 +294,7 @@ $orderGroups = [
             foreach ($group['orders'] as $order):
 
                 // Fetch loads for this specific order
-                $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
+                $loadQuery = "SELECT * FROM `process_load` WHERE order_id = '" . $order['order_id'] . "'";
                 $loadsResult = $conn->query($loadQuery);
                 $loadArray = [];
                 $canCancel = ($order['status'] !== 'Cancelled' && $order['status'] !== 'Completed');
@@ -377,6 +377,10 @@ $orderGroups = [
                                     <?php endif; ?>
                                 </div>
 
+                                <button class="btn btn-sm btn-link text-decoration-none w-100 mb-3" onclick="viewCustomerLogs('<?php echo $order['order_id']; ?>')">
+                                    <i class="bi bi-clock-history me-1"></i> View Full Activity History
+                                </button>
+
                                 <h6 class="fw-bold text-uppercase small text-muted mb-3">Order Information</h6>
                                 <div class="order-summary-card rounded-3 p-3 shadow-sm mb-2">
                                     <div class="d-flex justify-content-between mb-2 small">
@@ -431,6 +435,22 @@ $orderGroups = [
         endforeach;
     endif;
     ?>
+
+    <div class="modal fade" id="customerLogsModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable">
+            <div class="modal-content border-0">
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Activity History</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-4 pt-2">
+                    <div id="customerLogContainer" class="bg-light p-3 rounded-3 small">
+                        <span class="text-muted">Loading history...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
@@ -489,8 +509,24 @@ $orderGroups = [
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
-        // Popup Trigger Logic for "Track" Button
+        // --- Fetch Customer Logs Logic ---
+        function viewCustomerLogs(orderId) {
+            const container = document.getElementById('customerLogContainer');
+            container.innerHTML = '<div class="text-center py-3"><div class="spinner-border spinner-border-sm text-primary" role="status"></div> Loading...</div>';
+
+            const logsModal = new bootstrap.Modal(document.getElementById('customerLogsModal'));
+            logsModal.show();
+
+            fetch('backend/fetch_customer_logs.php?order_id=' + orderId)
+                .then(response => response.text())
+                .then(data => container.innerHTML = data)
+                .catch(err => container.innerHTML = '<div class="text-danger text-center py-3">Error loading history.</div>');
+        }
+
+        // --- Popup Trigger Logic for "Track" Button ---
         function trackOrder() {
             const input = document.getElementById('searchTracking').value.toLowerCase().trim();
             if (input === '') return;
@@ -543,7 +579,7 @@ $orderGroups = [
             }
         });
 
-        // Live Countdown Timer Logic
+        // --- Live Countdown Timer Logic ---
         document.addEventListener('DOMContentLoaded', function() {
             function updateTimers() {
                 const timers = document.querySelectorAll('.live-timer');
@@ -574,8 +610,8 @@ $orderGroups = [
             setInterval(updateTimers, 1000);
             updateTimers();
         });
-    </script>
-    <script>
+
+        // --- Profile Validation Logic ---
         const dashPwd = document.getElementById('new_password');
         const dashConfPwd = document.getElementById('confirm_password');
         const dashCriteria = document.getElementById('dash_criteria');
@@ -626,17 +662,33 @@ $orderGroups = [
         }
 
         validateDashPassword();
-
         dashPwd.addEventListener('input', validateDashPassword);
         dashConfPwd.addEventListener('input', validateDashPassword);
 
         function validatePasswordMatch() {
             return validateDashPassword();
         }
+
+        // --- Delete Account Confirm ---
+        function confirmDeleteAccount() {
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "This action cannot be undone. All your orders and personal data will be permanently deleted.",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#dc3545',
+                cancelButtonColor: '#6c757d',
+                confirmButtonText: 'Yes, delete my account'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('deleteAccountForm').submit();
+                }
+            });
+        }
     </script>
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <?php
+    // --- SweetAlert for successful order placement ---
     if (isset($_SESSION['order_success']) && $_SESSION['order_success'] === true):
     ?>
         <script>
@@ -658,24 +710,6 @@ $orderGroups = [
         unset($_SESSION['new_tracking']);
     endif;
     ?>
-
-    <script>
-        function confirmDeleteAccount() {
-            Swal.fire({
-                title: 'Are you sure?',
-                text: "This action cannot be undone. All your orders and personal data will be permanently deleted.",
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#dc3545',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Yes, delete my account'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    document.getElementById('deleteAccountForm').submit();
-                }
-            });
-        }
-    </script>
 </body>
 
 </html>

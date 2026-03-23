@@ -1,27 +1,37 @@
 <?php
 require 'db_conn.php';
 
-if (isset($_GET['load_id'])) {
-    $load_id = intval($_GET['load_id']);
+// Changed from load_id to order_id to match the JavaScript call in employee_dashboard.php
+if (isset($_GET['order_id'])) {
+    $order_id = $_GET['order_id']; // order_id is varchar(20)
 
-    $query = "SELECT * FROM `System_Log` WHERE load_id = ? ORDER BY timestamp DESC";
+    // Updated to query the correct table (order_logs) and columns (log_message, created_at)
+    $query = "SELECT log_message, created_at 
+              FROM `order_logs` 
+              WHERE order_id = ? 
+              ORDER BY created_at DESC";
+
     $stmt = $conn->prepare($query);
-    $stmt->bind_param("i", $load_id);
+    $stmt->bind_param("s", $order_id);
     $stmt->execute();
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
-            $time = date("M d, h:i A", strtotime($row['timestamp']));
-            echo '<div class="mb-2 pb-2 border-bottom border-white">';
-            echo '<div class="d-flex justify-content-between">';
-            echo '<strong class="text-dark">' . htmlspecialchars($row['status_event']) . '</strong>';
-            echo '<span class="text-muted" style="font-size:0.75rem">' . $time . '</span>';
+            $time = date("M d, h:i A", strtotime($row['created_at']));
+
+            echo '<div class="mb-2 pb-2 border-bottom border-light">';
+            echo '<div class="d-flex justify-content-between align-items-start">';
+
+            echo '<div class="text-dark small" style="line-height: 1.2;">' . htmlspecialchars($row['log_message']) . '</div>';
+            echo '<span class="text-muted ms-2" style="font-size:0.7rem; white-space: nowrap;">' . $time . '</span>';
+
             echo '</div>';
-            echo '<div class="text-muted fst-italic small">Updated by ' . htmlspecialchars($row['employee_name']) . '</div>';
             echo '</div>';
         }
     } else {
-        echo '<div class="text-center text-muted py-3">No history logs found for this bag.</div>';
+        echo '<div class="text-center text-muted py-3">No history logs found for this order.</div>';
     }
+    $stmt->close();
 }
+$conn->close();

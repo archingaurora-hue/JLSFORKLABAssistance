@@ -92,19 +92,3 @@ CREATE TABLE `process_load` (
   KEY `order_id` (`order_id`),
   CONSTRAINT `process_load_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
--- --------------------------------------------------------
--- 6. Table structure for table `system_log`
--- --------------------------------------------------------
-CREATE TABLE `system_log` (
-  `log_id` int(11) NOT NULL AUTO_INCREMENT,
-  `load_id` int(11) NOT NULL,
-  `status_event` varchar(50) NOT NULL,
-  `employee_name` varchar(255) NOT NULL,
-  `timestamp` datetime NOT NULL DEFAULT current_timestamp(),
-  PRIMARY KEY (`log_id`),
-  KEY `load_id` (`load_id`),
-  CONSTRAINT `system_log_ibfk_1` FOREIGN KEY (`load_id`) REFERENCES `process_load` (`load_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
-
-COMMIT;
