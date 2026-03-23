@@ -14,7 +14,8 @@ if (isset($_POST['send_link'])) {
     $email = $_POST['email'];
 
     // Check if the user email exists in the database
-    $stmt = $conn->prepare("SELECT user_id, full_name FROM `User` WHERE email = ?");
+    // UPDATED: Fetching first_name and last_name
+    $stmt = $conn->prepare("SELECT user_id, first_name, last_name FROM `User` WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -42,8 +43,8 @@ if (isset($_POST['send_link'])) {
             $mail->isSMTP();
             $mail->Host       = 'smtp.gmail.com';
             $mail->SMTPAuth   = true;
-            $mail->Username   = 'sevillaralph1504@gmail.com';
-            $mail->Password   = 'wagc ultm nqrk hnfp';
+            $mail->Username   = 'sevillaralph1504@gmail.com'; //to be changed in production
+            $mail->Password   = 'wagc ultm nqrk hnfp';        //to be changed in production
             $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
             $mail->Port       = 587;
 
@@ -53,6 +54,7 @@ if (isset($_POST['send_link'])) {
 
             // Create the password reset link
             $resetLink = "http://localhost/LABAssistance/reset_password.php?token=$token&email=$email";
+            $customerName = htmlspecialchars($row['first_name'] . ' ' . $row['last_name']);
 
             // Set email subject and HTML body
             $mail->isHTML(true);
@@ -60,7 +62,7 @@ if (isset($_POST['send_link'])) {
             $mail->Body    = "
                 <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; max-width: 600px;'>
                     <h2 style='color: #333;'>Password Reset Request</h2>
-                    <p>Hello " . htmlspecialchars($row['full_name']) . ",</p>
+                    <p>Hello " . $customerName . ",</p>
                     <p>We received a request to reset your password. Click the button below to create a new one:</p>
                     <p style='text-align: center;'>
                         <a href='$resetLink' style='background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Reset Password</a>

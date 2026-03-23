@@ -11,7 +11,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Get form data
     $customer_id = $_SESSION['user_id'];
-    $customer_name = $_SESSION['full_name'];
+    $customer_name = trim($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+
     $note = isset($_POST['note']) ? trim($_POST['note']) : "";
 
     // Service types

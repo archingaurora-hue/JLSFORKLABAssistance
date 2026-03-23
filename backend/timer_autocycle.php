@@ -27,9 +27,12 @@ if ($next_status) {
 
     // Log the event
     session_start();
-    $user = ($_POST['source'] === 'timer') ? 'Timer' : ($_SESSION['full_name'] ?? 'System');
+    $session_user = isset($_SESSION['first_name']) ? trim($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) : 'System';
+    $user = ($_POST['source'] === 'timer') ? 'Timer' : $session_user;
+
     $log = $conn->prepare("INSERT INTO System_Log (load_id, status_event, employee_name) VALUES (?, ?, ?)");
     $log->bind_param("iss", $load_id, $next_status, $user);
     $log->execute();
+
     echo json_encode(['success' => true, 'is_final' => ($next_status === 'Completed')]);
 }

@@ -8,7 +8,7 @@ if (isset($_POST['signin'])) {
 
     // Updated to use 'User' (singular) as the correct table name
     // Includes security check to ensure only 'Customer' roles can log in here
-    $stmt = $conn->prepare("SELECT user_id, password, role, full_name FROM `User` WHERE email = ? AND role = 'Customer'");
+    $stmt = $conn->prepare("SELECT user_id, password, role, first_name, last_name FROM `User` WHERE email = ? AND role = 'Customer'");
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -20,8 +20,8 @@ if (isset($_POST['signin'])) {
         if (password_verify($password, $row['password'])) {
             $_SESSION['user_id'] = $row['user_id'];
             $_SESSION['role'] = $row['role'];
-            $_SESSION['full_name'] = $row['full_name'];
-            $_SESSION['email'] = $email;
+            $_SESSION['first_name'] = $row['first_name'];
+            $_SESSION['last_name'] = $row['last_name'];
 
             // Redirect to the customer dashboard
             header("Location: ../dashboard.php");

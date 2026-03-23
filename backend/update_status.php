@@ -15,7 +15,9 @@ $email_sent = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $action = $_POST['action'];
-    $employee_name = $_SESSION['full_name'] ?? 'Staff';
+
+    // Construct the employee name from the new separated session variables
+    $employee_name = isset($_SESSION['first_name']) ? trim($_SESSION['first_name'] . ' ' . $_SESSION['last_name']) : 'Staff';
 
     if ($action === 'receive_order') {
         $order_id = $_POST['order_id'];

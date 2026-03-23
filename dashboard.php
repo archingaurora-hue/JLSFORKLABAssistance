@@ -108,7 +108,7 @@ $orderGroups = [
             <span class="navbar-brand fw-bold">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted d-none d-sm-inline">Hi,
-                    <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                    <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
 
                 <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#profileModal" title="Profile Settings">
                     <i class="bi bi-person-gear"></i>
@@ -293,7 +293,7 @@ $orderGroups = [
         foreach ($orderGroups as $group):
             foreach ($group['orders'] as $order):
 
-                // Fetch loads for this specific order (re-fetch needed since it's outside the previous loop scope)
+                // Fetch loads for this specific order
                 $loadQuery = "SELECT * FROM `Process_Load` WHERE order_id = '" . $order['order_id'] . "'";
                 $loadsResult = $conn->query($loadQuery);
                 $loadArray = [];
@@ -431,6 +431,7 @@ $orderGroups = [
         endforeach;
     endif;
     ?>
+
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4">
@@ -440,9 +441,15 @@ $orderGroups = [
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body p-4">
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Full Name</label>
-                            <input type="text" name="full_name" class="form-control" value="<?php echo htmlspecialchars($_SESSION['full_name']); ?>" required>
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">First Name</label>
+                                <input type="text" name="first_name" class="form-control" value="<?php echo htmlspecialchars($_SESSION['first_name']); ?>" required>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Last Name</label>
+                                <input type="text" name="last_name" class="form-control" value="<?php echo htmlspecialchars($_SESSION['last_name']); ?>" required>
+                            </div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label text-muted small fw-bold text-uppercase">New Password</label>

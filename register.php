@@ -23,9 +23,15 @@
 
                 <div class="app-card p-4 shadow-sm rounded bg-white">
                     <form action="backend/register_process.php" method="POST">
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Full Name</label>
-                            <input type="text" class="form-control" name="full_name" placeholder="Full Name" required>
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">First Name</label>
+                                <input type="text" class="form-control" name="first_name" placeholder="First Name" required>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label text-muted small fw-bold text-uppercase">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" placeholder="Last Name" required>
+                            </div>
                         </div>
 
                         <div class="mb-3">

@@ -149,7 +149,7 @@ $orderGroups = [
         <div class="container">
             <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name']); ?></span>
+                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
 
                 <?php if ($_SESSION['role'] === 'Manager'): ?>
                     <a href="manager_dashboard.php" class="btn btn-sm btn-outline-primary rounded-pill fw-bold" title="Go to Manager Dashboard">

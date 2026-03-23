@@ -133,7 +133,7 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y, H:i") : date("H:
         <div class="container">
             <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['full_name'] ?? 'Manager'); ?></span>
+                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
                 <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>

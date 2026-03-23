@@ -31,7 +31,8 @@ function sweetAlertRedirect($icon, $title, $text, $redirect_url)
 
 // Handle registration request
 if (isset($_POST['register'])) {
-    $full_name = $_POST['full_name'];
+    $first_name = $_POST['first_name'];
+    $last_name = $_POST['last_name'];
     $email = $_POST['email'];
     $password = $_POST['password'];
     $confirm_password = $_POST['confirm_password'];
@@ -52,9 +53,9 @@ if (isset($_POST['register'])) {
     if ($result->num_rows > 0) {
         sweetAlertRedirect('warning', 'Oops...', 'Email already exists!', '../register.php');
     } else {
-        $sql = "INSERT INTO `User` (email, password, role, full_name, created_at) VALUES (?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO `User` (email, password, role, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssss", $email, $hashed_password, $role, $full_name);
+        $stmt->bind_param("sssss", $email, $hashed_password, $role, $first_name, $last_name);
 
         if ($stmt->execute()) {
             sweetAlertRedirect('success', 'Success!', 'Registration Successful! Please login.', '../customer_login.php');

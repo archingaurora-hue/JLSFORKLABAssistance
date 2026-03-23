@@ -10,7 +10,11 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION[
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
     $action = $_POST['action'];
-    $employee_name = $_SESSION['full_name'] ?? 'Staff';
+
+    // Construct the employee name using the new session variables
+    $employee_name = (isset($_SESSION['first_name']) && isset($_SESSION['last_name']))
+        ? $_SESSION['first_name'] . ' ' . $_SESSION['last_name']
+        : 'Staff';
 
     // ==========================================
     // ADD BAG LOGIC
@@ -50,17 +54,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                 $stmt->bind_param("ssss", $order_id, $load_category, $bag_label, $status);
 
                 if ($stmt->execute()) {
+                    // Update Order Status to in progress if not already
+                    $conn->query("UPDATE `Order` SET status = 'In Progress' WHERE order_id = '$order_id'");
+
+                    // Insert Log
                     $log_msg = "$employee_name added an extra bag ($bag_label). Price auto-adjusted (+₱$costPerLoad).";
                     $log_stmt = $conn->prepare("INSERT INTO `Order_Logs` (order_id, log_message) VALUES (?, ?)");
                     $log_stmt->bind_param("ss", $order_id, $log_msg);
                     $log_stmt->execute();
-
-                    $conn->query("UPDATE `Order` SET status = 'In Progress' WHERE order_id = '$order_id'");
                 }
                 $stmt->close();
             }
         }
-    } elseif ($action === 'delete_bag') {
+    }
+    // ==========================================
+    // DELETE BAG LOGIC
+    // ==========================================
+    elseif ($action === 'delete_bag') {
         $load_id = intval($_POST['load_id'] ?? 0);
         $order_id = $_POST['order_id'] ?? '';
 
