@@ -37,6 +37,11 @@ CREATE TABLE `shop_status` (
   PRIMARY KEY (`status_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+INSERT INTO `shop_status` 
+(`status_id`, `is_shop_open`, `current_closing_time`, `next_manual_open_time`, `next_manual_close_time`, `default_open_time`, `default_close_time`) 
+VALUES 
+(1, 1, NULL, NULL, NULL, '08:00:00', '21:00:00');
+
 -- --------------------------------------------------------
 -- 3. Table structure for table `order`
 -- --------------------------------------------------------
