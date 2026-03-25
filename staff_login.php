@@ -28,6 +28,7 @@ body{
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4">
+                    <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" class="img-fluid mb-3" style="max-width: 110px;">
                     <h1 class="fw-bold text-white">LAB<span class="text-primary">Assistance</span></h1>
                     <span class="badge bg-primary fs-6 px-3 py-2 mt-1">
                         <i class="bi bi-person-badge me-1"></i> Staff Portal

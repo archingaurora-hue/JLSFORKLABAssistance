@@ -32,7 +32,10 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
 
     <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
         <div class="container d-flex justify-content-between align-items-center">
-            <span class="navbar-brand fw-bold text-white mb-0">LAB<span class="text-primary">Assistance</span></span>
+            <span class="navbar-brand fw-bold text-white mb-0 d-flex align-items-center gap-2">
+                <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
+                <span>LAB<span class="text-primary">Assistance</span></span>
+            </span>
             <a href="manager_dashboard.php" class="btn btn-sm btn-outline-light rounded-pill">
                 <i class="bi bi-arrow-left me-1"></i> <span class="d-none d-sm-inline">Dashboard</span>
             </a>

@@ -147,7 +147,10 @@ $orderGroups = [
 
     <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
         <div class="container">
-            <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
+            <span class="navbar-brand fw-bold text-white d-flex align-items-center gap-2">
+                <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
+                <span>LAB<span class="text-primary">Assistance</span></span>
+            </span>
             <div class="d-flex align-items-center gap-2">
                 <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
 
