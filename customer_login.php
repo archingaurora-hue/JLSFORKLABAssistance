@@ -18,6 +18,7 @@
             <div class="col-12 col-md-6 col-lg-4">
 
                 <div class="text-center mb-4">
+                    <img src="assets/labaratory_logo.png" alt="LABAssistance Logo" class="img-fluid mb-3" style="max-width: 110px;">
                     <h1 class="fw-bold display-6"><span>LAB<span class="text-primary    text-blue">Assistance</span></span></h1>
                     <p class="text-muted">Laundry Management System</p>
                 </div>
