@@ -84,7 +84,7 @@ $prices = array_merge([
                 </div>
 
                 <div class="app-card p-4 shadow-sm bg-white rounded-3 border">
-                    <h5 class="fw-bold text-uppercase mb-3 text-dark border-bottom pb-2" style="letter-spacing: 1px;">Service Pricing</h5>
+                    <h5 class="fw-bold text-uppercase mb-3 text-dark border-bottom pb-2" style="letter-spacing: 1px;">Service Rates</h5>
 
                     <?php if (isset($_SESSION['settings_success'])): ?>
                         <div class="alert alert-success small py-2">
