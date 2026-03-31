@@ -100,7 +100,7 @@ CREATE TABLE `process_load` (
 
 -- --------------------------------------------------------
 -- 5. Table structure for table `service_prices`
-
+-- --------------------------------------------------------
 CREATE TABLE `service_prices` (
   `service_name` varchar(50) NOT NULL,
   `price` decimal(10,2) NOT NULL,
