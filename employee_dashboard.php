@@ -275,7 +275,7 @@ $orderGroups = [
                                                                     <?php endif; ?>
                                                                 </div>
 
-                                                                <form id="price-form-<?php echo $order_id; ?>" action="backend/update_price.php" method="POST" class="d-none align-items-center" style="max-width: 200px;">
+                                                                <form id="price-form-<?php echo $order_id; ?>" action="backend/update_final_price.php" method="POST" class="d-none align-items-center" style="max-width: 200px;">
                                                                     <input type="hidden" name="order_id" value="<?php echo htmlspecialchars($order_id); ?>">
                                                                     <div class="input-group input-group-sm">
                                                                         <span class="input-group-text fw-bold">₱</span>

@@ -93,7 +93,7 @@ $prices = array_merge([
                         </div>
                     <?php endif; ?>
 
-                    <form action="backend/update_prices.php" method="POST">
+                    <form action="backend/update_rates.php" method="POST">
                         <div class="row g-3 mb-3">
                             <div class="col-12 col-sm-4">
                                 <label class="small fw-bold text-muted mb-1">Wash (₱)</label>

@@ -60,24 +60,20 @@ while ($row = $priceQuery->fetch_assoc()) {
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
                             <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="Wash" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Wash</div>
-                            <span class="fw-bold text-dark">₱<?= number_format($prices['Wash'], 2) ?><small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Wash'] ?? 0, 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
                             <input class="form-check-input me-3" type="checkbox" id="checkDry" name="checkDry" value="Dry" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Dry</div>
-                            <span class="fw-bold text-dark">₱<?= number_format($prices['Dry'], 2) ?><small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Dry'] ?? 0, 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
 
-                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
+                        <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100" id="foldContainer">
                             <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="Fold" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Fold</div>
-                            <span class="fw-bold text-dark">₱<?= number_format($prices['Fold'], 2) ?><small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Fold'] ?? 0, 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
-
-                        <div id="errorWetClothes" class="alert alert-danger mt-2 d-none small">
-                            <i class="bi bi-exclamation-circle-fill me-1"></i> Wet clothes cannot be folded!
-                        </div>
                     </div>
 
                     <div id="suppliesSection" class="mb-4 opacity-50" style="pointer-events: none;">
@@ -86,13 +82,13 @@ while ($row = $priceQuery->fetch_assoc()) {
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
                             <input class="form-check-input me-3" type="checkbox" id="supplyDetergent" name="supplyDetergent" value="Detergent" disabled>
                             <div class="flex-grow-1">Detergent</div>
-                            <span class="text-muted small">+₱<?= number_format($prices['Detergent'], 2) ?></span>
+                            <span class="text-muted small">+₱<?= number_format($prices['Detergent'] ?? 0, 2) ?></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
                             <input class="form-check-input me-3" type="checkbox" id="supplySoftener" name="supplySoftener" value="Softener" disabled>
                             <div class="flex-grow-1">Softener</div>
-                            <span class="text-muted small">+₱<?= number_format($prices['Softener'], 2) ?></span>
+                            <span class="text-muted small">+₱<?= number_format($prices['Softener'] ?? 0, 2) ?></span>
                         </label>
                     </div>
 
@@ -123,17 +119,27 @@ while ($row = $priceQuery->fetch_assoc()) {
 
                     <div class="fixed-bottom bg-white border-top shadow-lg p-3">
                         <div class="container" style="max-width: 600px;">
+
+                            <div class="d-flex align-items-start p-2 rounded-3 mb-3 border"
+                                style="background-color: #fff8e1; border-color: #ffe082;">
+                                <i class="bi bi-exclamation-triangle-fill text-warning me-2 mt-1" style="font-size: 0.9rem;"></i>
+                                <div class="text-dark" style="font-size: 0.75rem; line-height: 1.4;">
+                                    <strong>Note:</strong> This is only an initial estimate based on the bags you provided. The final price may change once our staff weighs and verifies your laundry.
+                                </div>
+                            </div>
+
                             <div class="d-flex justify-content-between align-items-center mb-2">
                                 <span class="text-muted small">Total Estimate</span>
                                 <span class="fs-4 fw-bold text-dark" id="totalPrice">₱0.00</span>
                             </div>
-                            <button type="submit" id="btnPlaceOrder" class="btn btn-primary-app py-3 fw-bold" disabled>
+
+                            <button type="submit" id="btnPlaceOrder" class="btn btn-primary-app py-3 fw-bold w-100" disabled>
                                 Confirm Order
                             </button>
                         </div>
                     </div>
 
-                    <div style="height: 100px;"></div>
+                    <div style="height: 120px;"></div>
 
                 </form>
             </div>
@@ -141,18 +147,17 @@ while ($row = $priceQuery->fetch_assoc()) {
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="js/order.js"></script>
+
     <script>
         const SERVICE_PRICES = {
-            wash: <?= $prices['Wash'] ?>,
-            dry: <?= $prices['Dry'] ?>,
-            fold: <?= $prices['Fold'] ?>,
-            detergent: <?= $prices['Detergent'] ?>,
-            softener: <?= $prices['Softener'] ?>
+            wash: <?= $prices['Wash'] ?? 0 ?>,
+            dry: <?= $prices['Dry'] ?? 0 ?>,
+            fold: <?= $prices['Fold'] ?? 0 ?>,
+            detergent: <?= $prices['Detergent'] ?? 0 ?>,
+            softener: <?= $prices['Softener'] ?? 0 ?>
         };
     </script>
     <script src="js/order.js"></script>
-</body>
 </body>
 
 </html>

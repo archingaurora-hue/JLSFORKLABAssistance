@@ -4,6 +4,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const checkWash = document.getElementById('checkWash');
     const checkDry = document.getElementById('checkDry');
     const checkFold = document.getElementById('checkFold');
+    const foldContainer = document.getElementById('foldContainer'); // The label wrapping the fold checkbox
 
     // Add-ons
     const suppliesSection = document.getElementById('suppliesSection'); 
@@ -19,7 +20,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const qtyFold = document.getElementById('qtyFold');
 
     // UI controls
-    const errorWetClothes = document.getElementById('errorWetClothes');
     const btnPlaceOrder = document.getElementById('btnPlaceOrder');
     const totalPriceDisplay = document.getElementById('totalPrice');
 
@@ -34,7 +34,23 @@ document.addEventListener('DOMContentLoaded', function() {
     function updateOrderState() {
         const isWash = checkWash.checked;
         const isDry = checkDry.checked;
+
+        // --- NEW FOLD LOGIC ---
+        // If Wash is checked but Dry is not, disable the Fold option
+        if (isWash && !isDry) {
+            checkFold.disabled = true;
+            checkFold.checked = false; // Force it to uncheck
+            foldContainer.classList.add('opacity-50');
+            foldContainer.style.pointerEvents = 'none';
+        } else {
+            checkFold.disabled = false;
+            foldContainer.classList.remove('opacity-50');
+            foldContainer.style.pointerEvents = 'auto';
+        }
+
+        // Re-evaluate isFold after the above logic might have unchecked it
         const isFold = checkFold.checked;
+        // ----------------------
 
         // Toggle supplies
         if (isWash) {
@@ -67,15 +83,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 suppliesHeader.classList.add('text-muted');
                 suppliesHeader.classList.remove('text-dark');
             }
-        }
-
-        // Validate wash/fold
-        let isInvalid = false;
-        if (isWash && isFold && !isDry) {
-            errorWetClothes.classList.remove('d-none');
-            isInvalid = true;
-        } else {
-            errorWetClothes.classList.add('d-none');
         }
 
         // Toggle input modes
@@ -112,7 +119,7 @@ document.addEventListener('DOMContentLoaded', function() {
         totalPriceDisplay.innerText = "₱" + grandTotal.toFixed(2);
 
         // Update button
-        if (isInvalid || grandTotal === 0 || (!isWash && !isDry && !isFold)) {
+        if (grandTotal === 0 || (!isWash && !isDry && !isFold)) {
             btnPlaceOrder.disabled = true;
         } else {
             btnPlaceOrder.disabled = false;
