@@ -99,13 +99,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         let costPerLoad = 0;
-        if (isWash) costPerLoad += 55; 
-        if (isDry) costPerLoad += 60;
-        if (isFold) costPerLoad += 30; 
+        if (isWash) costPerLoad += SERVICE_PRICES.wash; 
+        if (isDry) costPerLoad += SERVICE_PRICES.dry;
+        if (isFold) costPerLoad += SERVICE_PRICES.fold; 
         
         if (isWash) {
-            if (supplyDetergent.checked) costPerLoad += 20;
-            if (supplySoftener.checked) costPerLoad += 10;
+            if (supplyDetergent.checked) costPerLoad += SERVICE_PRICES.detergent;
+            if (supplySoftener.checked) costPerLoad += SERVICE_PRICES.softener;
         }
 
         const grandTotal = totalLoadCount * costPerLoad;

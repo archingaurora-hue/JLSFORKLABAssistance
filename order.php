@@ -1,3 +1,14 @@
+<?php
+session_start();
+require 'backend/db_conn.php';
+
+// Fetch dynamic prices
+$prices = [];
+$priceQuery = $conn->query("SELECT * FROM service_prices");
+while ($row = $priceQuery->fetch_assoc()) {
+    $prices[$row['service_name']] = $row['price'];
+}
+?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -47,21 +58,21 @@
                         <h6 class="text-muted fw-bold text-uppercase small mb-3 ps-1">Select Services</h6>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="55" style="transform: scale(1.3);">
+                            <input class="form-check-input me-3" type="checkbox" id="checkWash" name="checkWash" value="Wash" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Wash</div>
-                            <span class="fw-bold text-dark">₱55<small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Wash'], 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="checkDry" name="checkDry" value="60" style="transform: scale(1.3);">
+                            <input class="form-check-input me-3" type="checkbox" id="checkDry" name="checkDry" value="Dry" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Dry</div>
-                            <span class="fw-bold text-dark">₱60<small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Dry'], 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card cursor-pointer w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="30" style="transform: scale(1.3);">
+                            <input class="form-check-input me-3" type="checkbox" id="checkFold" name="checkFold" value="Fold" style="transform: scale(1.3);">
                             <div class="flex-grow-1 fw-bold">Fold</div>
-                            <span class="fw-bold text-dark">₱30<small class="text-muted fw-normal">/load</small></span>
+                            <span class="fw-bold text-dark">₱<?= number_format($prices['Fold'], 2) ?><small class="text-muted fw-normal">/load</small></span>
                         </label>
 
                         <div id="errorWetClothes" class="alert alert-danger mt-2 d-none small">
@@ -73,15 +84,15 @@
                         <h6 id="suppliesHeader" class="text-muted fw-bold text-uppercase small mb-3 ps-1">Add-ons (Wash only)</h6>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="supplyDetergent" name="supplyDetergent" value="20" disabled>
+                            <input class="form-check-input me-3" type="checkbox" id="supplyDetergent" name="supplyDetergent" value="Detergent" disabled>
                             <div class="flex-grow-1">Detergent</div>
-                            <span class="text-muted small">+₱20</span>
+                            <span class="text-muted small">+₱<?= number_format($prices['Detergent'], 2) ?></span>
                         </label>
 
                         <label class="app-card p-3 mb-2 d-flex align-items-center service-select-card w-100">
-                            <input class="form-check-input me-3" type="checkbox" id="supplySoftener" name="supplySoftener" value="10" disabled>
+                            <input class="form-check-input me-3" type="checkbox" id="supplySoftener" name="supplySoftener" value="Softener" disabled>
                             <div class="flex-grow-1">Softener</div>
-                            <span class="text-muted small">+₱10</span>
+                            <span class="text-muted small">+₱<?= number_format($prices['Softener'], 2) ?></span>
                         </label>
                     </div>
 
@@ -131,6 +142,17 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="js/order.js"></script>
+    <script>
+        const SERVICE_PRICES = {
+            wash: <?= $prices['Wash'] ?>,
+            dry: <?= $prices['Dry'] ?>,
+            fold: <?= $prices['Fold'] ?>,
+            detergent: <?= $prices['Detergent'] ?>,
+            softener: <?= $prices['Softener'] ?>
+        };
+    </script>
+    <script src="js/order.js"></script>
+</body>
 </body>
 
 </html>
