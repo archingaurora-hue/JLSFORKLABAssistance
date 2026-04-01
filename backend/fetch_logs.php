@@ -1,9 +1,8 @@
 <?php
 require 'db_conn.php';
 
-// Changed from load_id to order_id to match the JavaScript call in employee_dashboard.php
 if (isset($_GET['order_id'])) {
-    $order_id = $_GET['order_id']; // order_id is varchar(20)
+    $order_id = $_GET['order_id'];
 
     // Updated to query the correct table (order_logs) and columns (log_message, created_at)
     $query = "SELECT log_message, created_at 
