@@ -1,5 +1,12 @@
 <?php
+// Load PHPMailer classes
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
 
+// Include required files
+require 'PHPMailer/src/Exception.php';
+require 'PHPMailer/src/PHPMailer.php';
+require 'PHPMailer/src/SMTP.php';
 require_once 'db_conn.php';
 
 // SweetAlert and redirect helper
@@ -43,6 +50,7 @@ if (isset($_POST['register'])) {
 
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
     $role = 'Customer';
+    $verification_token = bin2hex(random_bytes(16));
 
     // Check if email exists
     $checkEmail = $conn->prepare("SELECT email FROM `User` WHERE email = ?");
@@ -53,12 +61,53 @@ if (isset($_POST['register'])) {
     if ($result->num_rows > 0) {
         sweetAlertRedirect('warning', 'Oops...', 'Email already exists!', '../register.php');
     } else {
-        $sql = "INSERT INTO `User` (email, password, role, first_name, last_name, created_at) VALUES (?, ?, ?, ?, ?, NOW())";
+        $sql = "INSERT INTO `User` (email, password, role, first_name, last_name, created_at, verification_token, is_verified) VALUES (?, ?, ?, ?, ?, NOW(), ?, 0)";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("sssss", $email, $hashed_password, $role, $first_name, $last_name);
+        $stmt->bind_param("ssssss", $email, $hashed_password, $role, $first_name, $last_name, $verification_token);
 
         if ($stmt->execute()) {
-            sweetAlertRedirect('success', 'Success!', 'Registration Successful! Please login.', '../customer_login.php');
+
+            // Initialize PHPMailer for Verification Email
+            $mail = new PHPMailer(true);
+
+            try {
+                // Gmail SMTP settings
+                $mail->isSMTP();
+                $mail->Host       = 'smtp.gmail.com';
+                $mail->SMTPAuth   = true;
+                $mail->Username   = 'sevillaralph1504@gmail.com'; // Adjust for production
+                $mail->Password   = 'wagc ultm nqrk hnfp';        // Adjust for production
+                $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+                $mail->Port       = 587;
+
+                // Sender and recipient details
+                $mail->setFrom('sevillaralph1504@gmail.com', 'LABAssistance Support');
+                $mail->addAddress($email);
+
+                // Create the verification link
+                $verifyLink = "http://localhost/LABAssistance/backend/verify_account.php?token=$verification_token&email=$email";
+
+                // Set email subject and HTML body
+                $mail->isHTML(true);
+                $mail->Subject = 'Verify Your Account - LABAssistance';
+                $mail->Body    = "
+                    <div style='font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; max-width: 600px;'>
+                        <h2 style='color: #333;'>Account Verification</h2>
+                        <p>Hello " . htmlspecialchars($first_name) . ",</p>
+                        <p>Thank you for registering. Please click the button below to verify your email address and activate your account:</p>
+                        <p style='text-align: center;'>
+                            <a href='$verifyLink' style='background-color: #0d6efd; color: white; padding: 12px 24px; text-decoration: none; border-radius: 5px; font-weight: bold;'>Verify Account</a>
+                        </p>
+                        <p><small>If you did not register for this account, please ignore this email.</small></p>
+                    </div>
+                ";
+
+                $mail->send();
+                sweetAlertRedirect('success', 'Registration Successful!', 'Please check your email to verify your account before logging in.', '../customer_login.php');
+            } catch (Exception $e) {
+                // Remove the user if email failed to send, or just show an error.
+                sweetAlertRedirect('error', 'Mail Error', 'Account created but failed to send verification email: ' . $mail->ErrorInfo, '../customer_login.php');
+            }
         } else {
             $errorMsg = addslashes($stmt->error);
             sweetAlertRedirect('error', 'Database Error', $errorMsg, '../register.php');

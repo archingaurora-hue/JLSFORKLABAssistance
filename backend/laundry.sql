@@ -18,9 +18,24 @@ CREATE TABLE `user` (
   `created_at` datetime NOT NULL DEFAULT current_timestamp(),
   `reset_token_hash` varchar(64) DEFAULT NULL,
   `reset_token_expires_at` datetime DEFAULT NULL,
+  `is_verified` tinyint(1) NOT NULL DEFAULT 0,
+  `verification_token` varchar(64) DEFAULT NULL,
   PRIMARY KEY (`user_id`),
   UNIQUE KEY `email` (`email`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+-- Trigger to automatically verify Managers and Employees
+-- --------------------------------------------------------
+DELIMITER $$
+CREATE TRIGGER `auto_verify_staff` BEFORE INSERT ON `user`
+FOR EACH ROW
+BEGIN
+    IF NEW.role IN ('Manager', 'Employee') THEN
+        SET NEW.is_verified = 1;
+    END IF;
+END$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 -- 2. Table structure for table `shop_status`
@@ -99,7 +114,7 @@ CREATE TABLE `process_load` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
--- 5. Table structure for table `service_prices`
+-- 6. Table structure for table `service_prices`
 -- --------------------------------------------------------
 CREATE TABLE `service_prices` (
   `service_name` varchar(50) NOT NULL,
@@ -113,3 +128,5 @@ INSERT INTO `service_prices` (`service_name`, `price`) VALUES
 ('Fold', 30.00),
 ('Detergent', 20.00),
 ('Softener', 10.00);
+
+COMMIT;

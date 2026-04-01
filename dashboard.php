@@ -458,12 +458,15 @@ $orderGroups = [
     <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content border-0 rounded-4">
-                <form method="POST" action="backend/update_profile.php" onsubmit="return validatePasswordMatch()">
-                    <div class="modal-header border-0 pb-0 pt-4 px-4">
-                        <h5 class="modal-title fw-bold">Update Profile</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body p-4">
+
+                <div class="modal-header border-0 pb-0 pt-4 px-4">
+                    <h5 class="modal-title fw-bold">Profile Settings</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body p-4">
+                    <form method="POST" action="backend/update_profile.php" class="mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Personal Information</h6>
                         <div class="row">
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">First Name</label>
@@ -474,35 +477,32 @@ $orderGroups = [
                                 <input type="text" name="last_name" class="form-control" value="<?php echo htmlspecialchars($_SESSION['last_name']); ?>" required>
                             </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">New Password</label>
-                            <input type="password" name="new_password" id="new_password" class="form-control" placeholder="Leave blank to keep current password">
-
-                            <ul id="dash_criteria" class="list-unstyled small mt-2 mb-0" style="font-size: 0.8rem;">
-                                <li id="dash_crit_len" class="text-danger"><i class="bi bi-x-circle me-1"></i>8+ characters</li>
-                                <li id="dash_crit_up" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 uppercase letter</li>
-                                <li id="dash_crit_low" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 lowercase letter</li>
-                                <li id="dash_crit_num" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 number</li>
-                                <li id="dash_crit_spec" class="text-danger"><i class="bi bi-x-circle me-1"></i>1 special character</li>
-                            </ul>
+                        <div class="text-end">
+                            <button type="submit" name="update_profile" class="btn btn-primary fw-bold px-4">Save Profile</button>
                         </div>
+                    </form>
+
+                    <hr class="border-secondary opacity-25 my-4">
+
+                    <form method="POST" action="backend/update_profile.php">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Security</h6>
                         <div class="mb-3">
-                            <label class="form-label text-muted small fw-bold text-uppercase">Confirm New Password</label>
-                            <input type="password" name="confirm_password" id="confirm_password" class="form-control" placeholder="Re-type new password">
-                            <div class="form-text text-danger d-none mt-2 fw-bold" id="password_error">
-                                <i class="bi bi-exclamation-circle-fill me-1"></i> Passwords do not match!
+                            <label class="form-label text-muted small fw-bold text-uppercase">Current Password</label>
+                            <input type="password" name="current_password" class="form-control" placeholder="Required to authorize change" required>
+                            <div class="form-text small mt-2">
+                                <i class="bi bi-envelope-check me-1"></i> A secure link to reset your password will be sent to your email.
                             </div>
                         </div>
-                    </div>
-                    <div class="modal-footer border-0 px-4 pb-4 d-flex justify-content-between w-100">
-                        <button type="button" class="btn btn-outline-danger fw-bold" onclick="confirmDeleteAccount()">Delete Account</button>
-
-                        <div>
-                            <button type="button" class="btn btn-light fw-bold border" data-bs-dismiss="modal">Cancel</button>
-                            <button type="submit" class="btn btn-primary fw-bold px-4">Save Changes</button>
+                        <div class="text-end">
+                            <button type="submit" name="update_password" class="btn btn-warning fw-bold px-4">Request Password Change</button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
+
+                <div class="modal-footer border-0 px-4 pb-4 d-flex justify-content-between w-100 bg-light rounded-bottom-4">
+                    <button type="button" class="btn btn-outline-danger fw-bold" onclick="confirmDeleteAccount()">Delete Account</button>
+                    <button type="button" class="btn btn-secondary fw-bold border" data-bs-dismiss="modal">Close</button>
+                </div>
 
                 <form id="deleteAccountForm" action="backend/delete_account.php" method="POST" style="display: none;">
                     <input type="hidden" name="action" value="delete_account">
@@ -613,64 +613,6 @@ $orderGroups = [
             setInterval(updateTimers, 1000);
             updateTimers();
         });
-
-        // --- Profile Validation Logic ---
-        const dashPwd = document.getElementById('new_password');
-        const dashConfPwd = document.getElementById('confirm_password');
-        const dashCriteria = document.getElementById('dash_criteria');
-        const errorText = document.getElementById('password_error');
-
-        function updateDashCriterion(id, isMet) {
-            const el = document.getElementById(id);
-            const icon = el.querySelector('i');
-            if (isMet) {
-                el.classList.replace('text-danger', 'text-success');
-                icon.classList.replace('bi-x-circle', 'bi-check-circle');
-            } else {
-                el.classList.replace('text-success', 'text-danger');
-                icon.classList.replace('bi-check-circle', 'bi-x-circle');
-            }
-        }
-
-        function validateDashPassword() {
-            const p = dashPwd.value;
-            const c = dashConfPwd.value;
-
-            const hasLen = p.length >= 8;
-            const hasUp = /[A-Z]/.test(p);
-            const hasLow = /[a-z]/.test(p);
-            const hasNum = /[0-9]/.test(p);
-            const hasSpec = /[^A-Za-z0-9]/.test(p);
-
-            updateDashCriterion('dash_crit_len', hasLen);
-            updateDashCriterion('dash_crit_up', hasUp);
-            updateDashCriterion('dash_crit_low', hasLow);
-            updateDashCriterion('dash_crit_num', hasNum);
-            updateDashCriterion('dash_crit_spec', hasSpec);
-
-            const isStrong = hasLen && hasUp && hasLow && hasNum && hasSpec;
-
-            if (c.length > 0 && p !== c) {
-                errorText.classList.remove('d-none');
-            } else {
-                errorText.classList.add('d-none');
-            }
-
-            if (p === "") {
-                errorText.classList.add('d-none');
-                return true;
-            }
-
-            return isStrong && p === c;
-        }
-
-        validateDashPassword();
-        dashPwd.addEventListener('input', validateDashPassword);
-        dashConfPwd.addEventListener('input', validateDashPassword);
-
-        function validatePasswordMatch() {
-            return validateDashPassword();
-        }
 
         // --- Delete Account Confirm ---
         function confirmDeleteAccount() {

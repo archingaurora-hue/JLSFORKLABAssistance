@@ -167,7 +167,6 @@ endif;
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script>
     // Create a dictionary of order services to check if an order is Fold Only
     const orderServices = {};
@@ -216,7 +215,6 @@ endif;
         addBagModalObj.show();
     }
 
-    // Track Order UI Function
     // Track Order UI Function
     function trackOrder() {
         let input = document.getElementById('searchTracking').value.toLowerCase().trim();

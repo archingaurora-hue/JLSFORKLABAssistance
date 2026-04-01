@@ -164,12 +164,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             $conn->query("INSERT INTO `Order_Logs` (order_id, log_message) VALUES ('$order_id', '$employee_name reset the timer for $bag_label.')");
         } elseif ($action === 'next_phase') {
-            $next = 'Awaiting Pickup';
 
-            if ($curr === 'In Queue') $next = 'Folding';
-            elseif ($curr === 'Washing') $next = $hasD ? 'Drying' : ($hasF ? 'Folding' : 'Awaiting Pickup');
-            elseif ($curr === 'Drying') $next = $hasF ? 'Folding' : 'Awaiting Pickup';
-            elseif ($curr === 'Folding') $next = 'Awaiting Pickup';
+            // Now fetches exactly what the UI told it to skip to
+            $next = $_POST['next_phase_name'] ?? 'Awaiting Pickup';
 
             $upd = $conn->prepare("UPDATE `Process_Load` SET status = ?, timer_end = NULL, timer_duration = NULL, timer_remaining = NULL WHERE load_id = ?");
             $upd->bind_param("si", $next, $load_id);

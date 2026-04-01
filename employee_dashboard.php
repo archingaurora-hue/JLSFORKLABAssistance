@@ -394,64 +394,75 @@ $orderGroups = [
                                                                                     }
                                                                                     ?>
 
-                                                                                    <?php if (($s === 'In Queue' && $needsMachine) || $s === 'Washing' || $s === 'Drying'): ?>
-                                                                                        <?php if ($hasTimer): ?>
-                                                                                            <div class="d-flex gap-2 mb-2">
-                                                                                                <form action="backend/update_status.php" method="POST" class="flex-grow-1">
-                                                                                                    <input type="hidden" name="action" value="pause_timer">
-                                                                                                    <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                                    <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold"><i class="bi bi-pause-fill"></i> Pause</button>
-                                                                                                </form>
-                                                                                                <form action="backend/update_status.php" method="POST" class="flex-grow-1">
-                                                                                                    <input type="hidden" name="action" value="reset_timer">
-                                                                                                    <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                                    <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
-                                                                                                </form>
+                                                                                    <div class="d-flex flex-wrap align-items-end justify-content-between gap-2">
+
+                                                                                        <?php if (($s === 'In Queue' && $needsMachine) || $s === 'Washing' || $s === 'Drying'): ?>
+                                                                                            <div class="flex-grow-1" style="max-width: 220px;">
+                                                                                                <?php if ($hasTimer): ?>
+                                                                                                    <div class="d-flex gap-2">
+                                                                                                        <form action="backend/update_status.php" method="POST" class="flex-grow-1 m-0">
+                                                                                                            <input type="hidden" name="action" value="pause_timer">
+                                                                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                            <button type="submit" class="btn btn-warning btn-sm w-100 fw-bold px-1"><i class="bi bi-pause-fill"></i> Pause</button>
+                                                                                                        </form>
+                                                                                                        <form action="backend/update_status.php" method="POST" class="flex-grow-1 m-0">
+                                                                                                            <input type="hidden" name="action" value="reset_timer">
+                                                                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                            <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold px-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                                                                                                        </form>
+                                                                                                    </div>
+                                                                                                <?php elseif ($isPaused): ?>
+                                                                                                    <div class="d-flex gap-2">
+                                                                                                        <form action="backend/update_status.php" method="POST" class="flex-grow-1 m-0">
+                                                                                                            <input type="hidden" name="action" value="resume_timer">
+                                                                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold px-1"><i class="bi bi-play-fill"></i> Resume</button>
+                                                                                                        </form>
+                                                                                                        <form action="backend/update_status.php" method="POST" class="flex-grow-1 m-0">
+                                                                                                            <input type="hidden" name="action" value="reset_timer">
+                                                                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                            <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold px-1"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
+                                                                                                        </form>
+                                                                                                    </div>
+                                                                                                <?php else: ?>
+                                                                                                    <form action="backend/update_status.php" method="POST" class="m-0">
+                                                                                                        <input type="hidden" name="action" value="start_timer">
+                                                                                                        <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                        <label class="small fw-bold text-muted mb-1 text-truncate d-block" style="max-width: 100%;">
+                                                                                                            <?php echo $timerLabel; ?>
+                                                                                                        </label>
+                                                                                                        <div class="input-group input-group-sm">
+                                                                                                            <input type="number" name="minutes" class="form-control text-center fw-bold" placeholder="Min" required min="1">
+                                                                                                            <button type="submit" class="btn btn-primary fw-bold px-2"><i class="bi bi-play-fill"></i> Start</button>
+                                                                                                        </div>
+                                                                                                    </form>
+                                                                                                <?php endif; ?>
                                                                                             </div>
-                                                                                        <?php elseif ($isPaused): ?>
-                                                                                            <div class="d-flex gap-2 mb-2">
-                                                                                                <form action="backend/update_status.php" method="POST" class="flex-grow-1">
-                                                                                                    <input type="hidden" name="action" value="resume_timer">
-                                                                                                    <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                                    <button type="submit" class="btn btn-success btn-sm w-100 fw-bold"><i class="bi bi-play-fill"></i> Resume</button>
-                                                                                                </form>
-                                                                                                <form action="backend/update_status.php" method="POST" class="flex-grow-1">
-                                                                                                    <input type="hidden" name="action" value="reset_timer">
-                                                                                                    <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                                    <button type="submit" class="btn btn-danger btn-sm w-100 fw-bold"><i class="bi bi-arrow-counterclockwise"></i> Reset</button>
-                                                                                                </form>
-                                                                                            </div>
-                                                                                        <?php else: ?>
-                                                                                            <form action="backend/update_status.php" method="POST" class="mb-2">
-                                                                                                <input type="hidden" name="action" value="start_timer">
-                                                                                                <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                                <label class="small fw-bold text-muted mb-1">
-                                                                                                    <?php echo $timerLabel; ?>
-                                                                                                </label>
-                                                                                                <div class="input-group input-group-sm" style="max-width: 180px;">
-                                                                                                    <input type="number" name="minutes" class="form-control text-center fw-bold" placeholder="Mins" required min="1">
-                                                                                                    <button type="submit" class="btn btn-primary fw-bold px-3">Start</button>
-                                                                                                </div>
-                                                                                            </form>
                                                                                         <?php endif; ?>
-                                                                                    <?php endif; ?>
 
-                                                                                    <?php
-                                                                                    $showNextPhase = true;
-                                                                                    if ($s === 'In Queue' && $needsMachine) $showNextPhase = false;
-                                                                                    if (($s === 'Washing' || $s === 'Drying') && !$hasTimer && !$isPaused) $showNextPhase = false;
+                                                                                        <?php
+                                                                                        // BYPASS LOGIC: Always allow moving to the next phase unless the bag is in a final state
+                                                                                        $showNextPhase = true;
+                                                                                        if (in_array($s, ['Pending Dropoff', 'Awaiting Pickup', 'Completed', 'Cancelled'])) {
+                                                                                            $showNextPhase = false;
+                                                                                        }
 
-                                                                                    if ($showNextPhase):
-                                                                                    ?>
-                                                                                        <form action="backend/update_status.php" method="POST" onsubmit="submitNextPhase(event, this)">
-                                                                                            <input type="hidden" name="is_ajax" value="1">
-                                                                                            <input type="hidden" name="action" value="next_phase">
-                                                                                            <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
-                                                                                            <button type="submit" class="btn btn-success btn-sm w-100 fw-bold mt-2">
-                                                                                                Move to <?php echo $nextPhase; ?> <i class="bi bi-arrow-right-short"></i>
-                                                                                            </button>
-                                                                                        </form>
-                                                                                    <?php endif; ?>
+                                                                                        if ($showNextPhase):
+                                                                                        ?>
+                                                                                            <div class="ms-auto">
+                                                                                                <form action="backend/update_status.php" method="POST" onsubmit="submitNextPhase(event, this)" class="m-0">
+                                                                                                    <input type="hidden" name="is_ajax" value="1">
+                                                                                                    <input type="hidden" name="action" value="next_phase">
+                                                                                                    <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
+                                                                                                    <input type="hidden" name="next_phase_name" value="<?php echo $nextPhase; ?>">
+                                                                                                    <button type="submit" class="btn btn-info text-dark btn-sm fw-bold shadow-sm border border-info" title="Move to <?php echo $nextPhase; ?>">
+                                                                                                        Move to <?php echo $nextPhase; ?> <i class="bi bi-arrow-right-short"></i>
+                                                                                                    </button>
+                                                                                                </form>
+                                                                                            </div>
+                                                                                        <?php endif; ?>
+
+                                                                                    </div>
                                                                                 </div>
                                                                             </div>
                                                                         <?php endif; ?>
@@ -513,14 +524,15 @@ $orderGroups = [
 
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Edit Profile</h5>
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-header bg-light border-bottom-0 pb-0 pt-4 px-4 rounded-top-4">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Profile Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
-                    <form action="backend/update_profile.php" method="POST">
+                <div class="modal-body p-4 pt-4">
 
+                    <form action="backend/update_profile.php" method="POST" class="mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Personal Information</h6>
                         <div class="row">
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label small text-muted fw-bold text-uppercase">First Name</label>
@@ -531,27 +543,30 @@ $orderGroups = [
                                 <input type="text" class="form-control" name="last_name" value="<?php echo isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : ''; ?>" required>
                             </div>
                         </div>
-
                         <div class="mb-3">
                             <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Please contact the manager to change your email.</small>
                         </div>
+                        <div class="text-end">
+                            <button type="submit" name="update_profile" class="btn btn-primary fw-bold px-4">Save Profile</button>
+                        </div>
+                    </form>
 
-                        <hr class="my-4">
-                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock me-2"></i>Change Password</h6>
+                    <hr class="border-secondary opacity-25 my-4">
 
-                        <div class="row">
-                            <div class="col-12 col-md-6 mb-3">
-                                <label class="form-label small text-muted fw-bold text-uppercase">New Password</label>
-                                <input type="password" class="form-control" name="new_password" placeholder="Leave blank to keep current">
-                            </div>
-                            <div class="col-12 col-md-6 mb-3">
-                                <label class="form-label small text-muted fw-bold text-uppercase">Confirm Password</label>
-                                <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password">
+                    <form action="backend/update_profile.php" method="POST">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3"><i class="bi bi-shield-lock me-2"></i>Security</h6>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold text-uppercase">Current Password</label>
+                            <input type="password" class="form-control" name="current_password" placeholder="Required to authorize change" required>
+                            <div class="form-text small mt-2">
+                                <i class="bi bi-envelope-check me-1"></i> A secure link to reset your password will be sent to your email.
                             </div>
                         </div>
-
-                        <button type="submit" name="update_profile" class="btn-primary-app w-100 py-2 fw-bold mt-3">Save Changes</button>
+                        <div class="text-end">
+                            <button type="submit" name="update_password" class="btn btn-warning fw-bold px-4">Request Password Change</button>
+                        </div>
                     </form>
+
                 </div>
             </div>
         </div>
@@ -588,6 +603,48 @@ $orderGroups = [
             if (status) {
                 window.history.replaceState(null, null, window.location.pathname);
             }
+
+            // --- DROPDOWN STATE PERSISTENCE LOGIC ---
+            // Restore any open bag collapsibles properly using Bootstrap's JS API
+            let openCollapses = JSON.parse(localStorage.getItem('openOrderCollapses')) || [];
+            openCollapses.forEach(id => {
+                let el = document.getElementById(id);
+                if (el) {
+                    // Remove the 'collapse' class temporarily to avoid animation, add 'show'
+                    el.classList.add('show');
+
+                    // Find the toggle button and update its ARIA state
+                    let toggleBtn = document.querySelector(`[data-bs-target="#${id}"]`);
+                    if (toggleBtn) {
+                        toggleBtn.setAttribute('aria-expanded', 'true');
+                        toggleBtn.classList.remove('collapsed');
+                    }
+
+                    // Initialize the Bootstrap instance so its internal state recognizes it's open
+                    bootstrap.Collapse.getOrCreateInstance(el, {
+                        toggle: false
+                    });
+                }
+            });
+
+            // Targeted listener: Only triggers on the collapsible itself to avoid bubbling bugs
+            const bagCollapses = document.querySelectorAll('.collapse');
+            bagCollapses.forEach(c => {
+                c.addEventListener('shown.bs.collapse', function(e) {
+                    if (e.target === this && this.id.startsWith('orderCollapse')) {
+                        let open = JSON.parse(localStorage.getItem('openOrderCollapses')) || [];
+                        if (!open.includes(this.id)) open.push(this.id);
+                        localStorage.setItem('openOrderCollapses', JSON.stringify(open));
+                    }
+                });
+                c.addEventListener('hidden.bs.collapse', function(e) {
+                    if (e.target === this && this.id.startsWith('orderCollapse')) {
+                        let open = JSON.parse(localStorage.getItem('openOrderCollapses')) || [];
+                        open = open.filter(id => id !== this.id);
+                        localStorage.setItem('openOrderCollapses', JSON.stringify(open));
+                    }
+                });
+            });
         });
     </script>
 </body>

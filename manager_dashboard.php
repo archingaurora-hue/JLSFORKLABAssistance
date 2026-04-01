@@ -137,14 +137,15 @@ $prices = array_merge([
 
     <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0 shadow">
-                <div class="modal-header bg-light border-bottom-0 pb-0">
-                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Edit Profile</h5>
+            <div class="modal-content border-0 rounded-4">
+                <div class="modal-header bg-light border-bottom-0 pb-0 pt-4 px-4 rounded-top-4">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Profile Settings</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <div class="modal-body pt-4">
-                    <form action="backend/update_profile.php" method="POST">
+                <div class="modal-body p-4 pt-4">
 
+                    <form action="backend/update_profile.php" method="POST" class="mb-4">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3">Personal Information</h6>
                         <div class="row">
                             <div class="col-12 col-md-6 mb-3">
                                 <label class="form-label small text-muted fw-bold text-uppercase">First Name</label>
@@ -155,28 +156,31 @@ $prices = array_merge([
                                 <input type="text" class="form-control" name="last_name" value="<?php echo isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : ''; ?>" required>
                             </div>
                         </div>
-
                         <div class="mb-3">
-                            <label class="form-label small text-muted fw-bold text-uppercase">New Email</label>
+                            <label class="form-label small text-muted fw-bold text-uppercase">Email Address</label>
                             <input type="email" class="form-control" name="email" value="<?php echo isset($_SESSION['email']) ? htmlspecialchars($_SESSION['email']) : ''; ?>" required>
                         </div>
+                        <div class="text-end">
+                            <button type="submit" name="update_profile" class="btn btn-primary fw-bold px-4">Save Profile</button>
+                        </div>
+                    </form>
 
-                        <hr class="my-4">
-                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock me-2"></i>Change Password</h6>
+                    <hr class="border-secondary opacity-25 my-4">
 
-                        <div class="row">
-                            <div class="col-12 col-md-6 mb-3">
-                                <label class="form-label small text-muted fw-bold text-uppercase">New Password</label>
-                                <input type="password" class="form-control" name="new_password" placeholder="Leave blank to keep current">
-                            </div>
-                            <div class="col-12 col-md-6 mb-3">
-                                <label class="form-label small text-muted fw-bold text-uppercase">Confirm Password</label>
-                                <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password">
+                    <form action="backend/update_profile.php" method="POST">
+                        <h6 class="fw-bold text-uppercase small text-muted mb-3"><i class="bi bi-shield-lock me-2"></i>Security</h6>
+                        <div class="mb-3">
+                            <label class="form-label small text-muted fw-bold text-uppercase">Current Password</label>
+                            <input type="password" class="form-control" name="current_password" placeholder="Required to authorize change" required>
+                            <div class="form-text small mt-2">
+                                <i class="bi bi-envelope-check me-1"></i> A secure link to reset your password will be sent to your email.
                             </div>
                         </div>
-
-                        <button type="submit" name="update_profile" class="btn-primary-app w-100 py-2 fw-bold mt-3">Save Changes</button>
+                        <div class="text-end">
+                            <button type="submit" name="update_password" class="btn btn-warning fw-bold px-4">Request Password Change</button>
+                        </div>
                     </form>
+
                 </div>
             </div>
         </div>
