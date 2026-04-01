@@ -259,12 +259,6 @@ $orderGroups = [
                                                                         </span>
                                                                     <?php endif; ?>
                                                                 </div>
-
-                                                                <?php if ($order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
-                                                                    <button class="btn btn-sm btn-outline-primary shadow-sm rounded-pill fw-bold" onclick="openAddBagModal('<?php echo htmlspecialchars($order_id); ?>')">
-                                                                        <i class="bi bi-plus-circle"></i> Add Bag
-                                                                    </button>
-                                                                <?php endif; ?>
                                                             </div>
 
                                                             <div>
@@ -472,6 +466,13 @@ $orderGroups = [
                                                         </div>
 
                                                         <div class="p-3 bg-white border-top d-flex flex-column gap-2">
+
+                                                            <?php if ($order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
+                                                                <button type="button" class="btn btn-outline-primary w-100 fw-bold py-2 shadow-sm" onclick="openAddBagModal('<?php echo htmlspecialchars($order_id); ?>')">
+                                                                    <i class="bi bi-plus-circle me-1"></i> Add Bag
+                                                                </button>
+                                                            <?php endif; ?>
+
                                                             <?php if ($pendingCount > 0 && $isOpen): ?>
                                                                 <form action="backend/update_status.php" method="POST" class="m-0">
                                                                     <input type="hidden" name="action" value="receive_order">
