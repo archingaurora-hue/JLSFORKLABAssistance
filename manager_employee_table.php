@@ -118,7 +118,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
                         <p class="text-muted small mb-3 ms-4"><i class="bi bi-envelope me-1"></i> <?php echo htmlspecialchars($row['email']); ?></p>
 
                         <div class="d-flex gap-2 mt-2 pt-2 border-top">
-                            <button class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill fw-bold" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['first_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['last_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')"
+                            <button class="btn btn-sm btn-outline-secondary flex-grow-1 rounded-pill fw-bold" onclick="editEmployee(<?php echo $row['user_id']; ?>, '<?php echo htmlspecialchars($row['first_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['last_name'], ENT_QUOTES); ?>', '<?php echo htmlspecialchars($row['email'], ENT_QUOTES); ?>')">
                                 <i class="bi bi-pencil-square me-1"></i> Edit
                             </button>
                             <a href="backend/employee_crud.php?delete=<?php echo $row['user_id']; ?>" class="btn btn-sm btn-outline-danger flex-grow-1 rounded-pill fw-bold" onclick="return confirm('Delete this employee?');">
@@ -202,35 +202,20 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
         function editEmployee(id, firstName, lastName, email) {
             document.getElementById('modalTitle').innerText = "Edit Employee";
             document.getElementById('emp_id').value = id;
-            // The arguments are now firstName and lastName to match these variables
             document.getElementById('emp_first_name').value = firstName;
             document.getElementById('emp_last_name').value = lastName;
             document.getElementById('emp_email').value = email;
 
-            // Password logic for editing
+            // Secure Password Logic: Ensure the form inputs are completely blank for editing
+            document.getElementById('emp_password').value = "";
+            document.getElementById('emp_confirm_password').value = "";
             document.getElementById('emp_password').required = false;
+            document.getElementById('emp_confirm_password').required = false;
             document.getElementById('emp_password').placeholder = "Leave blank to keep current";
             document.getElementById('passHelp').innerText = "Leave blank to keep current password.";
 
-            // Hide error message if it was previously triggered
-            document.getElementById('formError').classList.add('d-none');
-
-            var myModal = new bootstrap.Modal(document.getElementById('employeeModal'));
-            myModal.show();
-        }
-
-        function editEmployee(id, firstName, lastName, email) {
-            document.getElementById('modalTitle').innerText = "Edit Employee";
-            document.getElementById('emp_id').value = id;
-            // The arguments are now firstName and lastName to match these variables
-            document.getElementById('emp_first_name').value = firstName;
-            document.getElementById('emp_last_name').value = lastName;
-            document.getElementById('emp_email').value = email;
-
-            // Password logic for editing
-            document.getElementById('emp_password').required = false;
-            document.getElementById('emp_password').placeholder = "Leave blank to keep current";
-            document.getElementById('passHelp').innerText = "Leave blank to keep current password.";
+            // Reset criteria styling for the cleared passwords
+            validateEmpPassword();
 
             // Hide error message if it was previously triggered
             document.getElementById('formError').classList.add('d-none');

@@ -152,7 +152,9 @@ $orderGroups = [
                 <span>LAB<span class="text-primary">Assistance</span></span>
             </span>
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
+                <button type="button" class="btn btn-sm btn-light border shadow-sm rounded-pill d-none d-sm-inline" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                    <i class="bi bi-person-circle text-primary me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['first_name']); ?>
+                </button>
 
                 <?php if ($_SESSION['role'] === 'Manager'): ?>
                     <a href="manager_dashboard.php" class="btn btn-sm btn-outline-primary rounded-pill fw-bold" title="Go to Manager Dashboard">
@@ -509,8 +511,85 @@ $orderGroups = [
         </div>
     </div>
 
-    <?php include 'employee_modals.php'; ?>
+    <div class="modal fade" id="editProfileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content border-0 shadow">
+                <div class="modal-header bg-light border-bottom-0 pb-0">
+                    <h5 class="modal-title fw-bold text-dark"><i class="bi bi-person-circle me-2 text-primary"></i>Edit Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body pt-4">
+                    <form action="backend/update_profile.php" method="POST">
 
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label small text-muted fw-bold text-uppercase">First Name</label>
+                                <input type="text" class="form-control" name="first_name" value="<?php echo isset($_SESSION['first_name']) ? htmlspecialchars($_SESSION['first_name']) : ''; ?>" required>
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label small text-muted fw-bold text-uppercase">Last Name</label>
+                                <input type="text" class="form-control" name="last_name" value="<?php echo isset($_SESSION['last_name']) ? htmlspecialchars($_SESSION['last_name']) : ''; ?>" required>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <small class="text-muted"><i class="bi bi-info-circle me-1"></i>Please contact the manager to change your email.</small>
+                        </div>
+
+                        <hr class="my-4">
+                        <h6 class="fw-bold text-dark mb-3"><i class="bi bi-shield-lock me-2"></i>Change Password</h6>
+
+                        <div class="row">
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label small text-muted fw-bold text-uppercase">New Password</label>
+                                <input type="password" class="form-control" name="new_password" placeholder="Leave blank to keep current">
+                            </div>
+                            <div class="col-12 col-md-6 mb-3">
+                                <label class="form-label small text-muted fw-bold text-uppercase">Confirm Password</label>
+                                <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password">
+                            </div>
+                        </div>
+
+                        <button type="submit" name="update_profile" class="btn-primary-app w-100 py-2 fw-bold mt-3">Save Changes</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <?php include 'employee_modals.php'; ?>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const status = urlParams.get('status');
+
+            if (status === 'profile_updated') {
+                Swal.fire({
+                    title: 'Success!',
+                    text: 'Your profile has been updated.',
+                    icon: 'success'
+                });
+            } else if (status === 'password_mismatch') {
+                Swal.fire({
+                    title: 'Update Failed',
+                    text: 'Your new passwords do not match.',
+                    icon: 'warning'
+                });
+            } else if (status === 'error') {
+                Swal.fire({
+                    title: 'Error',
+                    text: 'Something went wrong. Please try again.',
+                    icon: 'error'
+                });
+            }
+
+            if (status) {
+                window.history.replaceState(null, null, window.location.pathname);
+            }
+        });
+    </script>
 </body>
 
 </html>

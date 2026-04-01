@@ -15,8 +15,8 @@ if (isset($_POST['login'])) {
         $row = $result->fetch_assoc();
 
         if ($row['role'] !== 'Manager' && $row['role'] !== 'Employee') {
-            $_SESSION['employee_login_error'] = "Access Denied. Customers must use the Customer Login.";
-            header("Location: ../staff_login.php");
+            // Redirect with access denied status for regular customers trying to use staff login
+            header("Location: ../staff_login.php?status=access_denied");
             exit();
         }
 
@@ -50,7 +50,7 @@ if (isset($_POST['login'])) {
         }
     }
 
-    $_SESSION['staff_login_error'] = "Invalid email or password.";
-    header("Location: ../staff_login.php");
+    // Redirect with invalid credentials status
+    header("Location: ../staff_login.php?status=invalid_credentials");
     exit();
 }

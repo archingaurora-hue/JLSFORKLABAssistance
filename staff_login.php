@@ -34,13 +34,6 @@
                 <div id="loginSection">
                     <div class="app-card p-4">
 
-                        <?php
-                        if (isset($_SESSION['staff_login_error'])) {
-                            echo '<div class="alert alert-danger text-center small py-2 mb-3" role="alert">' . $_SESSION['staff_login_error'] . '</div>';
-                            unset($_SESSION['staff_login_error']);
-                        }
-                        ?>
-
                         <form action="backend/staff_login_process.php" method="POST">
                             <div class="mb-3">
                                 <label class="form-label text-muted small fw-bold text-uppercase">Staff Email</label>
@@ -133,7 +126,19 @@
             const urlParams = new URLSearchParams(window.location.search);
             const status = urlParams.get('status');
 
-            if (status === 'link_sent') {
+            if (status === 'invalid_credentials') {
+                Swal.fire({
+                    title: 'Login Failed',
+                    text: 'Invalid email or password.',
+                    icon: 'error'
+                });
+            } else if (status === 'access_denied') {
+                Swal.fire({
+                    title: 'Access Denied',
+                    text: 'Customers must use the Customer Login.',
+                    icon: 'warning'
+                });
+            } else if (status === 'link_sent') {
                 Swal.fire({
                     title: 'Check your Inbox',
                     text: 'If a staff account exists for that email, we have sent a password reset link.',
@@ -151,6 +156,11 @@
                     text: 'Something went wrong. Please try again.',
                     icon: 'error'
                 });
+            }
+
+            // Cleanup the URL after alert so it doesn't show again on refresh
+            if (status) {
+                window.history.replaceState(null, null, window.location.pathname);
             }
         });
     </script>

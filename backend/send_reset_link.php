@@ -13,8 +13,11 @@ require 'db_conn.php';
 if (isset($_POST['send_link'])) {
     $email = $_POST['email'];
 
+    // Determine the user type to redirect to the correct login page
+    $user_type = isset($_POST['user_type']) ? $_POST['user_type'] : 'customer';
+    $redirect_page = ($user_type === 'staff') ? '../staff_login.php' : '../customer_login.php';
+
     // Check if the user email exists in the database
-    // UPDATED: Fetching first_name and last_name
     $stmt = $conn->prepare("SELECT user_id, first_name, last_name FROM `User` WHERE email = ?");
     $stmt->bind_param("s", $email);
     $stmt->execute();
@@ -74,8 +77,8 @@ if (isset($_POST['send_link'])) {
             // Send the email
             $mail->send();
 
-            // Redirect to login page on success
-            header("Location: ../customer_login.php?status=link_sent");
+            // Redirect to the correct login page on success
+            header("Location: {$redirect_page}?status=link_sent");
         } catch (Exception $e) {
             // Display error if email fails to send (for debugging only)
             echo "Message could not be sent. Mailer Error: {$mail->ErrorInfo}";
@@ -83,7 +86,7 @@ if (isset($_POST['send_link'])) {
         }
     } else {
         // Redirect even if email isn't found to prevent email scraping
-        header("Location: ../customer_login.php?status=link_sent");
+        header("Location: {$redirect_page}?status=link_sent");
     }
     exit();
 }
