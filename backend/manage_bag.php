@@ -75,9 +75,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     else $c_other += $lr['count'];
                 }
 
-                $isFoldOnly = (stripos($services, 'Fold') !== false && stripos($services, 'Wash') === false && stripos($services, 'Dry') === false);
-                $new_bag_counts_str = $isFoldOnly ? "Fold Only: $c_fold" : "Colored: $c_colored, White: $c_white";
-                if ($c_other > 0) $new_bag_counts_str .= ", Extra Types: $c_other";
+                // DYNAMIC BAG STRING GENERATOR
+                $bag_parts = [];
+                if ($c_colored > 0) $bag_parts[] = "Colored: $c_colored";
+                if ($c_white > 0) $bag_parts[] = "White: $c_white";
+                if ($c_fold > 0) $bag_parts[] = "Fold Only: $c_fold";
+                if ($c_other > 0) $bag_parts[] = "Extra Types: $c_other";
+
+                $new_bag_counts_str = !empty($bag_parts) ? implode(', ', $bag_parts) : "No Bags";
 
                 // Update Order Status, Price, and Bag Counts String
                 $conn->query("UPDATE `Order` SET final_price = $new_price, bag_counts = '$new_bag_counts_str', status = 'In Progress' WHERE order_id = '$order_id'");
@@ -138,9 +143,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
                     else $c_other += $lr['count'];
                 }
 
-                $isFoldOnly = (stripos($services, 'Fold') !== false && stripos($services, 'Wash') === false && stripos($services, 'Dry') === false);
-                $new_bag_counts_str = $isFoldOnly ? "Fold Only: $c_fold" : "Colored: $c_colored, White: $c_white";
-                if ($c_other > 0) $new_bag_counts_str .= ", Extra Types: $c_other";
+                // DYNAMIC BAG STRING GENERATOR
+                $bag_parts = [];
+                if ($c_colored > 0) $bag_parts[] = "Colored: $c_colored";
+                if ($c_white > 0) $bag_parts[] = "White: $c_white";
+                if ($c_fold > 0) $bag_parts[] = "Fold Only: $c_fold";
+                if ($c_other > 0) $bag_parts[] = "Extra Types: $c_other";
+
+                $new_bag_counts_str = !empty($bag_parts) ? implode(', ', $bag_parts) : "No Bags";
 
                 // Re-evaluate order status
                 $rem = $conn->query("SELECT COUNT(*) as c FROM `Process_Load` WHERE order_id = '$order_id' AND status != 'Completed'")->fetch_assoc();
