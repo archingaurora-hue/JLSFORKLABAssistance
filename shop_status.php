@@ -129,12 +129,21 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y, H:i") : date("H:
 
 <body class="bg-light">
 
-    <nav class="navbar navbar-light bg-dark shadow-sm sticky-top">
+    <nav class="navbar navbar-dark bg-dark shadow-sm sticky-top">
         <div class="container">
-            <span class="navbar-brand fw-bold text-white">LAB<span class="text-primary">Assistance</span></span>
+            <a href="manager_dashboard.php" class="navbar-brand fw-bold d-flex align-items-center gap-2 text-decoration-none text-white">
+                <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
+                <span>LAB<span class="text-primary">Assistance</span></span>
+            </a>
+
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
-                <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
+                <span class="small text-light d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
+
+                <a href="manager_dashboard.php" class="btn btn-sm btn-outline-info rounded-pill" title="Return to Dashboard">
+                    <i class="bi bi-house-door"></i>
+                </a>
+
+                <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill" title="Logout">
                     <i class="bi bi-box-arrow-right"></i>
                 </a>
             </div>
