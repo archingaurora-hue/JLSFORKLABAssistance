@@ -26,7 +26,7 @@
                 <div id="loginSection">
                     <div class="app-card p-4">
                         <div class="text-center mb-4">
-                            <h3 class="fw-bold">Log In</h3>
+                            <!-- <h3 class="fw-bold">Log In</h3> -->
                         </div>
 
                         <?php
@@ -62,7 +62,7 @@
                                 <button type="button" class="btn btn-link text-muted small p-0 text-decoration-none" onclick="toggleRecover()">Forgot Password?</button>
                             </div>
 
-                            <button type="submit" name="signin" class="btn-primary-app w-100">Sign In</button>
+                            <button type="submit" name="signin" class="btn-primary-app w-100">Login</button>
                         </form>
                     </div>
 
