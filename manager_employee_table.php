@@ -38,7 +38,9 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
             </a>
 
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-light d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
+                <span class="btn btn-sm btn-light border shadow-sm rounded-pill d-none d-sm-inline pe-none">
+                    <i class="bi bi-person-circle text-primary me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['first_name']); ?>
+                </span>
 
                 <a href="manager_dashboard.php" class="btn btn-sm btn-outline-info rounded-pill" title="Return to Dashboard">
                     <i class="bi bi-house-door"></i>
@@ -54,7 +56,7 @@ $result = $conn->query("SELECT * FROM `User` WHERE role = 'Employee'");
     <div class="container page-container mt-4">
 
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h3 class="fw-bold mb-0 text-dark">Employee Roster</h3>
+            <h3 class="fw-bold mb-0 text-dark">Employee Table</h3>
             <button class="btn btn-primary rounded-pill shadow-sm fw-bold px-3" data-bs-toggle="modal" data-bs-target="#employeeModal" onclick="resetForm()">
                 <i class="bi bi-person-plus-fill me-1"></i> Add <span class="d-none d-sm-inline">Employee</span>
             </button>

@@ -137,7 +137,9 @@ $formatted_open = $has_override ? $nextOpenObj->format("F j, Y, H:i") : date("H:
             </a>
 
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-light d-none d-sm-inline">Hi, <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
+                <span class="btn btn-sm btn-light border shadow-sm rounded-pill d-none d-sm-inline pe-none">
+                    <i class="bi bi-person-circle text-primary me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['first_name']); ?>
+                </span>
 
                 <a href="manager_dashboard.php" class="btn btn-sm btn-outline-info rounded-pill" title="Return to Dashboard">
                     <i class="bi bi-house-door"></i>
