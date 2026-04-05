@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $estimated_price = $totalLoads * $costPerLoad;
     $final_price = $estimated_price;
-    $bag_counts = $isFoldOnly ? "Fold Only: $qtyFold" : "Colored: $qtyColored, White: $qtyWhite";
+    $bag_counts = $isFoldOnly ? "Fold Only: $qtyFold" : "Colored/Mixed: $qtyColored, White: $qtyWhite";
 
     // Create Order ID
     $datePart = date("mdY");
@@ -116,8 +116,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             }
         } else {
             for ($i = 1; $i <= $qtyColored; $i++) {
-                $category = "Colored";
-                $label = "Colored #$i";
+                $category = "Colored/Mixed";
+                $label = "Colored/Mixed #$i";
                 $loadInsert->bind_param("sss", $order_id, $category, $label);
                 $loadInsert->execute();
             }
