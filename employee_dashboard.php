@@ -157,8 +157,8 @@ $orderGroups = [
                 </button>
 
                 <?php if ($_SESSION['role'] === 'Manager'): ?>
-                    <a href="manager_dashboard.php" class="btn btn-sm btn-outline-primary rounded-pill fw-bold" title="Go to Manager Dashboard">
-                        <i class="bi bi-speedometer2"></i> <span class="d-none d-sm-inline">Manager DB</span>
+                    <a href="manager_dashboard.php" class="btn btn-sm btn-outline-info rounded-pill" title="Return to Dashboard">
+                        <i class="bi bi-house-door"></i>
                     </a>
                 <?php endif; ?>
 
