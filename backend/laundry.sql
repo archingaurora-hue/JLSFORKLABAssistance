@@ -137,6 +137,7 @@ CREATE TABLE `order_messages` (
   `order_id` varchar(20) NOT NULL,
   `sender_id` int(11) NOT NULL,
   `message_text` text NOT NULL,
+  `is_read` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   PRIMARY KEY (`message_id`),
   KEY `order_id` (`order_id`),

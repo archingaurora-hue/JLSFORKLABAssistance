@@ -12,6 +12,13 @@ if (!isset($_SESSION['user_id']) || !isset($_GET['order_id'])) {
 $order_id = $_GET['order_id'];
 $current_user_id = $_SESSION['user_id'];
 
+// --- NEW: Mark messages as read automatically when this chat is loaded ---
+$updateQuery = "UPDATE `order_messages` SET is_read = 1 WHERE order_id = ? AND sender_id != ?";
+$updateStmt = $conn->prepare($updateQuery);
+$updateStmt->bind_param("si", $order_id, $current_user_id);
+$updateStmt->execute();
+// ------------------------------------------------------------------------
+
 $query = "
     SELECT m.message_id, m.message_text, DATE_FORMAT(m.created_at, '%b %d, %h:%i %p') as time_sent, 
            u.user_id, u.first_name, u.role

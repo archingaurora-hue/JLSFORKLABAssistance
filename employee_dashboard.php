@@ -151,6 +151,17 @@ $orderGroups = [
                 <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
                 <span>LAB<span class="text-primary">Assistance</span></span>
             </span>
+            <div class="dropdown me-2">
+                <button class="btn btn-light position-relative rounded-circle border shadow-sm p-1" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
+                    <i class="bi bi-bell-fill text-secondary"></i>
+                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size: 0.65rem;">
+                        0
+                    </span>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notifDropdown" id="notifList" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                    <li class="dropdown-item text-center text-muted small py-3">Loading...</li>
+                </ul>
+            </div>
             <div class="d-flex align-items-center gap-2">
                 <button type="button" class="btn btn-sm btn-light border shadow-sm rounded-pill d-none d-sm-inline" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     <i class="bi bi-person-circle text-primary me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['first_name']); ?>
@@ -290,9 +301,9 @@ $orderGroups = [
                                                                 </button>
                                                             </div>
                                                             <div class="col-6">
-                                                                <button class="btn btn-sm btn-primary w-100 shadow-sm fw-bold" type="button" onclick="openChat('<?php echo $order_id; ?>')">
+                                                                <a href="chat.php?order_id=<?php echo $order_id; ?>" class="btn btn-sm btn-primary w-100 shadow-sm fw-bold">
                                                                     <i class="bi bi-chat-dots-fill"></i> Chat Customer
-                                                                </button>
+                                                                </a>
                                                             </div>
                                                         </div>
                                                     </div>
@@ -657,8 +668,56 @@ $orderGroups = [
             });
         });
     </script>
+    <script>
+        function fetchNotifications() {
+            fetch('backend/check_notifications.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        const badge = document.getElementById('notifBadge');
+                        const list = document.getElementById('notifList');
 
-    <?php include 'chat_module.php'; ?>
+                        if (!badge || !list) return; // Safeguard
+
+                        if (data.unread_count > 0) {
+                            badge.innerText = data.unread_count;
+                            badge.classList.remove('d-none');
+                        } else {
+                            badge.classList.add('d-none');
+                        }
+
+                        if (data.notifications.length === 0) {
+                            list.innerHTML = '<li class="dropdown-item text-center text-muted small py-3"><i class="bi bi-check-circle text-success fs-4 d-block mb-2"></i>You are all caught up!</li>';
+                        } else {
+                            let html = '<li class="dropdown-header fw-bold text-dark bg-light border-bottom">Unread Messages</li>';
+                            data.notifications.forEach(notif => {
+                                html += `
+                            <li>
+                                <a class="dropdown-item border-bottom py-2 text-wrap" href="chat.php?order_id=${notif.order_id}">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <strong class="small text-primary"><i class="bi bi-person-circle me-1"></i>${escapeNotifHtml(notif.sender_name)}</strong>
+                                        <span class="badge bg-secondary" style="font-size: 0.65rem;">TRK: ${notif.tracking_code}</span>
+                                    </div>
+                                    <div class="small text-dark" style="display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden;">${escapeNotifHtml(notif.message_text)}</div>
+                                </a>
+                            </li>`;
+                            });
+                            list.innerHTML = html;
+                        }
+                    }
+                })
+                .catch(err => console.error("Notification Sync Error:", err));
+        }
+
+        function escapeNotifHtml(unsafe) {
+            if (!unsafe) return '';
+            return unsafe.toString().replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+        }
+
+        // Start Real-time sync
+        fetchNotifications();
+        setInterval(fetchNotifications, 5000); // Polls every 5 seconds
+    </script>
 </body>
 
 </html>
