@@ -9,6 +9,13 @@ if (!isset($_SESSION['role']) || ($_SESSION['role'] !== 'Employee' && $_SESSION[
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action'])) {
+    // --- NEW: Verify Shop is Open Before Allowing Bag Modifications ---
+    $shopCheckQuery = $conn->query("SELECT is_shop_open FROM Shop_Status WHERE status_id = 1");
+    $shopStatusData = $shopCheckQuery->fetch_assoc();
+    if (!$shopStatusData || $shopStatusData['is_shop_open'] == 0) {
+        header("Location: ../employee_dashboard.php?status=shop_closed");
+        exit();
+    }
     $action = $_POST['action'];
 
     $employee_name = (isset($_SESSION['first_name']) && isset($_SESSION['last_name']))

@@ -335,7 +335,7 @@ $orderGroups = [
                                                                                 ?>
                                                                                 <span class="badge rounded-pill <?php echo $badgeClass; ?> me-2"><?php echo $s; ?></span>
 
-                                                                                <?php if ($order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
+                                                                                <?php if ($isOpen && $order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
                                                                                     <form action="backend/manage_bag.php" method="POST" class="m-0 p-0" data-total-bags="<?php echo $totalBags; ?>">
                                                                                         <input type="hidden" name="action" value="delete_bag">
                                                                                         <input type="hidden" name="load_id" value="<?php echo $load['load_id']; ?>">
@@ -488,36 +488,37 @@ $orderGroups = [
 
                                                         <div class="p-3 bg-white border-top d-flex flex-column gap-2">
 
-                                                            <?php if ($order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
-                                                                <button type="button" class="btn btn-outline-primary w-100 fw-bold py-2 shadow-sm" onclick="openAddBagModal('<?php echo htmlspecialchars($order_id); ?>')">
-                                                                    <i class="bi bi-plus-circle me-1"></i> Add Bag
+                                                            <?php if ($isOpen && $order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
+                                                                <form action="backend/manage_bag.php" method="POST" class="m-0 p-0" data-total-bags="<?php echo $totalBags; ?>">
+                                                                    <button type="button" class="btn btn-outline-primary w-100 fw-bold py-2 shadow-sm" onclick="openAddBagModal('<?php echo htmlspecialchars($order_id); ?>')">
+                                                                        <i class="bi bi-plus-circle me-1"></i> Add Bag
+                                                                    </button>
+                                                                <?php endif; ?>
+
+                                                                <?php if ($pendingCount > 0 && $isOpen): ?>
+                                                                    <form action="backend/update_status.php" method="POST" class="m-0">
+                                                                        <input type="hidden" name="action" value="receive_order">
+                                                                        <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
+                                                                        <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
+                                                                            <i class="bi bi-box-seam me-1"></i> Mark Order as Received
+                                                                        </button>
+                                                                    </form>
+                                                                <?php endif; ?>
+
+                                                                <?php if ($awaitingCount === $totalBags && $totalBags > 0 && $isOpen && $order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
+                                                                    <form action="backend/update_status.php" method="POST" class="m-0" onsubmit="submitCompleteOrder(event, this)">
+                                                                        <input type="hidden" name="is_ajax" value="1">
+                                                                        <input type="hidden" name="action" value="complete_order">
+                                                                        <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
+                                                                        <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">
+                                                                            <i class="bi bi-check2-circle me-1"></i> Complete Order
+                                                                        </button>
+                                                                    </form>
+                                                                <?php endif; ?>
+
+                                                                <button class="btn btn-sm btn-link text-decoration-none w-100 mt-1" onclick="viewLogs('<?php echo $order_id; ?>')">
+                                                                    <i class="bi bi-journal-text"></i> View Order History Logs
                                                                 </button>
-                                                            <?php endif; ?>
-
-                                                            <?php if ($pendingCount > 0 && $isOpen): ?>
-                                                                <form action="backend/update_status.php" method="POST" class="m-0">
-                                                                    <input type="hidden" name="action" value="receive_order">
-                                                                    <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
-                                                                    <button type="submit" class="btn btn-primary w-100 fw-bold py-2 shadow-sm">
-                                                                        <i class="bi bi-box-seam me-1"></i> Mark Order as Received
-                                                                    </button>
-                                                                </form>
-                                                            <?php endif; ?>
-
-                                                            <?php if ($awaitingCount === $totalBags && $totalBags > 0 && $isOpen && $order['order_status'] !== 'Completed' && $order['order_status'] !== 'Cancelled'): ?>
-                                                                <form action="backend/update_status.php" method="POST" class="m-0" onsubmit="submitCompleteOrder(event, this)">
-                                                                    <input type="hidden" name="is_ajax" value="1">
-                                                                    <input type="hidden" name="action" value="complete_order">
-                                                                    <input type="hidden" name="order_id" value="<?php echo $order_id; ?>">
-                                                                    <button type="submit" class="btn btn-success w-100 fw-bold py-2 shadow-sm">
-                                                                        <i class="bi bi-check2-circle me-1"></i> Complete Order
-                                                                    </button>
-                                                                </form>
-                                                            <?php endif; ?>
-
-                                                            <button class="btn btn-sm btn-link text-decoration-none w-100 mt-1" onclick="viewLogs('<?php echo $order_id; ?>')">
-                                                                <i class="bi bi-journal-text"></i> View Order History Logs
-                                                            </button>
                                                         </div>
                                                     </div>
                                                 </div> <?php endforeach; ?>
@@ -608,6 +609,13 @@ $orderGroups = [
                     text: 'Your profile has been updated.',
                     icon: 'success'
                 });
+            } else if (status === 'shop_closed') {
+                Swal.fire({
+                    title: 'Action Denied',
+                    text: 'You cannot manage or modify bags while the shop is closed.',
+                    icon: 'error'
+                });
+                // --------------------------
             } else if (status === 'password_mismatch') {
                 Swal.fire({
                     title: 'Update Failed',
