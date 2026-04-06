@@ -283,9 +283,18 @@ $orderGroups = [
                                                             </div>
                                                         </div>
 
-                                                        <button class="btn btn-sm btn-light w-100 mt-3 border shadow-sm fw-bold text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#orderCollapse<?php echo $order_id; ?>">
-                                                            <i class="bi bi-chevron-expand"></i> Manage Bags
-                                                        </button>
+                                                        <div class="row g-2 mt-2">
+                                                            <div class="col-6">
+                                                                <button class="btn btn-sm btn-light w-100 border shadow-sm fw-bold text-secondary" type="button" data-bs-toggle="collapse" data-bs-target="#orderCollapse<?php echo $order_id; ?>">
+                                                                    <i class="bi bi-chevron-expand"></i> Manage Bags
+                                                                </button>
+                                                            </div>
+                                                            <div class="col-6">
+                                                                <button class="btn btn-sm btn-primary w-100 shadow-sm fw-bold" type="button" onclick="openChat('<?php echo $order_id; ?>')">
+                                                                    <i class="bi bi-chat-dots-fill"></i> Chat Customer
+                                                                </button>
+                                                            </div>
+                                                        </div>
                                                     </div>
 
                                                     <div class="collapse" id="orderCollapse<?php echo $order_id; ?>">
@@ -648,6 +657,8 @@ $orderGroups = [
             });
         });
     </script>
+
+    <?php include 'chat_module.php'; ?>
 </body>
 
 </html>

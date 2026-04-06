@@ -129,4 +129,20 @@ INSERT INTO `service_prices` (`service_name`, `price`) VALUES
 ('Detergent', 20.00),
 ('Softener', 10.00);
 
+-- --------------------------------------------------------
+-- 7. Table structure for table `order_messages`
+-- --------------------------------------------------------
+CREATE TABLE `order_messages` (
+  `message_id` int(11) NOT NULL AUTO_INCREMENT,
+  `order_id` varchar(20) NOT NULL,
+  `sender_id` int(11) NOT NULL,
+  `message_text` text NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  PRIMARY KEY (`message_id`),
+  KEY `order_id` (`order_id`),
+  KEY `sender_id` (`sender_id`),
+  CONSTRAINT `fk_msg_order` FOREIGN KEY (`order_id`) REFERENCES `order` (`order_id`) ON DELETE CASCADE,
+  CONSTRAINT `fk_msg_user` FOREIGN KEY (`sender_id`) REFERENCES `user` (`user_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 COMMIT;

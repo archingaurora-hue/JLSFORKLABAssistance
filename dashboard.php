@@ -380,6 +380,10 @@ $orderGroups = [
                                     <?php endif; ?>
                                 </div>
 
+                                <button type="button" class="btn btn-primary w-100 fw-bold shadow-sm mb-3" onclick="openChat('<?php echo $order['order_id']; ?>')">
+                                    <i class="bi bi-chat-dots-fill me-2"></i> Message Staff
+                                </button>
+
                                 <button class="btn btn-sm btn-link text-decoration-none w-100 mb-3" onclick="viewCustomerLogs('<?php echo $order['order_id']; ?>')">
                                     <i class="bi bi-clock-history me-1"></i> View Full Activity History
                                 </button>
@@ -655,6 +659,8 @@ $orderGroups = [
         unset($_SESSION['new_tracking']);
     endif;
     ?>
+
+    <?php include 'chat_module.php'; ?>
 </body>
 
 </html>
