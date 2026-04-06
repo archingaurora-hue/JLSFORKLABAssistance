@@ -151,17 +151,6 @@ $orderGroups = [
                 <img src="assets/labaratory_logo_white.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
                 <span>LAB<span class="text-primary">Assistance</span></span>
             </span>
-            <div class="dropdown me-2">
-                <button class="btn btn-light position-relative rounded-circle border shadow-sm p-1" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
-                    <i class="bi bi-bell-fill text-secondary"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size: 0.65rem;">
-                        0
-                    </span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notifDropdown" id="notifList" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                    <li class="dropdown-item text-center text-muted small py-3">Loading...</li>
-                </ul>
-            </div>
             <div class="d-flex align-items-center gap-2">
                 <button type="button" class="btn btn-sm btn-light border shadow-sm rounded-pill d-none d-sm-inline" data-bs-toggle="modal" data-bs-target="#editProfileModal">
                     <i class="bi bi-person-circle text-primary me-1"></i> Hi, <?php echo htmlspecialchars($_SESSION['first_name']); ?>
@@ -172,6 +161,18 @@ $orderGroups = [
                         <i class="bi bi-house-door"></i>
                     </a>
                 <?php endif; ?>
+
+                <div class="dropdown">
+                    <button class="btn btn-light position-relative rounded-circle border shadow-sm p-1" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
+                        <i class="bi bi-bell-fill text-secondary"></i>
+                        <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size: 0.65rem;">
+                            0
+                        </span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notifDropdown" id="notifList" style="width: 320px; max-height: 400px; overflow-y: auto;">
+                        <li class="dropdown-item text-center text-muted small py-3">Loading...</li>
+                    </ul>
+                </div>
 
                 <a href="staff_login.php" class="btn btn-sm btn-outline-danger rounded-pill">
                     <i class="bi bi-box-arrow-right"></i>

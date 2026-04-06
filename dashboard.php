@@ -109,29 +109,34 @@ $orderGroups = [
                 <img src="assets/labaratory_logo.png" alt="LABAssistance Logo" style="height: 28px; width: auto;">
                 <span>LAB<span class="text-primary">Assistance</span></span>
             </span>
-            <div class="dropdown me-2">
-                <button class="btn btn-light position-relative rounded-circle border shadow-sm p-1" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
-                    <i class="bi bi-bell-fill text-secondary"></i>
-                    <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size: 0.65rem;">
-                        0
-                    </span>
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notifDropdown" id="notifList" style="width: 320px; max-height: 400px; overflow-y: auto;">
-                    <li class="dropdown-item text-center text-muted small py-3">Loading...</li>
-                </ul>
-            </div>
+
+            <!-- start of notifs -->
             <div class="d-flex align-items-center gap-2">
-                <span class="small text-muted d-none d-sm-inline">Hi,
-                    <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
+    <span class="small text-muted d-none d-sm-inline">Hi,
+        <?php echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']); ?></span>
 
-                <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#profileModal" title="Profile Settings">
-                    <i class="bi bi-person-gear"></i>
-                </button>
+    <button class="btn btn-sm btn-outline-primary rounded-pill" data-bs-toggle="modal" data-bs-target="#profileModal" title="Profile Settings">
+        <i class="bi bi-person-gear"></i>
+    </button>
 
-                <a href="customer_login.php" class="btn btn-sm btn-outline-danger rounded-pill" title="Logout">
-                    <i class="bi bi-box-arrow-right"></i>
-                </a>
-            </div>
+    <div class="dropdown">
+        <button class="btn btn-light position-relative rounded-circle border shadow-sm p-1" type="button" id="notifDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="width: 36px; height: 36px;">
+            <i class="bi bi-bell-fill text-secondary"></i>
+            <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger d-none" id="notifBadge" style="font-size: 0.65rem;">
+                0
+            </span>
+        </button>
+        <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="notifDropdown" id="notifList" style="width: 320px; max-height: 400px; overflow-y: auto;">
+            <li class="dropdown-item text-center text-muted small py-3">Loading...</li>
+        </ul>
+    </div>
+
+    <a href="customer_login.php" class="btn btn-sm btn-outline-danger rounded-pill" title="Logout">
+        <i class="bi bi-box-arrow-right"></i>
+    </a>
+</div>
+            <!-- end of notifs -->
+
         </div>
     </nav>
 
